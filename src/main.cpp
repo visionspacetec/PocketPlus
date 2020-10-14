@@ -35,13 +35,13 @@ std::deque<bool> count(const unsigned int& a){
 // 5.3.1.2 Run length encoding
 std::deque<bool> run_length_encoding(const std::deque<bool>& a){
     std::deque<bool> output_vector;
-    unsigned int zero_counter = 0;
+    auto zero_counter = std::make_unique<unsigned int>(0);
     for(auto i = a.begin(); i != a.end(); i++){
-        zero_counter++;
+        zero_counter = std::make_unique<unsigned int>(*zero_counter + 1);
         if(!(*i == 0)){
-            auto count_value = count(zero_counter);
+            auto count_value = count(*zero_counter);
             output_vector.insert(output_vector.end(), count_value.begin(), count_value.end());
-            zero_counter = 0;
+            zero_counter = std::make_unique<unsigned int>(0);
         }
     }
     return output_vector;
@@ -206,6 +206,15 @@ int main(int argc, char* argv[]){
     mask_change_0.assign(*input_vector_length, 0); 
     std::deque<bool> rle_mask_change;
     std::deque<bool> input_mask_bit_extraction;
+
+    std::deque<bool> X_t;
+    std::deque<bool> y_t;
+    std::deque<bool> e_t;
+    std::deque<bool> k_t;
+    std::deque<bool> X_t_rle;
+    std::deque<bool> robustness_level_bit_3;
+    std::deque<bool> mask_shifted_rle;
+
     std::deque<bool> first_binary_vector; // h_t Mask change vector
     std::deque<bool> second_binary_vector; // q_t Information about entire mask vector
     std::deque<bool> third_binary_vector ; // u_t either unpredictable bits or the original input I_t
@@ -229,12 +238,6 @@ int main(int argc, char* argv[]){
     std::cout << "new_mask_flag: ";
     for(auto i: new_mask_flag){
         std::cout << i << " ";
-    }
-    std::cout << std::endl;
-
-    std::cout << "initial_mask_vector: ";
-    for(auto i: initial_mask_vector){
-        std::cout << (int) i << " ";
     }
     std::cout << std::endl;
 
@@ -317,7 +320,6 @@ int main(int argc, char* argv[]){
         first_binary_vector = {1, 0, 0, 0, 0, 0};
     }
     else{
-        std::deque<bool> X_t;
         X_t.resize(*input_vector_length);
         if(*robustness_level == 0){
             X_t = reverse(mask_change_vector.at(0));
@@ -340,11 +342,9 @@ int main(int argc, char* argv[]){
                 }
             }
         }
-
-        std::deque<bool> y_t;
+        
         y_t = bit_extraction(inverse(mask_new), reverse(X_t));
-
-        std::deque<bool> e_t;
+        
         if((*robustness_level == 0) || (hamming_weight(X_t) == 0)){}
         else if ((hamming_weight(y_t) == 0) && (*robustness_level > 0) && (hamming_weight(X_t) != 0)){
             e_t = {0};
@@ -353,16 +353,15 @@ int main(int argc, char* argv[]){
             e_t = {1};
         }
 
-        std::deque<bool> k_t;
         if(!((*robustness_level == 0) || (hamming_weight(X_t) == 0) || (hamming_weight(y_t) == 0))){
             k_t = bit_extraction(inverse(mask_new), reverse(X_t));
         }
 
         //first_binary_vector = [RLE(X_t), '10', BIT_3(robustness_level), e_t, k_t, d_t]
-        auto X_t_rle = run_length_encoding(X_t);
+        X_t_rle = run_length_encoding(X_t);
         first_binary_vector.insert(first_binary_vector.end(), X_t_rle.begin(), X_t_rle.end());
         first_binary_vector.insert(first_binary_vector.end(), {1, 0});
-        std::deque<bool> robustness_level_bit_3;
+        robustness_level_bit_3 = std::deque<bool>();
         for(unsigned int i = 0; i < 3; i++){
             robustness_level_bit_3.emplace_front((*robustness_level >> i) & 1);
         }
@@ -380,7 +379,6 @@ int main(int argc, char* argv[]){
     else if(*send_mask_flag == 1){
         second_binary_vector = std::deque<bool>();
         second_binary_vector.insert(second_binary_vector.end(), {1});
-        std::deque<bool> mask_shifted_rle;
         mask_shifted_rle = mask_new;
         mask_shifted_rle.pop_front();
         mask_shifted_rle.push_back({0});
