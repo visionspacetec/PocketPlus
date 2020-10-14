@@ -102,13 +102,11 @@ int main(int argc, char* argv[]){
     auto input_vector_length_count = count(*input_vector_length);
     std::deque<bool> initial_mask_vector;
     initial_mask_vector.assign(*input_vector_length, 0); // M_0 = 0
-    auto robustness_level = std::make_unique<unsigned int>(1); // R_t // User defined value
+    auto robustness_level = std::make_unique<unsigned int>(7); // R_t // User defined value
     std::deque<bool> new_mask_flag; // p_t
     auto uncompressed_flag = std::make_unique<bool>(); // r_t
     auto send_mask_flag = std::make_unique<bool>(); // n_t
     auto send_input_length_flag = std::make_unique<bool>(); // v_t
-
-    auto d_t = std::make_unique<bool>();
 
     // Vectors
     std::deque<bool> input_new;
@@ -126,7 +124,7 @@ int main(int argc, char* argv[]){
     mask_change_0.assign(*input_vector_length, 0); 
     std::deque<bool> rle_mask_change;
     std::deque<bool> input_mask_bit_extraction;
-
+    auto d_t = std::make_unique<bool>();
     std::deque<bool> X_t;
     std::deque<bool> y_t;
     std::deque<bool> e_t;
@@ -134,7 +132,6 @@ int main(int argc, char* argv[]){
     std::deque<bool> X_t_rle;
     std::deque<bool> robustness_level_bit_3;
     std::deque<bool> mask_shifted_rle;
-
     std::deque<bool> first_binary_vector; // h_t Mask change vector
     std::deque<bool> second_binary_vector; // q_t Information about entire mask vector
     std::deque<bool> third_binary_vector ; // u_t either unpredictable bits or the original input I_t
@@ -167,7 +164,6 @@ int main(int argc, char* argv[]){
     if(!*send_mask_flag && !*uncompressed_flag){
         throw std::invalid_argument("if send_mask_flag = = false -> uncompressed_flag != true");
     }
-
     send_input_length_flag = std::make_unique<bool>(0); // v_t // v_0 = 0
 
     // Section 4.2 Mask update    
@@ -186,7 +182,13 @@ int main(int argc, char* argv[]){
     else{
         std::fill(mask_build_new.begin(), mask_build_new.end(), 0);
     }
+
     // Section 4.2.2
+    while(mask_change_vector.size() > *robustness_level_max + 1){
+        mask_change_vector.pop_front();
+    }
+    mask_change_vector.push_back(mask_change_0);
+
     if(!(*t == 0)){
         if(!new_mask_flag.at(0)){
             std::generate(
@@ -198,6 +200,7 @@ int main(int argc, char* argv[]){
                     return out;
                 }
             );
+            
         }
         else{
             std::generate(
@@ -211,10 +214,6 @@ int main(int argc, char* argv[]){
             );
         }
         // Section 4.2.3
-        while(mask_change_vector.size() > *robustness_level_max + 1){
-            mask_change_vector.pop_front();
-        }
-        mask_change_vector.push_back(mask_change_0);
         std::generate(
             mask_change_vector.at(0).begin(), 
             mask_change_vector.at(0).end(), 
@@ -225,7 +224,6 @@ int main(int argc, char* argv[]){
             }
         );
     }
-
     // 5.3.2 Encoding step
     // 5.3.2.1
     if(!*send_mask_flag && !*uncompressed_flag){
@@ -234,7 +232,6 @@ int main(int argc, char* argv[]){
     else{
         d_t = std::make_unique<bool>(0);
     }
-
     // 5.3.2.2 first binary vector
     if(!send_mask_flag){
         first_binary_vector = {1, 0, 0, 0, 0, 0};
@@ -246,12 +243,12 @@ int main(int argc, char* argv[]){
         }
         else if((int)(*t - *robustness_level) <= 0){
             // X_t = [<D_1 OR D_2 OR ... OR D_t>]
-            X_t.assign(*input_vector_length, 0); 
+            X_t.assign(*input_vector_length, 0);
             for(unsigned int i = 0; i < mask_change_vector.size(); i++){
-                for(unsigned int index = 0; i < mask_change_vector.at(i).size(); index++){
+                for(unsigned int index = 0; index < mask_change_vector.at(i).size(); index++){
                     X_t.at(index) = mask_change_vector.at(i).at(index) || X_t.at(index);
                 }
-            } 
+            }
         }
         else{
             // X_t = [<D_(t-robustness_level) OR D_(t-robustness_level)+1 OR ... OR D_t>]
@@ -262,7 +259,6 @@ int main(int argc, char* argv[]){
                 }
             }
         }
-        
         y_t = bit_extraction(inverse(mask_new), reverse(X_t));
         
         if((*robustness_level == 0) || (hamming_weight(X_t) == 0)){}
