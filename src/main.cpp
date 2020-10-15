@@ -344,6 +344,7 @@ std::deque<bool> PocketPlusCompressor::compress(
             }
         );
         mask_shifted_rle = reverse(mask_shifted_rle);
+        mask_shifted_rle = run_length_encoding(mask_shifted_rle);
         second_binary_vector.insert(second_binary_vector.end(), mask_shifted_rle.begin(), mask_shifted_rle.end());
         second_binary_vector.insert(second_binary_vector.end(), {1, 0});
     }
