@@ -185,6 +185,11 @@ std::deque<bool> PocketPlusCompressor::compress(
         throw std::invalid_argument("if send_changes_flag == true -> t > 0");
     }
 
+    first_binary_vector.clear();
+    second_binary_vector.clear();
+    third_binary_vector.clear();
+    output.clear();
+
     // ToDo handle the new mask flag correctly ##############################
     mask_flag.resize(*robustness_level + 1);
     mask_flag.at(0) = *new_mask_flag; // User defined value
@@ -406,7 +411,7 @@ int main(int argc, char* argv[]){
     PocketPlusCompressor compressor(input_vector_length);
 
     auto robustness_level = std::make_unique<unsigned int>(1); // R_t
-    auto new_mask_flag = std::make_unique<bool>(1);            // p_t
+    auto new_mask_flag = std::make_unique<bool>(0);            // p_t
     auto send_mask_flag = std::make_unique<bool>(0);           // f_t // f_0 = 0
     auto uncompressed_flag = std::make_unique<bool>(1);        // r_t // if n_t == 0 -> r_t = 1 --> r_0 = 1
     auto send_changes_flag = std::make_unique<bool>(0);        // n_t // n_0 = 0
@@ -438,9 +443,9 @@ int main(int argc, char* argv[]){
         print_vector(output_vector);
 
         new_mask_flag = std::make_unique<bool>(0);
-        send_mask_flag = std::make_unique<bool>(0);
-        uncompressed_flag = std::make_unique<bool>(1);
-        send_changes_flag = std::make_unique<bool>(1);
+        send_mask_flag = std::make_unique<bool>(1);
+        uncompressed_flag = std::make_unique<bool>(0);
+        send_changes_flag = std::make_unique<bool>(0);
 
         output_vector = compressor.compress(
             input_vector, 
@@ -456,9 +461,9 @@ int main(int argc, char* argv[]){
         print_vector(output_vector);
 
         new_mask_flag = std::make_unique<bool>(0);
-        send_mask_flag = std::make_unique<bool>(0);
-        uncompressed_flag = std::make_unique<bool>(1);
-        send_changes_flag = std::make_unique<bool>(1);
+        send_mask_flag = std::make_unique<bool>(1);
+        uncompressed_flag = std::make_unique<bool>(0);
+        send_changes_flag = std::make_unique<bool>(0);
 
         output_vector = compressor.compress(
             input_vector, 
