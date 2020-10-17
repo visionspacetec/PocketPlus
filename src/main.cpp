@@ -113,11 +113,12 @@ std::deque<bool> PocketPlusCompressor::count(const unsigned int& a){
 // 5.3.1.2 Run length encoding
 std::deque<bool> PocketPlusCompressor::run_length_encoding(const std::deque<bool>& a){
     std::deque<bool> output_vector;
+    std::deque<bool> count_value;
     auto zero_counter = std::make_unique<unsigned int>(0);
     for(auto i = a.begin(); i != a.end(); i++){
         zero_counter = std::make_unique<unsigned int>(*zero_counter + 1);
         if(!(*i == 0)){
-            auto count_value = count(*zero_counter);
+            count_value = count(*zero_counter);
             output_vector.insert(output_vector.end(), count_value.begin(), count_value.end());
             zero_counter = std::make_unique<unsigned int>(0);
         }
@@ -196,11 +197,6 @@ std::deque<bool> PocketPlusCompressor::compress(
     if((*robustness_level > 0) && mask_flag.at(0) == true){
         std::fill(mask_flag.begin()+1, mask_flag.end(), 0);
     }
-    std::cout << "mask_flag: ";
-    for(auto i: mask_flag){
-        std::cout << i << " ";
-    }
-    std::cout << std::endl;
 
     // Section 4.2 Mask update    
     // Section 4.2.1
@@ -209,7 +205,7 @@ std::deque<bool> PocketPlusCompressor::compress(
             mask_build_new.begin(), 
             mask_build_new.end(), 
             [mo=mask_build_old, input_new, io=input_old, n = 0]() mutable {
-                auto out = (input_new.at(n) ^ io.at(n)) | mo.at(n);
+                auto out = (!input_new.at(n) != !io.at(n)) || mo.at(n);
                 n++;
                 return out;
             }
@@ -231,7 +227,7 @@ std::deque<bool> PocketPlusCompressor::compress(
                 mask_new.begin(), 
                 mask_new.end(), 
                 [mo=mask_old, input_new, io=input_old, n = 0]() mutable {
-                    auto out = (input_new.at(n) ^ io.at(n)) | mo.at(n);
+                    auto out = (!input_new.at(n) != !io.at(n)) || mo.at(n);
                     n++;
                     return out;
                 }
@@ -243,7 +239,7 @@ std::deque<bool> PocketPlusCompressor::compress(
                 mask_new.begin(), 
                 mask_new.end(), 
                 [mbo=mask_build_old, input_new, io=input_old, n = 0]() mutable {
-                    auto out = (input_new.at(n) ^ io.at(n)) | mbo.at(n);
+                    auto out = (!input_new.at(n) != !io.at(n)) || mbo.at(n);
                     n++;
                     return out;
                 }
@@ -254,7 +250,7 @@ std::deque<bool> PocketPlusCompressor::compress(
             mask_change_vector.at(0).begin(), 
             mask_change_vector.at(0).end(), 
             [mn=mask_new, mo=mask_old, n = 0]() mutable {
-                auto out = mn.at(n) ^ mo.at(n);
+                auto out = !mn.at(n) != !mo.at(n);
                 n++;
                 return out;
             }
@@ -270,7 +266,7 @@ std::deque<bool> PocketPlusCompressor::compress(
         d_t = std::make_unique<bool>(0);
     }
     // 5.3.2.2 first binary vector
-    if(!send_changes_flag){
+    if(!*send_changes_flag){
         first_binary_vector = {1, 0, 0, 0, 0, 0};
     }
     else{
@@ -296,7 +292,9 @@ std::deque<bool> PocketPlusCompressor::compress(
                 }
             }
         }
+
         y_t = bit_extraction(inverse(mask_new), reverse(X_t));
+
         if((*robustness_level == 0) || (hamming_weight(X_t) == 0)){}
         else if ((hamming_weight(y_t) == 0) && (*robustness_level > 0) && (hamming_weight(X_t) != 0)){
             e_t = {0};
@@ -317,6 +315,7 @@ std::deque<bool> PocketPlusCompressor::compress(
         for(unsigned int i = 0; i < 3; i++){
             robustness_level_bit_3.emplace_front((*robustness_level >> i) & 1);
         }
+        
         first_binary_vector.insert(first_binary_vector.end(), robustness_level_bit_3.begin(), robustness_level_bit_3.end());
         first_binary_vector.insert(first_binary_vector.end(), e_t.begin(), e_t.end());
         first_binary_vector.insert(first_binary_vector.end(), k_t.begin(), k_t.end());
@@ -403,6 +402,14 @@ void print_vector(const std::deque<bool>& in){
     std::cout << std::endl;
 }
 
+std::deque<bool> number_to_deque_bool(std::unique_ptr<long int>& input, std::unique_ptr<unsigned int>& length){
+    std::deque<bool> out;
+    for(unsigned int i = 0; i < *length; i++){
+        out.emplace_front((*input >> i) & 1);
+    }
+    return out;
+}
+
 int main(int argc, char* argv[]){
 
     std::cout << "Welcome to PocketPlus in c++" << std::endl;
@@ -412,22 +419,18 @@ int main(int argc, char* argv[]){
     PocketPlusCompressor compressor(input_vector_length);
 
     auto robustness_level = std::make_unique<unsigned int>(1); // R_t
-    auto new_mask_flag = std::make_unique<bool>(0);            // p_t
+    auto new_mask_flag = std::make_unique<bool>(1);            // p_t
     auto send_mask_flag = std::make_unique<bool>(0);           // f_t // f_0 = 0
     auto uncompressed_flag = std::make_unique<bool>(1);        // r_t // if n_t == 0 -> r_t = 1 --> r_0 = 1
     auto send_changes_flag = std::make_unique<bool>(0);        // n_t // n_0 = 0
     auto send_input_length_flag = std::make_unique<bool>(0);   // v_t // v_0 = 0
 
     auto input = std::make_unique<long int>(3333333333);
-    std::deque<bool> input_vector;
-    for(unsigned int i = 0; i < *input_vector_length; i++){
-        input_vector.emplace_front((*input >> i) & 1);
-    }
-
+    std::deque<bool> input_vector = number_to_deque_bool(input, input_vector_length);
+    std::deque<bool> output_vector;
+    
     std::cout << "INPUT: " << std::endl;
     print_vector(input_vector);
-
-    std::deque<bool> output_vector;
 
     try{
         output_vector = compressor.compress(
@@ -446,7 +449,7 @@ int main(int argc, char* argv[]){
         new_mask_flag = std::make_unique<bool>(0);
         send_mask_flag = std::make_unique<bool>(1);
         uncompressed_flag = std::make_unique<bool>(0);
-        send_changes_flag = std::make_unique<bool>(0);
+        send_changes_flag = std::make_unique<bool>(1);
 
         output_vector = compressor.compress(
             input_vector, 
@@ -457,8 +460,22 @@ int main(int argc, char* argv[]){
             send_changes_flag,
             send_input_length_flag
         );
+        print_vector(output_vector);
 
-        std::cout << "OUTPUT: " << std::endl;
+        new_mask_flag = std::make_unique<bool>(0);
+        send_mask_flag = std::make_unique<bool>(1);
+        uncompressed_flag = std::make_unique<bool>(0);
+        send_changes_flag = std::make_unique<bool>(1);
+
+        output_vector = compressor.compress(
+            input_vector, 
+            robustness_level,
+            new_mask_flag,
+            send_mask_flag,
+            uncompressed_flag,
+            send_changes_flag,
+            send_input_length_flag
+        );
         print_vector(output_vector);
 
         new_mask_flag = std::make_unique<bool>(0);
@@ -466,6 +483,11 @@ int main(int argc, char* argv[]){
         uncompressed_flag = std::make_unique<bool>(0);
         send_changes_flag = std::make_unique<bool>(0);
 
+        input = std::make_unique<long int>(3333333334);
+        input_vector = number_to_deque_bool(input, input_vector_length);
+        std::cout << "INPUT: " << std::endl;
+        print_vector(input_vector);
+
         output_vector = compressor.compress(
             input_vector, 
             robustness_level,
@@ -475,7 +497,6 @@ int main(int argc, char* argv[]){
             send_changes_flag,
             send_input_length_flag
         );
-
         std::cout << "OUTPUT: " << std::endl;
         print_vector(output_vector);
     }
