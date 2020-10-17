@@ -5,6 +5,8 @@
 #include <algorithm>
 #include <deque>
 #include <cmath>
+#include <fstream>
+#include <iterator>
 
 class PocketPlusCompressor{
     // Private functions
@@ -425,14 +427,24 @@ int main(int argc, char* argv[]){
     auto send_changes_flag = std::make_unique<bool>(0);        // n_t // n_0 = 0
     auto send_input_length_flag = std::make_unique<bool>(0);   // v_t // v_0 = 0
 
+    // Prepare for file save operation
+    std::ofstream uncompressed_file;
+    std::ofstream compressed_file;
+    uncompressed_file.open("uncompressed.bin", std::ios::binary);
+    compressed_file.open("compressed.bin", std::ios::binary);
+
     auto input = std::make_unique<long int>(3333333333);
     std::deque<bool> input_vector = number_to_deque_bool(input, input_vector_length);
     std::deque<bool> output_vector;
+
+    std::ostream_iterator<bool> output_iterator(compressed_file);
     
+
     std::cout << "INPUT: " << std::endl;
     print_vector(input_vector);
 
     try{
+        uncompressed_file << *input;
         output_vector = compressor.compress(
             input_vector, 
             robustness_level,
@@ -442,6 +454,7 @@ int main(int argc, char* argv[]){
             send_changes_flag,
             send_input_length_flag
         );
+        std::copy(output_vector.begin(), output_vector.end(), output_iterator);
 
         std::cout << "OUTPUT: " << std::endl;
         print_vector(output_vector);
@@ -451,6 +464,7 @@ int main(int argc, char* argv[]){
         uncompressed_flag = std::make_unique<bool>(0);
         send_changes_flag = std::make_unique<bool>(1);
 
+        uncompressed_file << *input;
         output_vector = compressor.compress(
             input_vector, 
             robustness_level,
@@ -467,6 +481,7 @@ int main(int argc, char* argv[]){
         uncompressed_flag = std::make_unique<bool>(0);
         send_changes_flag = std::make_unique<bool>(1);
 
+        uncompressed_file << *input;
         output_vector = compressor.compress(
             input_vector, 
             robustness_level,
@@ -488,6 +503,7 @@ int main(int argc, char* argv[]){
         std::cout << "INPUT: " << std::endl;
         print_vector(input_vector);
 
+        uncompressed_file << *input;
         output_vector = compressor.compress(
             input_vector, 
             robustness_level,
@@ -504,4 +520,6 @@ int main(int argc, char* argv[]){
     {
         std::cerr << "Error: " << e.what() << std::endl;
     }
+    uncompressed_file.close();
+    compressed_file.close();
 }
