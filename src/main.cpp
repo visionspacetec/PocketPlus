@@ -412,6 +412,25 @@ std::deque<bool> number_to_deque_bool(std::unique_ptr<long int>& input, std::uni
     return out;
 }
 
+std::size_t divide_up(std::size_t dividend, std::size_t divisor){
+    return (dividend + divisor - 1) / divisor;
+}
+
+std::string bool_to_string(std::deque<bool> const& boolvector){
+    std::string ret(divide_up(boolvector.size(), 8), 0);
+    auto out = ret.begin();
+    int shift = 1;
+    std::cout << boolvector.size() << " size" << std::endl;
+    for(bool bit: boolvector){
+        *out |= bit << shift;
+        if(++shift == 9){
+            ++out;
+            shift = 1;
+        }
+    }
+    return ret;
+}
+
 int main(int argc, char* argv[]){
 
     std::cout << "Welcome to PocketPlus in c++" << std::endl;
@@ -430,21 +449,24 @@ int main(int argc, char* argv[]){
     // Prepare for file save operation
     std::ofstream uncompressed_file;
     std::ofstream compressed_file;
-    uncompressed_file.open("uncompressed.bin", std::ios::binary);
-    compressed_file.open("compressed.bin", std::ios::binary);
+    uncompressed_file.open("uncompressed.bin", std::ios::out | std::ofstream::binary);
+    compressed_file.open("compressed.bin", std::ios::out | std::ofstream::binary);
 
     auto input = std::make_unique<long int>(3333333333);
+
     std::deque<bool> input_vector = number_to_deque_bool(input, input_vector_length);
     std::deque<bool> output_vector;
 
-    std::ostream_iterator<bool> output_iterator(compressed_file);
-    
+    //std::ostream_iterator<bool> output_iterator(compressed_file);
+    //auto out_string = bool_to_string(input_vector);
+    //uncompressed_file.write(out_string, out_string.size());
+    uncompressed_file << bool_to_string(input_vector);
 
     std::cout << "INPUT: " << std::endl;
     print_vector(input_vector);
 
     try{
-        uncompressed_file << *input;
+        //uncompressed_file << *input;
         output_vector = compressor.compress(
             input_vector, 
             robustness_level,
@@ -454,7 +476,7 @@ int main(int argc, char* argv[]){
             send_changes_flag,
             send_input_length_flag
         );
-        std::copy(output_vector.begin(), output_vector.end(), output_iterator);
+        //std::copy(output_vector.begin(), output_vector.end(), output_iterator);
 
         std::cout << "OUTPUT: " << std::endl;
         print_vector(output_vector);
@@ -464,7 +486,7 @@ int main(int argc, char* argv[]){
         uncompressed_flag = std::make_unique<bool>(0);
         send_changes_flag = std::make_unique<bool>(1);
 
-        uncompressed_file << *input;
+        //uncompressed_file << *input;
         output_vector = compressor.compress(
             input_vector, 
             robustness_level,
@@ -481,7 +503,7 @@ int main(int argc, char* argv[]){
         uncompressed_flag = std::make_unique<bool>(0);
         send_changes_flag = std::make_unique<bool>(1);
 
-        uncompressed_file << *input;
+        //uncompressed_file << *input;
         output_vector = compressor.compress(
             input_vector, 
             robustness_level,
@@ -503,7 +525,7 @@ int main(int argc, char* argv[]){
         std::cout << "INPUT: " << std::endl;
         print_vector(input_vector);
 
-        uncompressed_file << *input;
+        //uncompressed_file << *input;
         output_vector = compressor.compress(
             input_vector, 
             robustness_level,
