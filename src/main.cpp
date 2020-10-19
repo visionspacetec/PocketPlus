@@ -98,14 +98,14 @@ std::deque<bool> PocketPlusCompressor::count(const unsigned int& a){
     else if ((2 <= a) && (a <= 33)){
         auto length = std::make_unique<unsigned int>(5);
         for(unsigned int i = 0; i < *length; i++){
-            output_vector.emplace_front((a >> i) & 1);
+            output_vector.emplace_front(((a - 2) >> i) & 1);
         }
         output_vector.insert(output_vector.begin(), {1, 1, 0});
     }
     else{
         auto length = std::make_unique<unsigned int>(2 * std::floor(std::log2(a - 2) + 1) - 6);
         for(unsigned int i = 0; i < *length; i++){
-            output_vector.emplace_front((a >> i) & 1);
+            output_vector.emplace_front(((a - 2) >> i) & 1);
         }
         output_vector.insert(output_vector.begin(), {1, 1, 1});
     }
@@ -327,11 +327,9 @@ std::deque<bool> PocketPlusCompressor::compress(
     // 5.3.2.3 Second binary vector
     // Second vector: ['1', RLE(< mask ^ mask_<< >), '10']
     if(*d_t == 1){
-        std::cout << "d_t: " << *d_t << std::endl;
         second_binary_vector = std::deque<bool>();
     }
     else if(*send_mask_flag == 1){
-        std::cout << "send_mask_flag: " << *send_mask_flag << std::endl;
         second_binary_vector = std::deque<bool>();
         second_binary_vector.insert(second_binary_vector.end(), {1});
         mask_shifted_rle = mask_new;
@@ -468,7 +466,6 @@ int main(int argc, char* argv[]){
     print_vector(new_input_vector);
 
     try{
-        //uncompressed_file << bool_to_string(input_vector);
         input_vector.insert(input_vector.end(), new_input_vector.begin(), new_input_vector.end());
         new_output_vector = compressor.compress(
             new_input_vector, 
@@ -480,8 +477,6 @@ int main(int argc, char* argv[]){
             send_input_length_flag
         );
         std::move(new_output_vector.begin(), new_output_vector.end(), std::back_inserter(output_vector));
-
-        //compressed_file << bool_to_string(output_vector);
 
         std::cout << "OUTPUT: " << std::endl;
         print_vector(output_vector);
@@ -491,7 +486,6 @@ int main(int argc, char* argv[]){
         uncompressed_flag = std::make_unique<bool>(0);
         send_changes_flag = std::make_unique<bool>(1);
 
-        //uncompressed_file << bool_to_string(input_vector);
         input_vector.insert(input_vector.end(), new_input_vector.begin(), new_input_vector.end());
         new_output_vector = compressor.compress(
             new_input_vector, 
@@ -503,7 +497,6 @@ int main(int argc, char* argv[]){
             send_input_length_flag
         );
         std::move(new_output_vector.begin(), new_output_vector.end(), std::back_inserter(output_vector));
-        //compressed_file << bool_to_string(output_vector);
         print_vector(output_vector);
 
         new_mask_flag = std::make_unique<bool>(0);
@@ -511,7 +504,6 @@ int main(int argc, char* argv[]){
         uncompressed_flag = std::make_unique<bool>(0);
         send_changes_flag = std::make_unique<bool>(1);
 
-        //uncompressed_file << bool_to_string(input_vector);
         input_vector.insert(input_vector.end(), new_input_vector.begin(), new_input_vector.end());
         new_output_vector = compressor.compress(
             new_input_vector, 
@@ -523,7 +515,6 @@ int main(int argc, char* argv[]){
             send_input_length_flag
         );
         std::move(new_output_vector.begin(), new_output_vector.end(), std::back_inserter(output_vector));
-        //compressed_file << bool_to_string(output_vector);
         print_vector(output_vector);
 
         new_mask_flag = std::make_unique<bool>(0);
@@ -536,7 +527,6 @@ int main(int argc, char* argv[]){
         std::cout << "INPUT: " << std::endl;
         print_vector(new_input_vector);
 
-        //uncompressed_file << bool_to_string(input_vector);
         input_vector.insert(input_vector.end(), new_input_vector.begin(), new_input_vector.end());
         new_output_vector = compressor.compress(
             new_input_vector, 
