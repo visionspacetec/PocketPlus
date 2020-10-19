@@ -418,16 +418,37 @@ std::size_t divide_up(std::size_t dividend, std::size_t divisor){
 
 std::string bool_to_string(std::deque<bool> const& boolvector){
     std::string ret(divide_up(boolvector.size(), 8), 0);
-    auto out = ret.begin();
-    int shift = 1;
+    auto counter = 0;
+    //auto out = ret.begin();
+    auto out = ret.rbegin();
+    int shift = 0;
     std::cout << boolvector.size() << " size" << std::endl;
+
+    for(auto it = boolvector.rbegin(); it != boolvector.rend(); it++){
+        *out |= *it << shift;
+        //*out += bit >> shift;
+        if(++shift == 8){
+            ++out;
+            shift = 0;
+        }
+        counter++;
+        //std::cout << bit << "";
+    }
+/*
     for(bool bit: boolvector){
         *out |= bit << shift;
-        if(++shift == 9){
+        //*out += bit >> shift;
+        if(++shift == 8){
             ++out;
-            shift = 1;
+            shift = 0;
         }
+        counter++;
+        std::cout << bit << "";
     }
+    */
+    
+    std::cout << std::endl;
+    std::cout << ret << " return" << std::endl;
     return ret;
 }
 
