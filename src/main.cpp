@@ -327,9 +327,11 @@ std::deque<bool> PocketPlusCompressor::compress(
     // 5.3.2.3 Second binary vector
     // Second vector: ['1', RLE(< mask ^ mask_<< >), '10']
     if(*d_t == 1){
+        std::cout << "d_t: " << *d_t << std::endl;
         second_binary_vector = std::deque<bool>();
     }
     else if(*send_mask_flag == 1){
+        std::cout << "send_mask_flag: " << *send_mask_flag << std::endl;
         second_binary_vector = std::deque<bool>();
         second_binary_vector.insert(second_binary_vector.end(), {1});
         mask_shifted_rle = mask_new;
@@ -350,7 +352,7 @@ std::deque<bool> PocketPlusCompressor::compress(
         second_binary_vector.insert(second_binary_vector.end(), {1, 0});
     }
     else{
-        second_binary_vector = std::deque<bool>(0);
+        second_binary_vector = std::deque<bool>({0});
     }
 
     // 5.3.2.4 Third binary vector
@@ -419,36 +421,18 @@ std::size_t divide_up(std::size_t dividend, std::size_t divisor){
 std::string bool_to_string(std::deque<bool> const& boolvector){
     std::string ret(divide_up(boolvector.size(), 8), 0);
     auto counter = 0;
-    //auto out = ret.begin();
-    auto out = ret.rbegin();
+    auto out = ret.rbegin(); //big endian
+    //auto out = ret.begin();     // little endian
     int shift = 0;
-    std::cout << boolvector.size() << " size" << std::endl;
-
-    for(auto it = boolvector.rbegin(); it != boolvector.rend(); it++){
+    for(auto it = boolvector.rbegin(); it != boolvector.rend(); it++){ //big
+    //for(auto it = boolvector.begin(); it != boolvector.end(); it++){ // little
         *out |= *it << shift;
-        //*out += bit >> shift;
         if(++shift == 8){
             ++out;
             shift = 0;
         }
         counter++;
-        //std::cout << bit << "";
     }
-/*
-    for(bool bit: boolvector){
-        *out |= bit << shift;
-        //*out += bit >> shift;
-        if(++shift == 8){
-            ++out;
-            shift = 0;
-        }
-        counter++;
-        std::cout << bit << "";
-    }
-    */
-    
-    std::cout << std::endl;
-    std::cout << ret << " return" << std::endl;
     return ret;
 }
 
@@ -465,31 +449,29 @@ int main(int argc, char* argv[]){
     auto send_mask_flag = std::make_unique<bool>(0);           // f_t // f_0 = 0
     auto uncompressed_flag = std::make_unique<bool>(1);        // r_t // if n_t == 0 -> r_t = 1 --> r_0 = 1
     auto send_changes_flag = std::make_unique<bool>(0);        // n_t // n_0 = 0
-    auto send_input_length_flag = std::make_unique<bool>(0);   // v_t // v_0 = 0
+    auto send_input_length_flag = std::make_unique<bool>(1);   // v_t // v_0 = 1
 
     // Prepare for file save operation
     std::ofstream uncompressed_file;
     std::ofstream compressed_file;
-    uncompressed_file.open("uncompressed.bin", std::ios::out | std::ofstream::binary);
+    uncompressed_file.open("original.bin", std::ios::out | std::ofstream::binary);
     compressed_file.open("compressed.bin", std::ios::out | std::ofstream::binary);
 
     auto input = std::make_unique<long int>(3333333333);
 
-    std::deque<bool> input_vector = number_to_deque_bool(input, input_vector_length);
+    std::deque<bool> input_vector;
+    std::deque<bool> new_input_vector = number_to_deque_bool(input, input_vector_length);
     std::deque<bool> output_vector;
-
-    //std::ostream_iterator<bool> output_iterator(compressed_file);
-    //auto out_string = bool_to_string(input_vector);
-    //uncompressed_file.write(out_string, out_string.size());
-    uncompressed_file << bool_to_string(input_vector);
+    std::deque<bool> new_output_vector;
 
     std::cout << "INPUT: " << std::endl;
-    print_vector(input_vector);
+    print_vector(new_input_vector);
 
     try{
-        //uncompressed_file << *input;
-        output_vector = compressor.compress(
-            input_vector, 
+        //uncompressed_file << bool_to_string(input_vector);
+        input_vector.insert(input_vector.end(), new_input_vector.begin(), new_input_vector.end());
+        new_output_vector = compressor.compress(
+            new_input_vector, 
             robustness_level,
             new_mask_flag,
             send_mask_flag,
@@ -497,7 +479,9 @@ int main(int argc, char* argv[]){
             send_changes_flag,
             send_input_length_flag
         );
-        //std::copy(output_vector.begin(), output_vector.end(), output_iterator);
+        std::move(new_output_vector.begin(), new_output_vector.end(), std::back_inserter(output_vector));
+
+        //compressed_file << bool_to_string(output_vector);
 
         std::cout << "OUTPUT: " << std::endl;
         print_vector(output_vector);
@@ -507,9 +491,10 @@ int main(int argc, char* argv[]){
         uncompressed_flag = std::make_unique<bool>(0);
         send_changes_flag = std::make_unique<bool>(1);
 
-        //uncompressed_file << *input;
-        output_vector = compressor.compress(
-            input_vector, 
+        //uncompressed_file << bool_to_string(input_vector);
+        input_vector.insert(input_vector.end(), new_input_vector.begin(), new_input_vector.end());
+        new_output_vector = compressor.compress(
+            new_input_vector, 
             robustness_level,
             new_mask_flag,
             send_mask_flag,
@@ -517,6 +502,8 @@ int main(int argc, char* argv[]){
             send_changes_flag,
             send_input_length_flag
         );
+        std::move(new_output_vector.begin(), new_output_vector.end(), std::back_inserter(output_vector));
+        //compressed_file << bool_to_string(output_vector);
         print_vector(output_vector);
 
         new_mask_flag = std::make_unique<bool>(0);
@@ -524,9 +511,10 @@ int main(int argc, char* argv[]){
         uncompressed_flag = std::make_unique<bool>(0);
         send_changes_flag = std::make_unique<bool>(1);
 
-        //uncompressed_file << *input;
-        output_vector = compressor.compress(
-            input_vector, 
+        //uncompressed_file << bool_to_string(input_vector);
+        input_vector.insert(input_vector.end(), new_input_vector.begin(), new_input_vector.end());
+        new_output_vector = compressor.compress(
+            new_input_vector, 
             robustness_level,
             new_mask_flag,
             send_mask_flag,
@@ -534,6 +522,8 @@ int main(int argc, char* argv[]){
             send_changes_flag,
             send_input_length_flag
         );
+        std::move(new_output_vector.begin(), new_output_vector.end(), std::back_inserter(output_vector));
+        //compressed_file << bool_to_string(output_vector);
         print_vector(output_vector);
 
         new_mask_flag = std::make_unique<bool>(0);
@@ -542,13 +532,14 @@ int main(int argc, char* argv[]){
         send_changes_flag = std::make_unique<bool>(0);
 
         input = std::make_unique<long int>(3333333334);
-        input_vector = number_to_deque_bool(input, input_vector_length);
+        new_input_vector = number_to_deque_bool(input, input_vector_length);
         std::cout << "INPUT: " << std::endl;
-        print_vector(input_vector);
+        print_vector(new_input_vector);
 
-        //uncompressed_file << *input;
-        output_vector = compressor.compress(
-            input_vector, 
+        //uncompressed_file << bool_to_string(input_vector);
+        input_vector.insert(input_vector.end(), new_input_vector.begin(), new_input_vector.end());
+        new_output_vector = compressor.compress(
+            new_input_vector, 
             robustness_level,
             new_mask_flag,
             send_mask_flag,
@@ -556,6 +547,16 @@ int main(int argc, char* argv[]){
             send_changes_flag,
             send_input_length_flag
         );
+        std::move(new_output_vector.begin(), new_output_vector.end(), std::back_inserter(output_vector));
+
+        while(output_vector.size() % 8 != 0){
+            output_vector.emplace_back(0);
+        }
+        while(input_vector.size() % 8 != 0){
+            input_vector.emplace_back(0);
+        }
+        uncompressed_file << bool_to_string(input_vector);
+        compressed_file << bool_to_string(output_vector);
         std::cout << "OUTPUT: " << std::endl;
         print_vector(output_vector);
     }
