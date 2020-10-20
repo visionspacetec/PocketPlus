@@ -15,11 +15,17 @@ find_package( Threads REQUIRED )
 # Include source folders
 include_directories(
     ./src
+    ./src/compressor
+    ./src/utils
 )
 
 # Declare source files
 set(SOURCES 
-    ./src/main.cpp 
+    ./src/main.cpp
+    ./src/compressor/compressor.h
+    ./src/compressor/compressor.cpp 
+    ./src/utils/utils.h
+    ./src/utils/utils.cpp
 )
 
 # Declare target
