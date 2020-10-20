@@ -169,6 +169,7 @@ std::deque<bool> PocketPlusCompressor::inverse(const std::deque<bool>& a){
     return output_vector;
 }
 
+// Performs the actual compression
 std::deque<bool> PocketPlusCompressor::compress(
     const std::deque<bool>& input_new, 
     std::unique_ptr<unsigned int>& robustness_level, // R_t // User defined value
@@ -397,6 +398,14 @@ std::deque<bool> PocketPlusCompressor::add_termination_sequence(const std::deque
     return output;
 }
 
+// Helper function for file saving
+void zero_stuffing(std::deque<bool>& in){
+    while(in.size() % 8 != 0){
+        in.emplace_back(0);
+    }
+}
+
+// Prints a boolean vector
 void print_vector(const std::deque<bool>& in){
     for(auto i: in){
         std::cout << i << " ";
@@ -404,6 +413,7 @@ void print_vector(const std::deque<bool>& in){
     std::cout << std::endl;
 }
 
+// Converts a long integer to a size n boolean vector
 std::deque<bool> number_to_deque_bool(std::unique_ptr<long int>& input, std::unique_ptr<unsigned int>& length){
     std::deque<bool> out;
     for(unsigned int i = 0; i < *length; i++){
@@ -412,10 +422,12 @@ std::deque<bool> number_to_deque_bool(std::unique_ptr<long int>& input, std::uni
     return out;
 }
 
+// Helper function for bool_to_string
 std::size_t divide_up(std::size_t dividend, std::size_t divisor){
     return (dividend + divisor - 1) / divisor;
 }
 
+// COnverts a boolean vector to a string
 std::string bool_to_string(std::deque<bool> const& boolvector){
     std::string ret(divide_up(boolvector.size(), 8), 0);
     auto counter = 0;
@@ -476,6 +488,7 @@ int main(int argc, char* argv[]){
             send_changes_flag,
             send_input_length_flag
         );
+        zero_stuffing(new_output_vector);
         std::move(new_output_vector.begin(), new_output_vector.end(), std::back_inserter(output_vector));
 
         std::cout << "OUTPUT: " << std::endl;
@@ -496,6 +509,7 @@ int main(int argc, char* argv[]){
             send_changes_flag,
             send_input_length_flag
         );
+        zero_stuffing(new_output_vector);
         std::move(new_output_vector.begin(), new_output_vector.end(), std::back_inserter(output_vector));
         print_vector(output_vector);
 
@@ -514,6 +528,7 @@ int main(int argc, char* argv[]){
             send_changes_flag,
             send_input_length_flag
         );
+        zero_stuffing(new_output_vector);
         std::move(new_output_vector.begin(), new_output_vector.end(), std::back_inserter(output_vector));
         print_vector(output_vector);
 
@@ -537,14 +552,11 @@ int main(int argc, char* argv[]){
             send_changes_flag,
             send_input_length_flag
         );
+        zero_stuffing(new_output_vector);
         std::move(new_output_vector.begin(), new_output_vector.end(), std::back_inserter(output_vector));
 
-        while(output_vector.size() % 8 != 0){
-            output_vector.emplace_back(0);
-        }
-        while(input_vector.size() % 8 != 0){
-            input_vector.emplace_back(0);
-        }
+        zero_stuffing(input_vector);
+
         uncompressed_file << bool_to_string(input_vector);
         compressed_file << bool_to_string(output_vector);
         std::cout << "OUTPUT: " << std::endl;
