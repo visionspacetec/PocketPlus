@@ -16,6 +16,7 @@ find_package( Threads REQUIRED )
 include_directories(
     ./src
     ./src/compressor
+    ./src/decompressor
     ./src/utils
 )
 
@@ -24,6 +25,8 @@ set(SOURCES
     ./src/main.cpp
     ./src/compressor/compressor.h
     ./src/compressor/compressor.cpp 
+    ./src/decompressor/decompressor.h
+    ./src/decompressor/decompressor.cpp
     ./src/utils/utils.h
     ./src/utils/utils.cpp
 )
