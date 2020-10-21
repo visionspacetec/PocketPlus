@@ -2,6 +2,7 @@
 #include <iterator>
 
 #include "./compressor/compressor.h"
+#include "./decompressor/decompressor.h"
 #include "./utils/utils.h"
 
 int main(int argc, char* argv[]){
@@ -117,17 +118,22 @@ int main(int argc, char* argv[]){
         std::move(new_output_vector.begin(), new_output_vector.end(), std::back_inserter(output_vector));
 
         pocketplus::utils::zero_stuffing(input_vector);
-
-        pocketplus::utils::write_bool_deque_to_file("original.bin", input_vector);
-        pocketplus::utils::write_bool_deque_to_file("compressed.bin", output_vector);
-
         std::cout << "OUTPUT: " << std::endl;
         pocketplus::utils::print_vector(output_vector);
 
+        // Save the total input and output to separate files
+        pocketplus::utils::write_bool_deque_to_file("original.bin", input_vector);
+        pocketplus::utils::write_bool_deque_to_file("compressed.bin", output_vector);
+
         std::cout << "############# DECOMPRESSION #############" << std::endl;
         std::cout << "INPUT: " << std::endl;
-        std::deque<bool> read_compressed = pocketplus::utils::read_bool_deque_from_file("compressed.bin");
+        auto read_compressed = pocketplus::utils::read_bool_deque_from_file("compressed.bin");
         pocketplus::utils::print_vector(read_compressed);
+
+        pocketplus::decompressor::PocketPlusDecompressor decompressor(input_vector_length);
+
+        auto first_data = decompressor.decompress(read_compressed);
+        pocketplus::utils::print_vector(first_data);
     }
     catch(const std::exception& e)
     {

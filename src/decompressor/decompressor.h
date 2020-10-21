@@ -19,7 +19,7 @@ class PocketPlusDecompressor{
         PocketPlusDecompressor(std::unique_ptr<unsigned int>& vector_length){
         }
         // Public functions
-        std::deque<bool> decompress(const std::deque<bool>& input);
+        std::deque<bool> decompress(std::deque<bool>& input);
 };
 
 };
