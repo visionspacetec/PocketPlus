@@ -59,10 +59,10 @@ std::deque<bool> PocketPlusCompressor::bit_extraction(const std::deque<bool>& a,
 }
 
 // Hamming weight - Number of ones in vector
-unsigned int PocketPlusCompressor::hamming_weight(const std::deque<bool>& alpha){
+unsigned int PocketPlusCompressor::hamming_weight(const std::deque<bool>& a){
     unsigned int output = 0;
-    for(size_t i = 0; i < alpha.size(); i++){
-        output += alpha.at(i);
+    for(size_t i = 0; i < a.size(); i++){
+        output += a.at(i);
     }
     return output;
 }

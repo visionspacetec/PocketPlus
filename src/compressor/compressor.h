@@ -57,7 +57,7 @@ class PocketPlusCompressor{
     std::deque<bool> output;
     public:
         PocketPlusCompressor(std::unique_ptr<unsigned int>& vector_length){
-            if ((*vector_length < 8) || (*vector_length > 65535)){
+            if ((*vector_length < 8) || (*vector_length > 65535)){ // ############ ToDo: check if this is still the case after the review
                 throw std::out_of_range("8 <= input_vector_length <= 2^16-1 (65535");
             }
             robustness_level_min = std::make_unique<const unsigned int>(0);
