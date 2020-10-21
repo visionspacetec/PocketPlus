@@ -49,3 +49,29 @@ std::string pocketplus::utils::bool_to_string(std::deque<bool> const& boolvector
     }
     return ret;
 }
+
+// Saves a boolean deque to file
+void pocketplus::utils::write_bool_deque_to_file(const std::string& file_name, const std::deque<bool>& in){
+    std::ofstream output_file;
+    output_file.open(file_name, std::ios::out | std::ofstream::binary);
+    output_file << pocketplus::utils::bool_to_string(in);
+    output_file.close();
+}
+
+// Reads as boolean deque from file
+std::deque<bool> pocketplus::utils::read_bool_deque_from_file(const std::string& file_name){
+    std::ifstream input_file;
+    input_file.open(file_name, std::ios::in | std::ifstream::binary);
+    std::deque<char> buffer_char;
+    std::copy(
+        std::istream_iterator<unsigned char>(input_file),
+        std::istream_iterator<unsigned char>(),
+        std::front_inserter(buffer_char));
+    std::deque<bool> buffer_bool;
+    for(auto byte: buffer_char){
+        for(unsigned int i = 0; i < 8; i++){
+            buffer_bool.emplace_front(((unsigned char)byte >> i) & 1);
+        }
+    }
+    return buffer_bool;
+}

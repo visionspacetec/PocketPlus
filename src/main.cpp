@@ -1,4 +1,5 @@
 #include <fstream>
+#include <iterator>
 
 #include "./compressor/compressor.h"
 #include "./utils/utils.h"
@@ -17,12 +18,6 @@ int main(int argc, char* argv[]){
     auto uncompressed_flag = std::make_unique<bool>(1);        // r_t // if n_t == 0 -> r_t = 1 --> r_0 = 1
     auto send_changes_flag = std::make_unique<bool>(0);        // n_t // n_0 = 0
     auto send_input_length_flag = std::make_unique<bool>(1);   // v_t // v_0 = 1
-
-    // Prepare for file save operation
-    std::ofstream uncompressed_file;
-    std::ofstream compressed_file;
-    uncompressed_file.open("original.bin", std::ios::out | std::ofstream::binary);
-    compressed_file.open("compressed.bin", std::ios::out | std::ofstream::binary);
 
     auto input = std::make_unique<long int>(3333333333);
 
@@ -123,15 +118,19 @@ int main(int argc, char* argv[]){
 
         pocketplus::utils::zero_stuffing(input_vector);
 
-        uncompressed_file << pocketplus::utils::bool_to_string(input_vector);
-        compressed_file << pocketplus::utils::bool_to_string(output_vector);
+        pocketplus::utils::write_bool_deque_to_file("original.bin", input_vector);
+        pocketplus::utils::write_bool_deque_to_file("compressed.bin", output_vector);
+
         std::cout << "OUTPUT: " << std::endl;
         pocketplus::utils::print_vector(output_vector);
+
+        std::cout << "############# DECOMPRESSION #############" << std::endl;
+        std::cout << "INPUT: " << std::endl;
+        std::deque<bool> read_compressed = pocketplus::utils::read_bool_deque_from_file("compressed.bin");
+        pocketplus::utils::print_vector(read_compressed);
     }
     catch(const std::exception& e)
     {
         std::cerr << "Error: " << e.what() << std::endl;
     }
-    uncompressed_file.close();
-    compressed_file.close();
 }
