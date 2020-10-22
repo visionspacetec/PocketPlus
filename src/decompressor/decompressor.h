@@ -20,6 +20,7 @@ class PocketPlusDecompressor{
 
     // Define inputs and parameters
     std::unique_ptr<unsigned int> t; // Counter for successful decompressions
+    std::unique_ptr<unsigned int> input_vector_length; // F
     // Vectors
 
     public:

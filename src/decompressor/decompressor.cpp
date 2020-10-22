@@ -60,8 +60,18 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
     }
     else{
         send_changes_flag = std::make_unique<bool>(1);
-        std::cout << "send_changes_flag (n_t) = 0" << std::endl;
-        // ToDo
+        std::cout << "send_changes_flag (n_t) = 1" << std::endl;
+        std::deque<bool> X_t;
+        auto done = std::make_unique<bool>(0);
+        while(!*done){
+            // D_t = M_t XOR M_t-1 (mask change vector)
+            // X_t = < D_t >
+            // What is the minumum size that RLE(X_t) can have? --> NULL!
+            if(*bit_position == 0){
+
+            }
+        }
+        // ############ ToDo!!!!!!!!!!!!!!!!!
     }
 
     // Process second sub vector
@@ -94,7 +104,6 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
 
     // Process third sub vector
     // 5.3.2.4
-    std::unique_ptr<unsigned int> input_vector_length; // F
     if(*d_t == 1){ // d_t = 1
         //ToDo
     }
@@ -148,6 +157,7 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
         *send_changes_flag = input.front();
         input.pop_front();
         std::cout << "send_changes_flag (n_t) = " << *send_changes_flag << std::endl;
+        *t += 1;
     }
     else if((*uncompressed_flag == 1) && (*send_input_length_flag == 0)){ // rt = 1 and vt = 0
         //ToDo

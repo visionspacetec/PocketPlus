@@ -134,6 +134,9 @@ int main(int argc, char* argv[]){
 
         auto first_data = decompressor.decompress(read_compressed);
         pocketplus::utils::print_vector(first_data);
+
+        auto second_data = decompressor.decompress(read_compressed);
+        pocketplus::utils::print_vector(second_data);
     }
     catch(const std::exception& e)
     {
