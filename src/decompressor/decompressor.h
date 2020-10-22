@@ -3,6 +3,7 @@
 
 #include <deque>
 #include <memory>
+#include <numeric>
 
 #include "../utils/utils.h"
 
