@@ -32,6 +32,9 @@ void write_bool_deque_to_file(const std::string& file_name, const std::deque<boo
 // Reads as boolean deque from file
 std::deque<bool> read_bool_deque_from_file(const std::string& file_name);
 
+// Pops n elements from the front of a boolean deque
+void pop_n_from_front(std::deque<bool>& in, unsigned int n);
+
 }
 }
 

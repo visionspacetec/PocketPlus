@@ -102,40 +102,52 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
         //ToDo
         if(hamming_weight_in_range(bit_position, bit_position + 1) == 2){
             bit_position += 2;
-            input.pop_front();
-            input.pop_front();
+            pocketplus::utils::pop_n_from_front(input, 2);
         }
         else{
             throw std::invalid_argument("Something went wrong");
         }
-        // Revert COUNT(F) operation
+        // Revert COUNT(input_vector_length) operation
         if(*bit_position == 0){
             input_vector_length = std::make_unique<unsigned int>(1);
         }
         else if(hamming_weight_in_range(bit_position, bit_position + 2) == 2){
-            std::cout << "2<=A<=33" << std::endl;
+            std::cout << "2<=input_vector_length<=33" << std::endl;
             bit_position += 3;
-            input.pop_front();
-            input.pop_front();
-            input.pop_front();
+            pocketplus::utils::pop_n_from_front(input, 3);
             // Undo BIT_5(A - 2)
-            auto A = std::make_unique<unsigned int>(0);
+            input_vector_length = std::make_unique<unsigned int>(0);
             auto bit_shift = std::make_unique<unsigned int>(0);
             for(auto it = bit_position + 4; it >= bit_position; it--, *bit_shift += 1){
                 if(*it){
-                    *A |= 1 << *bit_shift;
+                    *input_vector_length |= 1 << *bit_shift;
                 }
             }
-            *A += 2;
-            std::cout << "A=" << *A << std::endl;
+            *input_vector_length += 2;
+            bit_position += 5;
+            pocketplus::utils::pop_n_from_front(input, 5);
+            std::cout << "input_vector_length=" << *input_vector_length << std::endl;
         }
         else if(hamming_weight_in_range(bit_position, bit_position + 2) == 3){
-            std::cout << "A>=34" << std::endl;
+            std::cout << "input_vector_length>=34" << std::endl;
             // ToDo
         }
         else{
-            throw std::invalid_argument("Revert of COUNT(A) failed");
+            throw std::invalid_argument("Revert of COUNT(input_vector_length) failed");
         }
+        pocketplus::utils::print_vector(input);
+        if(input.size() >= *input_vector_length){
+            output.insert(output.end(), std::make_move_iterator(input.begin()), std::make_move_iterator(input.begin() + *input_vector_length));
+            std::cout << "Extracted:" << std::endl;
+            pocketplus::utils::print_vector(output);
+            input.erase(input.begin(), input.begin() + *input_vector_length );
+        }
+        else{
+            throw std::invalid_argument("Not enough bits left to extract data frame of length " + std::to_string(*input_vector_length) + " and n_t");
+        }
+        *send_changes_flag = input.front();
+        input.pop_front();
+        std::cout << "send_changes_flag (n_t) = " << *send_changes_flag << std::endl;
     }
     else if((*uncompressed_flag == 1) && (*send_input_length_flag == 0)){ // rt = 1 and vt = 0
         //ToDo
@@ -143,6 +155,7 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
     else{
         //ToDo
     }
+    std::cout << "INPUT remaining:" << std::endl;
     pocketplus::utils::print_vector(input);
     return output;
 }

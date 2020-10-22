@@ -34,11 +34,11 @@ std::deque<bool> PocketPlusCompressor::run_length_encoding(const std::deque<bool
     std::deque<bool> count_value;
     auto zero_counter = std::make_unique<unsigned int>(0);
     for(auto i = a.begin(); i != a.end(); i++){
-        zero_counter = std::make_unique<unsigned int>(*zero_counter + 1);
+        *zero_counter += 1;
         if(!(*i == 0)){
             count_value = count(*zero_counter);
             output_vector.insert(output_vector.end(), count_value.begin(), count_value.end());
-            zero_counter = std::make_unique<unsigned int>(0);
+            *zero_counter = 0;
         }
     }
     return output_vector;

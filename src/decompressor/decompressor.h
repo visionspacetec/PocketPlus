@@ -3,7 +3,7 @@
 
 #include <deque>
 #include <memory>
-#include <numeric>
+#include <iterator>
 
 #include "../utils/utils.h"
 
