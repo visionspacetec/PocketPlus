@@ -18,6 +18,7 @@ class PocketPlusDecompressor{
     std::unique_ptr<const unsigned int> minimum_size;
 
     // Define inputs and parameters
+    std::unique_ptr<unsigned int> t; // Counter for successful decompressions
     // Vectors
 
     public:
@@ -26,6 +27,8 @@ class PocketPlusDecompressor{
                 throw std::out_of_range("8 <= input_vector_length <= 2^16-1 (65535");
             }
             minimum_size = std::make_unique<const unsigned int>(10); // ToDo: check the actual minimum size!
+            
+            t = std::make_unique<unsigned int>(0);
         }
         // Public functions
         std::deque<bool> decompress(std::deque<bool>& input);
