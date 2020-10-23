@@ -26,6 +26,20 @@ std::deque<bool> pocketplus::utils::number_to_deque_bool(std::unique_ptr<long in
     return out;
 }
 
+// Converts a boolean deque to long int
+long int pocketplus::utils::deque_bool_to_number(const std::deque<bool>& input){
+    auto output = std::make_unique<long int>(0);
+    auto bit_shift = std::make_unique<unsigned int>(0);
+
+    auto one = std::make_unique<long int>(1);
+    for(auto it = input.rbegin(); it < input.rend(); it++, *bit_shift += 1){
+        if(*it){
+            *output |= *one << *bit_shift;
+        }
+    }
+    return *output;
+}
+
 // Helper function for bool_to_string
 std::size_t pocketplus::utils::divide_up(std::size_t dividend, std::size_t divisor){
     return (dividend + divisor - 1) / divisor;

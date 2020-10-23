@@ -135,6 +135,9 @@ int main(int argc, char* argv[]){
         auto first_data = decompressor.decompress(read_compressed);
         pocketplus::utils::print_vector(first_data);
 
+        auto first_data_int = std::make_unique<long int>(pocketplus::utils::deque_bool_to_number(first_data));
+        std::cout << "Decompressed: " << *first_data_int << std::endl;
+
         auto second_data = decompressor.decompress(read_compressed);
         pocketplus::utils::print_vector(second_data);
     }

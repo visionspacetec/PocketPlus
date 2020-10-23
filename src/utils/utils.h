@@ -17,8 +17,11 @@ void zero_stuffing(std::deque<bool>& in);
 // Prints a deque
 void print_vector(const std::deque<bool>& in);
 
-// Converts a long integer to a size n boolean vector
+// Converts a long integer to a size n boolean deque
 std::deque<bool> number_to_deque_bool(std::unique_ptr<long int>& input, std::unique_ptr<unsigned int>& length);
+
+// Converts a boolean deque to long int
+long int deque_bool_to_number(const std::deque<bool>& input);
 
 // Helper function for bool_to_string
 std::size_t divide_up(std::size_t dividend, std::size_t divisor);

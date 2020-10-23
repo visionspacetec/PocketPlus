@@ -63,14 +63,14 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
         std::cout << "send_changes_flag (n_t) = 1" << std::endl;
         std::deque<bool> X_t;
         auto done = std::make_unique<bool>(0);
-        while(!*done){
-            // D_t = M_t XOR M_t-1 (mask change vector)
-            // X_t = < D_t >
-            // What is the minumum size that RLE(X_t) can have? --> NULL!
-            if(*bit_position == 0){
+        //while(!*done){
+        //    // D_t = M_t XOR M_t-1 (mask change vector)
+        //    // X_t = < D_t >
+        //    // What is the minumum size that RLE(X_t) can have? --> NULL!
+        //    if(*bit_position == 0){
 
-            }
-        }
+        //    }
+        //}
         // ############ ToDo!!!!!!!!!!!!!!!!!
     }
 
