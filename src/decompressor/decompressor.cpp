@@ -54,24 +54,49 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
         std::cout << "uncompressed_flag (r_t) = 1" << std::endl;
         uncompressed_flag = std::make_unique<bool>(1); // From the standard: if nt = 0 -> rt = 1
         bit_position += 6;
-        for(auto i = 0; i < 6; i++){
-            input.pop_front();
-        }
+        pocketplus::utils::pop_n_from_front(input, 6);
+        //for(auto i = 0; i < 6; i++){
+        //    input.pop_front();
+        //}
     }
     else{
         send_changes_flag = std::make_unique<bool>(1);
         std::cout << "send_changes_flag (n_t) = 1" << std::endl;
         std::deque<bool> X_t;
-        auto done = std::make_unique<bool>(0);
-        //while(!*done){
-        //    // D_t = M_t XOR M_t-1 (mask change vector)
-        //    // X_t = < D_t >
-        //    // What is the minumum size that RLE(X_t) can have? --> NULL!
-        //    if(*bit_position == 0){
-
-        //    }
-        //}
-        // ############ ToDo!!!!!!!!!!!!!!!!!
+        if(!((*bit_position == 1) && (*bit_position + 1 == 0))){
+            while(!(*bit_position == 1) && (*bit_position + 1 == 0)){ // '1' '0' indicates the end of the RLE
+            //    // D_t = M_t XOR M_t-1 (mask change vector)
+            //    // X_t = < D_t >
+            //    // What is the minumum size that RLE(X_t) can have? --> NULL!
+                //bit_position++;
+                // ############ ToDo!!!!!!!!!!!!!!!!!
+            }
+        }
+        std::cout << "End of RLE!" << std::endl;
+        pocketplus::utils::print_vector(input);
+        bit_position += 2;
+        pocketplus::utils::pop_n_from_front(input, 2);
+        // Undo BIT_3(robustness_level)
+        robustness_level = std::make_unique<unsigned int>(0);
+        auto bit_shift = std::make_unique<unsigned int>(0);
+        for(auto it = bit_position + 2; it >= bit_position; it--, *bit_shift += 1){
+            if(*it){
+                *robustness_level |= 1 << *bit_shift;
+            }
+        }
+        std::cout << "Robustness level: " << *robustness_level << std::endl;
+        bit_position += 3;
+        pocketplus::utils::pop_n_from_front(input, 3);
+        std::deque<bool> e_t;
+        if((*robustness_level == 0) || (X_t.size() == 0)){
+            // e_t is empty
+        }
+        else if((*robustness_level > 0) && (X_t.size() != 0)){
+            e_t.push_back({0});
+        }
+        else{
+            e_t.push_back({1});
+        }
     }
 
     // Process second sub vector
