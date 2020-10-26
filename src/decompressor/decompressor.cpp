@@ -238,9 +238,31 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
             pocketplus::utils::pop_n_from_front(input, 5);
             std::cout << "input_vector_length=" << *input_vector_length << std::endl;
         }
-        else if(hamming_weight_in_range(bit_position, bit_position + 2) == 3){
+        else if(hamming_weight_in_range(bit_position, bit_position + 2) == 3){ // ToDo ### Check if working!
             std::cout << "input_vector_length>=34" << std::endl;
-            // ToDo
+            bit_position += 3;
+            pocketplus::utils::pop_n_from_front(input, 3);
+            // Undo BIT_E(A - 2)
+            auto one_detected = std::make_unique<bool>(1);
+            auto count_size = std::make_unique<unsigned int>(0);
+            while(*one_detected){
+                if(*(bit_position + *count_size)){
+                    *one_detected = 0;
+                }
+                *count_size += 1;
+            }
+            *count_size += 4;
+            input_vector_length = std::make_unique<unsigned int>(0);
+            auto bit_shift = std::make_unique<unsigned int>(0);
+            for(auto it = bit_position + *count_size; it >= bit_position; it--, *bit_shift += 1){
+                if(*it){
+                    *input_vector_length |= 1 << *bit_shift;
+                }
+            }
+            *input_vector_length += 2;
+            bit_position += *count_size + 1;
+            pocketplus::utils::pop_n_from_front(input, *count_size + 1);
+            std::cout << "input_vector_length=" << *input_vector_length << std::endl;
         }
         else{
             throw std::invalid_argument("Revert of COUNT(input_vector_length) failed");
@@ -268,7 +290,7 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
     }
     else{
         //ToDo
-        std::cout << "testi3" << std::endl;
+        std::cout << "test" << std::endl;
         bit_position += 1;
         input.pop_front();
     }

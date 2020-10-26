@@ -23,7 +23,9 @@ class PocketPlusDecompressor{
     std::unique_ptr<unsigned int> input_vector_length; // F
     std::unique_ptr<unsigned int> robustness_level; // R_t
     std::unique_ptr<bool> d_t;
+
     // Vectors
+    std::deque<std::deque<bool>> input_vector; // I
 
     public:
         PocketPlusDecompressor(std::unique_ptr<unsigned int>& vector_length){
