@@ -63,11 +63,75 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
         std::cout << "send_changes_flag (n_t) = 1" << std::endl;
         std::deque<bool> X_t;
         if(!((*bit_position == 1) && (*bit_position + 1 == 0))){
-            while(!(*bit_position == 1) && (*bit_position + 1 == 0)){ // '1' '0' indicates the end of the RLE
+            while(!((*bit_position == 1) && (*(bit_position + 1) == 0))){ // '1' '0' indicates the end of the RLE
             //    // D_t = M_t XOR M_t-1 (mask change vector)
             //    // X_t = < D_t >
             // bit_position++;
             // ############ ToDo!!!!!!!!!!!!!!!!!
+
+
+                // Revert COUNT(input_vector_length) operation
+                if(*bit_position == 0){
+                    X_t.push_back({1});
+                    bit_position += 1;
+                    input.pop_front();
+                }
+                else if(hamming_weight_in_range(bit_position, bit_position + 2) == 2){
+                    std::cout << "2<=input_vector_length<=33" << std::endl;
+                    bit_position += 3;
+                    pocketplus::utils::pop_n_from_front(input, 3);
+                    // Undo BIT_5(A - 2)
+                    auto count_tmp = std::make_unique<unsigned int>(0);
+                    auto bit_shift = std::make_unique<unsigned int>(0);
+                    for(auto it = bit_position + 4; it >= bit_position; it--, *bit_shift += 1){
+                        if(*it){
+                            *count_tmp |= 1 << *bit_shift;
+                        }
+                    }
+                    *count_tmp += 2;
+                    bit_position += 5;
+                    pocketplus::utils::pop_n_from_front(input, 5);
+                    std::cout << "count_tmp=" << *count_tmp << std::endl;
+                    auto length = std::make_unique<unsigned int>(5);
+                    for(unsigned int i = 0; i < *length; i++){
+                        X_t.emplace_front(((*count_tmp) >> i) & 1);
+                    }
+                }
+                else if(hamming_weight_in_range(bit_position, bit_position + 2) == 3){ // ToDo ### Check if working!
+                    std::cout << "input_vector_length>=34" << std::endl;
+                    bit_position += 3;
+                    pocketplus::utils::pop_n_from_front(input, 3);
+                    // Undo BIT_E(A - 2)
+                    auto one_detected = std::make_unique<bool>(1);
+                    auto count_size = std::make_unique<unsigned int>(0);
+                    while(*one_detected){
+                        if(*(bit_position + *count_size)){
+                            *one_detected = 0;
+                        }
+                        *count_size += 1;
+                    }
+                    *count_size += 4;
+                    auto count_tmp = std::make_unique<unsigned int>(0);
+                    auto bit_shift = std::make_unique<unsigned int>(0);
+                    for(auto it = bit_position + *count_size; it >= bit_position; it--, *bit_shift += 1){
+                        if(*it){
+                            *count_tmp |= 1 << *bit_shift;
+                        }
+                    }
+                    *count_tmp += 2;
+                    bit_position += *count_size + 1;
+                    pocketplus::utils::pop_n_from_front(input, *count_size + 1);
+                    std::cout << "count_tmp=" << *count_tmp << std::endl;
+                }
+                else{
+                    throw std::invalid_argument("Revert of COUNT(X) failed");
+                }
+                std::cout << "X_t: ";
+                pocketplus::utils::print_vector(X_t);
+
+
+
+
             }
         }
         if(X_t.size() == 0){
