@@ -70,6 +70,14 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
             // ############ ToDo!!!!!!!!!!!!!!!!!
             }
         }
+        if(X_t.size() == 0){
+            std::deque<bool> D_t;
+            D_t.assign(*input_vector_length, 0);
+            change_vector.push_back(D_t);
+        }
+        else{
+            // ############ ToDo!!!!!!!!!!!!!!!!!
+        }
         std::cout << "End of RLE!" << std::endl;
         pocketplus::utils::print_vector(input);
         bit_position += 2;
@@ -140,6 +148,9 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
         send_input_length_flag = std::make_unique<bool>(1);
         std::cout << "send_mask_flag (f_t) = 0" << std::endl;
         send_mask_flag = std::make_unique<bool>(0);
+        std::deque<bool> M_t;
+        M_t.assign(*input_vector_length, 0);
+        mask_vector.push_back(M_t);
     }
 
     // 5.3.2.3
@@ -158,15 +169,13 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
             input.pop_front();
             if(!((*bit_position == 1) && (*bit_position + 1 == 0))){
                 while(!(*bit_position == 1) && (*bit_position + 1 == 0)){ // '1' '0' indicates the end of the RLE
-                    //    // D_t = M_t XOR M_t-1 (mask change vector)
-                    //    // X_t = < D_t >
-                    // bit_position++;
                     // ############ ToDo!!!!!!!!!!!!!!!!!
                 }
             }
-            else{
-                // RLE(<(M_t XOR M_t<<))>) == NULL
-                // ############ ToDo!!!!!!!!!!!!!!!!!
+            else{ // RLE(<(M_t XOR M_t<<))>) == NULL
+                std::deque<bool> M_t;
+                M_t.assign(*input_vector_length, 0);
+                mask_vector.push_back(M_t);
             }
             std::cout << "End of RLE!" << std::endl;
             pocketplus::utils::print_vector(input);
@@ -273,6 +282,7 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
             std::cout << "Extracted:" << std::endl;
             pocketplus::utils::print_vector(output);
             input.erase(input.begin(), input.begin() + *input_vector_length );
+            input_vector.push_back(output);
         }
         else{
             throw std::invalid_argument("Not enough bits left to extract data frame of length " + std::to_string(*input_vector_length) + " and n_t");
@@ -289,10 +299,26 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
         
     }
     else{
-        //ToDo
-        std::cout << "test" << std::endl;
+        // BE(I_t, M_t) values of I_t at the positions where M_t is one
+        // Mask must be known at this point
+        // Predictable values are already in the output vector at this point?
+        // Evaluate mask and add bits in predictable positions from previous input_vector
         bit_position += 1;
         input.pop_front();
+        output.assign(*input_vector_length, 0); // Fill the output vector with zeros
+        for(auto i = 0; i < mask_vector.back().size(); i++){
+            if(mask_vector.back().at(i) == 1){
+                output.at(i) = *bit_position;
+                *bit_position += 1;
+                input.pop_front();
+            }
+            else{
+                output.at(i) = input_vector.back().at(i);
+            }
+        }
+        input_vector.push_back(output);
+        std::cout << "Extracted:" << std::endl;
+        pocketplus::utils::print_vector(output);
     }
     std::cout << "INPUT remaining:" << std::endl;
     pocketplus::utils::print_vector(input);
