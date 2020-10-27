@@ -201,6 +201,7 @@ std::deque<bool> PocketPlusCompressor::compress(
                     X_t.at(index) = mask_change_vector.at(i).at(index) || X_t.at(index);
                 }
             }
+            X_t = reverse(X_t); // ToDo: Just go the other way thru the for loop to avoid this step
         }
         else{
             // X_t = [<D_(t-robustness_level) OR D_(t-robustness_level)+1 OR ... OR D_t>]
@@ -210,6 +211,7 @@ std::deque<bool> PocketPlusCompressor::compress(
                     X_t.at(index) = mask_change_vector.at(i).at(index) || X_t.at(index);
                 }
             }
+            X_t = reverse(X_t); // ToDo: Just go the other way thru the for loop to avoid this step
         }
 
         y_t = bit_extraction(inverse(mask_new), reverse(X_t));
@@ -227,7 +229,11 @@ std::deque<bool> PocketPlusCompressor::compress(
         }
 
         //first_binary_vector = [RLE(X_t), '10', BIT_3(robustness_level), e_t, k_t, d_t]
+        std::cout << "X_t: " << std::endl;
+        pocketplus::utils::print_vector(X_t);
         X_t_rle = run_length_encoding(X_t);
+        std::cout << "X_t_rle: " << std::endl;
+        pocketplus::utils::print_vector(X_t_rle);
         first_binary_vector.insert(first_binary_vector.end(), X_t_rle.begin(), X_t_rle.end());
         first_binary_vector.insert(first_binary_vector.end(), {1, 0});
         robustness_level_bit_3 = std::deque<bool>();
@@ -305,8 +311,11 @@ std::deque<bool> PocketPlusCompressor::compress(
     mask_old = mask_new;
     mask_build_old = mask_build_new;
 
+    std::cout << "First:" << std::endl;
     pocketplus::utils::print_vector(first_binary_vector);
+    std::cout << "Second:" << std::endl;
     pocketplus::utils::print_vector(second_binary_vector);
+    std::cout << "Third:" << std::endl;
     pocketplus::utils::print_vector(third_binary_vector);
 
     return output;

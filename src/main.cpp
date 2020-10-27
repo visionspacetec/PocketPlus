@@ -133,25 +133,25 @@ int main(int argc, char* argv[]){
         pocketplus::decompressor::PocketPlusDecompressor decompressor(input_vector_length);
 
         auto first_data = decompressor.decompress(read_compressed);
-        pocketplus::utils::print_vector(first_data);
+        //pocketplus::utils::print_vector(first_data);
 
         auto first_data_int = std::make_unique<long int>(pocketplus::utils::deque_bool_to_number(first_data));
         std::cout << "Decompressed #1: " << *first_data_int << std::endl;
 
         auto second_data = decompressor.decompress(read_compressed);
-        pocketplus::utils::print_vector(second_data);
+        //pocketplus::utils::print_vector(second_data);
 
         auto second_data_int = std::make_unique<long int>(pocketplus::utils::deque_bool_to_number(second_data));
         std::cout << "Decompressed #2: " << *second_data_int << std::endl;
 
         auto third_data = decompressor.decompress(read_compressed);
-        pocketplus::utils::print_vector(second_data);
+        //pocketplus::utils::print_vector(third_data);
 
         auto third_data_int = std::make_unique<long int>(pocketplus::utils::deque_bool_to_number(third_data));
         std::cout << "Decompressed #3: " << *third_data_int << std::endl;
 
         auto fourth_data = decompressor.decompress(read_compressed);
-        pocketplus::utils::print_vector(second_data);
+       // pocketplus::utils::print_vector(fourth_data);
 
         auto fourth_data_int = std::make_unique<long int>(pocketplus::utils::deque_bool_to_number(fourth_data));
         std::cout << "Decompressed #4: " << *fourth_data_int << std::endl;

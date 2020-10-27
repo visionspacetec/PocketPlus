@@ -92,8 +92,7 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
                     bit_position += 5;
                     pocketplus::utils::pop_n_from_front(input, 5);
                     std::cout << "count_tmp=" << *count_tmp << std::endl;
-                    auto length = std::make_unique<unsigned int>(5);
-                    for(unsigned int i = 0; i < *length; i++){
+                    for(unsigned int i = 0; i < 5; i++){
                         X_t.emplace_front(((*count_tmp) >> i) & 1);
                     }
                 }
@@ -163,16 +162,21 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
             // e_t is empty
         }
         else if((*robustness_level > 0) && (X_t.size() != 0)){
-            e_t.push_back({0});
+            e_t.emplace_back(0);
             bit_position += 1;
             input.pop_front();
         }
         else{
-            e_t.push_back({1});
+            e_t.emplace_back(0);
             bit_position += 1;
             input.pop_front();
         }
-        std::cout << "e_t: " << e_t.front() << std::endl;
+        if(e_t.size() == 0){
+            std::cout << "e_t: EMPTY" << std::endl;
+        }
+        else{
+            std::cout << "e_t: " << e_t.at(0) << std::endl;
+        }
         std::deque<bool> k_t;
         if((*robustness_level == 0) || (X_t.size() == 0) || (y_t.size() == 0)){
             // k_t is empty
