@@ -35,28 +35,11 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
     // Initialize bit iterator
     auto bit_position = input.begin();
 
-/*
-    // Jump over leading zeros
-    while(*bit_position == 0){
-        bit_position++;
-        input.pop_front();
-        if(bit_position == input.end()){
-            input.clear();
-            return output;
-        }
-    }
-*/
-
     // Check if there are enough bits left for a successful decode
     if(input.size() < *minimum_size){
         input.clear();
         return output;
     }
-
-    for(auto i = bit_position; i < bit_position + 6; i++){
-        std::cout << *i << " ";
-    }
-    std::cout << std::endl;
 
     // Process first sub vector
     // 5.3.2.2
@@ -79,12 +62,8 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
         std::deque<bool> X_t;
         if(!((*bit_position == 1) && (*(bit_position + 1) == 0))){
             while(!((*bit_position == 1) && (*(bit_position + 1) == 0))){ // '1' '0' indicates the end of the RLE
-            //    // D_t = M_t XOR M_t-1 (mask change vector)
-            //    // X_t = < D_t >
-            // bit_position++;
-            // ############ ToDo!!!!!!!!!!!!!!!!!
-
-
+                // D_t = M_t XOR M_t-1 (mask change vector)
+                // X_t = < D_t >
                 // Revert COUNT(input_vector_length) operation
                 if(*bit_position == 0){
                     X_t.push_back({1});
@@ -217,7 +196,6 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
             }
             std::cout << "k_t: " << std::endl;
             pocketplus::utils::print_vector(k_t);
-
             // ############ ToDo!!!!!!!!!!!!!!!!!
         }
         std::cout << "k_t.size(): " << k_t.size() << std::endl;
@@ -247,7 +225,6 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
     }
 
     // 5.3.2.3
-    pocketplus::utils::print_vector(input);
     std::deque<bool> q_t;
     if(*d_t == 1){
         // q_t is empty
@@ -263,7 +240,6 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
             if(!((*bit_position == 1) && (*(bit_position + 1) == 0))){
                 std::deque<bool> mask_mask_shifted;
                 while(!((*bit_position == 1) && (*(bit_position + 1) == 0))){ // '1' '0' indicates the end of the RLE
-                    // Revert COUNT(input_vector_length) operation
                     if(*bit_position == 0){
                         mask_mask_shifted.emplace_front(1);
                         bit_position += 1;
@@ -365,7 +341,6 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
             input.pop_front();
         }
     }
-    pocketplus::utils::print_vector(input);
 
     // Process third sub vector
     // 5.3.2.4
@@ -391,10 +366,10 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
         }
     }
     if(*d_t == 1){ // d_t = 1
-        //ToDo
+        // ############ ToDo!!!!!!!!!!!!!!!!!
     }
     else if((*uncompressed_flag == 1) && (*send_input_length_flag == 1)){ // rt = 1 and vt = 1
-        //ToDo
+        // ############ ToDo!!!!!!!!!!!!!!!!!
         if(hamming_weight_in_range(bit_position, bit_position + 1) == 2){
             bit_position += 2;
             pocketplus::utils::pop_n_from_front(input, 2);
@@ -469,10 +444,9 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
         *t += 1;
     }
     else if((*uncompressed_flag == 1) && (*send_input_length_flag == 0)){ // rt = 1 and vt = 0
-        //ToDo
+        // ############ ToDo!!!!!!!!!!!!!!!!!
         bit_position += 2;
         pocketplus::utils::pop_n_from_front(input, 2);
-        
     }
     else{
         // BE(I_t, M_t) values of I_t at the positions where M_t is one
@@ -486,8 +460,7 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
         auto it_output = output.begin();
         auto it_last_input = input_vector.back().begin();
         for(; it_mask != mask_vector.back().end();){
-            if(*it_mask == 1){    
-                std::cout << "Case1 : " << input.front() << std::endl;
+            if(*it_mask == 1){
                 *it_output = input.front();
                 input.pop_front();
             }
