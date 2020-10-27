@@ -263,8 +263,6 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
             if(!((*bit_position == 1) && (*(bit_position + 1) == 0))){
                 std::deque<bool> mask_mask_shifted;
                 while(!((*bit_position == 1) && (*(bit_position + 1) == 0))){ // '1' '0' indicates the end of the RLE
-                    // ############ ToDo!!!!!!!!!!!!!!!!!
-
                     // Revert COUNT(input_vector_length) operation
                     if(*bit_position == 0){
                         mask_mask_shifted.emplace_front(1);
@@ -323,14 +321,33 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
                     else{
                         throw std::invalid_argument("Revert of COUNT(X) failed");
                     }
-
-                    std::cout << "mask_mask_shifted" << std::endl;
-                    pocketplus::utils::print_vector(mask_mask_shifted);
-                    // ToDo undo 
-
-
-
                 }
+                std::deque<bool> M_t;
+                auto it = mask_mask_shifted.rbegin();
+                auto it_M_t = M_t.rbegin();
+                if(*it == 1){
+                    M_t.emplace_front(1);
+                }
+                else{
+                    M_t.emplace_front(0);
+                }
+                it++;
+                for(; it != mask_mask_shifted.rend(); it++){
+                    if((*it == 1) && (*it_M_t == 0)){
+                        M_t.emplace_front(1);
+                    }
+                    else if((*it == 0) && (*it_M_t == 1)){
+                        M_t.emplace_front(1);
+                    }
+                    else{
+                        M_t.emplace_front(0);
+                    }
+                    it_M_t++;
+                }
+                while(M_t.size() < *input_vector_length){
+                    M_t.emplace_front(0);
+                }
+                mask_vector.push_back(M_t);
             }
             else{ // RLE(<(M_t XOR M_t<<))>) == NULL
                 std::deque<bool> M_t;
@@ -338,7 +355,6 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
                 mask_vector.push_back(M_t);
             }
             std::cout << "End of RLE!" << std::endl;
-            pocketplus::utils::print_vector(input);
             bit_position += 2;
             pocketplus::utils::pop_n_from_front(input, 2);
         }
@@ -466,27 +482,28 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
         bit_position += 1;
         input.pop_front();
         output.assign(*input_vector_length, 0); // Fill the output vector with zeros
-        for(auto i = 0; i < mask_vector.back().size(); i++){
-            if(mask_vector.back().at(i) == 1){
-                output.at(i) = *bit_position;
-                *bit_position += 1;
+        auto it_mask = mask_vector.back().begin();
+        auto it_output = output.begin();
+        auto it_last_input = input_vector.back().begin();
+        for(; it_mask != mask_vector.back().end();){
+            if(*it_mask == 1){    
+                std::cout << "Case1 : " << input.front() << std::endl;
+                *it_output = input.front();
                 input.pop_front();
             }
             else{
-                output.at(i) = input_vector.back().at(i);
+                *it_output = *it_last_input;
             }
+            it_mask++;
+            it_output++;
+            it_last_input++;
         }
         input_vector.push_back(output);
         std::cout << "Extracted:" << std::endl;
         pocketplus::utils::print_vector(output);
     }
-    std::cout << "INPUT remaining:" << std::endl;
-    pocketplus::utils::print_vector(input);
-    std::cout << "input_vector_size_before_processing: " << *input_vector_size_before_processing << std::endl;
-    std::cout << "input.size(): " << input.size() << std::endl;
-    std::cout << "POP ZEROS: " << 8 - ((*input_vector_size_before_processing - input.size()) % 8) << std::endl;
-    pocketplus::utils::pop_n_from_front(input, 8 - ((*input_vector_size_before_processing - input.size()) % 8));
-
+    std::cout << "POP ZEROS: " << (8 - ((*input_vector_size_before_processing - input.size()) % 8)) % 8 << std::endl;
+    pocketplus::utils::pop_n_from_front(input, (8 - ((*input_vector_size_before_processing - input.size()) % 8) % 8));
     std::cout << "INPUT remaining:" << std::endl;
     pocketplus::utils::print_vector(input);
     return output;

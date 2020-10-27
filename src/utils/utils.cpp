@@ -93,6 +93,11 @@ std::deque<bool> pocketplus::utils::read_bool_deque_from_file(const std::string&
 // Pops n elements from the front of a boolean deque
 void pocketplus::utils::pop_n_from_front(std::deque<bool>& in, unsigned int n){
     for(auto i = 0; i < n; i++){
-        in.pop_front();
+        if(in.size() > 0){
+            in.pop_front();
+        }
+        else{
+            i = n;
+        }
     }
 }
