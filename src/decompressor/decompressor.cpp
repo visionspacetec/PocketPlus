@@ -77,7 +77,7 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
         send_changes_flag = std::make_unique<bool>(1);
         std::cout << "send_changes_flag (n_t) = 1" << std::endl;
         std::deque<bool> X_t;
-        if(!((*bit_position == 1) && (*bit_position + 1 == 0))){
+        if(!((*bit_position == 1) && (*(bit_position + 1) == 0))){
             while(!((*bit_position == 1) && (*(bit_position + 1) == 0))){ // '1' '0' indicates the end of the RLE
             //    // D_t = M_t XOR M_t-1 (mask change vector)
             //    // X_t = < D_t >
@@ -135,6 +135,9 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
                     *count_tmp += 2;
                     bit_position += *count_size + 1;
                     pocketplus::utils::pop_n_from_front(input, *count_size + 1);
+                    for(unsigned int i = 0; i < *count_size + 1; i++){
+                        X_t.emplace_front(((*count_tmp) >> i) & 1);
+                    }
                     std::cout << "count_tmp=" << *count_tmp << std::endl;
                 }
                 else{
@@ -158,6 +161,7 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
             pocketplus::utils::print_vector(D_t);
             // ############ ToDo!!!!!!!!!!!!!!!!!
         }
+        auto X_t_weight = std::make_unique<unsigned int>(hamming_weight_in_range(X_t.begin(), X_t.end()));
         std::cout << "End of RLE!" << std::endl;
         bit_position += 2;
         pocketplus::utils::pop_n_from_front(input, 2);
@@ -174,20 +178,26 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
         bit_position += 3;
         pocketplus::utils::pop_n_from_front(input, 3);
         std::deque<bool> e_t;
-        std::deque<bool> y_t; // ############ ToDo!!!!!!!!!!!!!!!!!
-        if((*robustness_level == 0) || (hamming_weight_in_range(X_t.begin(), X_t.end()) == 0)){
+        auto y_t = std::make_unique<bool>(0); // ############ ToDo!!!!!!!!!!!!!!!!!
+        if((*robustness_level == 0) || (*X_t_weight == 0)){
             // e_t is empty
-        }
-        else if((*robustness_level > 0) && (hamming_weight_in_range(X_t.begin(), X_t.end()) != 0)){
-            e_t.emplace_back(0);
-            bit_position += 1;
-            input.pop_front();
+            *y_t = 0;
         }
         else{
-            e_t.emplace_back(0);
-            bit_position += 1;
-            input.pop_front();
+            if(input.front() == 0){
+                e_t.emplace_back(0);
+                bit_position += 1;
+                input.pop_front();
+                *y_t = 0;
+            }
+            else{
+                e_t.emplace_back(1);
+                bit_position += 1;
+                input.pop_front();
+                *y_t = 1;
+            }
         }
+
         if(e_t.size() == 0){
             std::cout << "e_t: EMPTY" << std::endl;
         }
@@ -195,19 +205,19 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
             std::cout << "e_t: " << e_t.at(0) << std::endl;
         }
         std::deque<bool> k_t;
-        if((*robustness_level == 0) || (hamming_weight_in_range(X_t.begin(), X_t.end()) == 0) || (y_t.size() == 0)){
+        if((*robustness_level == 0) || (*X_t_weight == 0) || (*y_t == 0)){
             // k_t is empty
         }
         else{
             // k_t = BE( ~M_t, <X_t> )
-            if(input.size() >= *input_vector_length){
-                bit_position += *input_vector_length;
-                k_t.insert(k_t.end(), std::make_move_iterator(input.begin()), std::make_move_iterator(input.begin() + *input_vector_length));
-                input.erase(input.begin(), input.begin() + *input_vector_length );
+            std::cout << "X_t_weight: " << *X_t_weight << std::endl;
+            for(auto i = 0; i < *X_t_weight; i++){
+                *bit_position += 1;
+                k_t.emplace_back(input.front());
             }
-            else{
-                throw std::invalid_argument("Not enough bits left to extract k_t of length " + std::to_string(*input_vector_length));
-            }
+            std::cout << "k_t: " << std::endl;
+            pocketplus::utils::print_vector(k_t);
+
             // ############ ToDo!!!!!!!!!!!!!!!!!
         }
         std::cout << "k_t.size(): " << k_t.size() << std::endl;
@@ -225,6 +235,7 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
     }
 
     // Process second sub vector
+    std::cout << "Second vector" << std::endl;
     std::unique_ptr<bool> send_input_length_flag;
     if(*t == 0){
         std::cout << "d_t = 0" << std::endl;
@@ -233,9 +244,6 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
         send_input_length_flag = std::make_unique<bool>(1);
         std::cout << "send_mask_flag (f_t) = 0" << std::endl;
         send_mask_flag = std::make_unique<bool>(0);
-        std::deque<bool> M_t;
-        M_t.assign(*input_vector_length, 0);
-        mask_vector.push_back(M_t);
     }
 
     // 5.3.2.3
@@ -252,9 +260,76 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
             // Undo RLE
             bit_position++;
             input.pop_front();
-            if(!((*bit_position == 1) && (*bit_position + 1 == 0))){
-                while(!(*bit_position == 1) && (*bit_position + 1 == 0)){ // '1' '0' indicates the end of the RLE
+            if(!((*bit_position == 1) && (*(bit_position + 1) == 0))){
+                std::deque<bool> mask_mask_shifted;
+                while(!((*bit_position == 1) && (*(bit_position + 1) == 0))){ // '1' '0' indicates the end of the RLE
                     // ############ ToDo!!!!!!!!!!!!!!!!!
+
+                    // Revert COUNT(input_vector_length) operation
+                    if(*bit_position == 0){
+                        mask_mask_shifted.emplace_front(1);
+                        bit_position += 1;
+                        input.pop_front();
+                    }
+                    else if(hamming_weight_in_range(bit_position, bit_position + 2) == 2){
+                        std::cout << "2<=input_vector_length<=33" << std::endl;
+                        bit_position += 3;
+                        pocketplus::utils::pop_n_from_front(input, 3);
+                        // Undo BIT_5(A - 2)
+                        auto count_tmp = std::make_unique<unsigned int>(0);
+                        auto bit_shift = std::make_unique<unsigned int>(0);
+                        for(auto it = bit_position + 4; it >= bit_position; it--, *bit_shift += 1){
+                            if(*it){
+                                *count_tmp |= 1 << *bit_shift;
+                            }
+                        }
+                        *count_tmp += 2;
+                        bit_position += 5;
+                        pocketplus::utils::pop_n_from_front(input, 5);
+                        std::cout << "count_tmp=" << *count_tmp << std::endl;
+                        for(unsigned int i = 0; i < 5; i++){
+                            mask_mask_shifted.emplace_front(((*count_tmp) >> i) & 1);
+                        }
+                    }
+                    else if(hamming_weight_in_range(bit_position, bit_position + 2) == 3){ // ToDo ### Check if working!
+                        std::cout << "input_vector_length>=34" << std::endl;
+                        bit_position += 3;
+                        pocketplus::utils::pop_n_from_front(input, 3);
+                        // Undo BIT_E(A - 2)
+                        auto one_detected = std::make_unique<bool>(1);
+                        auto count_size = std::make_unique<unsigned int>(0);
+                        while(*one_detected){
+                            if(*(bit_position + *count_size)){
+                                *one_detected = 0;
+                            }
+                            *count_size += 1;
+                        }
+                        *count_size += 4;
+                        auto count_tmp = std::make_unique<unsigned int>(0);
+                        auto bit_shift = std::make_unique<unsigned int>(0);
+                        for(auto it = bit_position + *count_size; it >= bit_position; it--, *bit_shift += 1){
+                            if(*it){
+                                *count_tmp |= 1 << *bit_shift;
+                            }
+                        }
+                        *count_tmp += 2;
+                        bit_position += *count_size + 1;
+                        pocketplus::utils::pop_n_from_front(input, *count_size + 1);
+                        for(unsigned int i = 0; i < *count_size + 1; i++){
+                            mask_mask_shifted.emplace_front(((*count_tmp) >> i) & 1);
+                        }
+                        std::cout << "count_tmp=" << *count_tmp << std::endl;
+                    }
+                    else{
+                        throw std::invalid_argument("Revert of COUNT(X) failed");
+                    }
+
+                    std::cout << "mask_mask_shifted" << std::endl;
+                    pocketplus::utils::print_vector(mask_mask_shifted);
+                    // ToDo undo 
+
+
+
                 }
             }
             else{ // RLE(<(M_t XOR M_t<<))>) == NULL
