@@ -476,7 +476,7 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
         pocketplus::utils::print_vector(output);
     }
     std::cout << "POP ZEROS: " << (8 - ((*input_vector_size_before_processing - input.size()) % 8)) % 8 << std::endl;
-    pocketplus::utils::pop_n_from_front(input, (8 - ((*input_vector_size_before_processing - input.size()) % 8) % 8));
+    pocketplus::utils::pop_n_from_front(input, (8 - ((*input_vector_size_before_processing - input.size()) % 8)) % 8);
     std::cout << "INPUT remaining:" << std::endl;
     pocketplus::utils::print_vector(input);
     return output;
