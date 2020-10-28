@@ -66,7 +66,7 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
                 // X_t = < D_t >
                 // Revert COUNT(input_vector_length) operation
                 if(*bit_position == 0){
-                    X_t.push_back({1});
+                    X_t.emplace_back(1);
                     bit_position += 1;
                     input.pop_front();
                 }
@@ -82,12 +82,13 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
                             *count_tmp |= 1 << *bit_shift;
                         }
                     }
-                    *count_tmp += 2;
+                    *count_tmp += 1;
                     bit_position += 5;
                     pocketplus::utils::pop_n_from_front(input, 5);
-                    for(unsigned int i = 0; i < 5; i++){
-                        X_t.emplace_front(((*count_tmp) >> i) & 1);
+                    for(unsigned int i = 0; i < *count_tmp; i++){
+                        X_t.emplace_back(0);
                     }
+                    X_t.emplace_back(1);
                 }
                 else if(hamming_weight_in_range(bit_position, bit_position + 2) == 3){ // ToDo ### Check if working!
                     std::cout << "input_vector_length>=34" << std::endl;
@@ -259,12 +260,19 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
                                 *count_tmp |= 1 << *bit_shift;
                             }
                         }
-                        *count_tmp += 2;
+                        *count_tmp += 1;
                         bit_position += 5;
                         pocketplus::utils::pop_n_from_front(input, 5);
-                        for(unsigned int i = 0; i < 5; i++){
-                            mask_mask_shifted.emplace_front(((*count_tmp) >> i) & 1);
+                        for(unsigned int i = 0; i < *count_tmp; i++){
+                                mask_mask_shifted.emplace_back(0);
                         }
+                        mask_mask_shifted.emplace_back(1);
+                        //*count_tmp += 2;
+                        //bit_position += 5;
+                        //pocketplus::utils::pop_n_from_front(input, 5);
+                        //for(unsigned int i = 0; i < 5; i++){
+                        //    mask_mask_shifted.emplace_front(((*count_tmp) >> i) & 1);
+                        //}
                     }
                     else if(hamming_weight_in_range(bit_position, bit_position + 2) == 3){ // ToDo ### Check if working!
                         std::cout << "input_vector_length>=34" << std::endl;

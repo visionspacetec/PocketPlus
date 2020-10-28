@@ -225,9 +225,10 @@ std::deque<bool> PocketPlusCompressor::compress(
 
         std::cout << "mask_new:" << std::endl;
         pocketplus::utils::print_vector(mask_new);
-
+        
+        e_t.clear();
         if((*robustness_level == 0) || (hamming_weight(X_t) == 0)){}
-        else if ((hamming_weight(y_t) == 0) && (*robustness_level > 0) && (hamming_weight(X_t) != 0)){
+        else if(((hamming_weight(y_t) == 0) && (*robustness_level > 0)) && (hamming_weight(X_t) != 0)){
             e_t = {0};
         }
         else{
