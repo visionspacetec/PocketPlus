@@ -76,6 +76,7 @@ void pocketplus::utils::write_bool_deque_to_file(const std::string& file_name, c
 std::deque<bool> pocketplus::utils::read_bool_deque_from_file(const std::string& file_name){
     std::ifstream input_file;
     input_file.open(file_name, std::ios::in | std::ifstream::binary);
+    input_file >> std::noskipws;
     std::deque<char> buffer_char;
     std::copy(
         std::istream_iterator<unsigned char>(input_file),

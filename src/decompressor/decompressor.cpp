@@ -244,7 +244,7 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
                 std::deque<bool> mask_mask_shifted;
                 while(!((*bit_position == 1) && (*(bit_position + 1) == 0))){ // '1' '0' indicates the end of the RLE
                     if(*bit_position == 0){
-                        mask_mask_shifted.emplace_front(1);
+                        mask_mask_shifted.emplace_back(1);
                         bit_position += 1;
                         input.pop_front();
                     }
@@ -267,12 +267,6 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
                                 mask_mask_shifted.emplace_back(0);
                         }
                         mask_mask_shifted.emplace_back(1);
-                        //*count_tmp += 2;
-                        //bit_position += 5;
-                        //pocketplus::utils::pop_n_from_front(input, 5);
-                        //for(unsigned int i = 0; i < 5; i++){
-                        //    mask_mask_shifted.emplace_front(((*count_tmp) >> i) & 1);
-                        //}
                     }
                     else if(hamming_weight_in_range(bit_position, bit_position + 2) == 3){ // ToDo ### Check if working!
                         std::cout << "input_vector_length>=34" << std::endl;
@@ -317,7 +311,7 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
                     M_t.emplace_front(0);
                 }
                 it++;
-                for(; it != mask_mask_shifted.rend(); it++){
+                for(; it != mask_mask_shifted.rend() - 1; it++){
                     if((*it == 1) && (*it_M_t == 0)){
                         M_t.emplace_front(1);
                     }
@@ -329,10 +323,13 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
                     }
                     it_M_t++;
                 }
+                M_t = reverse(M_t);
                 while(M_t.size() < *input_vector_length){
                     M_t.emplace_front(0);
                 }
                 mask_vector.push_back(M_t);
+                std::cout << "M_t:" << std::endl;
+                pocketplus::utils::print_vector(M_t);
             }
             else{ // RLE(<(M_t XOR M_t<<))>) == NULL
                 std::deque<bool> M_t;
@@ -352,6 +349,8 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
     }
 
     // Process third sub vector
+    std::cout << "Before third vecotr processing:" << std::endl;
+    pocketplus::utils::print_vector(input);
     // 5.3.2.4
     if(*t > 0){
         if(*d_t == 1){

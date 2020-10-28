@@ -151,7 +151,7 @@ int main(int argc, char* argv[]){
 
         // 7
         std::cout << "#### 7" << std::endl;
-        input = std::make_unique<long int>(3333333337);
+        input = std::make_unique<long int>(3333333737);
         new_input_vector = pocketplus::utils::number_to_deque_bool(input, input_vector_length);
         std::cout << "INPUT: " << std::endl;
         pocketplus::utils::print_vector(new_input_vector);
