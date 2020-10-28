@@ -138,7 +138,7 @@ std::deque<bool> PocketPlusCompressor::compress(
     while(mask_change_vector.size() > *robustness_level_max + 1){
         mask_change_vector.pop_front();
     }
-    mask_change_vector.push_back(mask_change_0);
+    mask_change_vector.emplace_front(mask_change_0);
 
     if(!(*t == 0)){
         if(!mask_flag.at(0)){
@@ -175,6 +175,10 @@ std::deque<bool> PocketPlusCompressor::compress(
             }
         );
     }
+    std::cout << "All mask change vectors:" << std::endl;
+    for(auto vec: mask_change_vector){
+        pocketplus::utils::print_vector(vec);
+    }
     // 5.3.2 Encoding step
     // 5.3.2.1
     std::unique_ptr<bool> d_t;
@@ -210,8 +214,11 @@ std::deque<bool> PocketPlusCompressor::compress(
                 for(unsigned int index = 0; index < mask_change_vector.at(i).size(); index++){
                     X_t.at(index) = mask_change_vector.at(i).at(index) || X_t.at(index);
                 }
+                std::cout << "mask_change_vector.at(i)" << std::endl;
+                pocketplus::utils::print_vector(mask_change_vector.at(i));
             }
             X_t = reverse(X_t); // ToDo: Just go the other way thru the for loop to avoid this step
+            std::cout << "X_t case 3" << std::endl;
         }
 
         y_t = bit_extraction(inverse(mask_new), reverse(X_t));

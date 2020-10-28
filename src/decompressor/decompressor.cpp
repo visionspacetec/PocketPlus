@@ -85,7 +85,6 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
                     *count_tmp += 2;
                     bit_position += 5;
                     pocketplus::utils::pop_n_from_front(input, 5);
-                    std::cout << "count_tmp=" << *count_tmp << std::endl;
                     for(unsigned int i = 0; i < 5; i++){
                         X_t.emplace_front(((*count_tmp) >> i) & 1);
                     }
@@ -122,13 +121,14 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
                 else{
                     throw std::invalid_argument("Revert of COUNT(X) failed");
                 }
-            }
-            while(X_t.size() < *input_vector_length){
-                X_t.emplace_back(0);
-            }
-            std::cout << "X_t: ";
-            pocketplus::utils::print_vector(X_t);
+            } 
         }
+        while(X_t.size() < *input_vector_length){
+            X_t.emplace_back(0);
+        }
+        std::cout << "X_t: ";
+        pocketplus::utils::print_vector(X_t);
+
         std::deque<bool> D_t;
         if(X_t.size() == 0){
             D_t.assign(*input_vector_length, 0);
@@ -141,6 +141,7 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
             // ############ ToDo!!!!!!!!!!!!!!!!!
         }
         auto X_t_weight = std::make_unique<unsigned int>(hamming_weight_in_range(X_t.begin(), X_t.end()));
+        std::cout << "X_t_weight: " << *X_t_weight << std::endl;
         std::cout << "End of RLE!" << std::endl;
         bit_position += 2;
         pocketplus::utils::pop_n_from_front(input, 2);
@@ -230,6 +231,7 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
         // q_t is empty
     }
     else{
+        pocketplus::utils::print_vector(input);
         if(input.front() == 1){ // send_mask_flag (f_t) = 1
             send_mask_flag = std::make_unique<bool>(1);
             std::cout << "send_mask_flag (f_t) = 1" << std::endl;
@@ -260,7 +262,6 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
                         *count_tmp += 2;
                         bit_position += 5;
                         pocketplus::utils::pop_n_from_front(input, 5);
-                        std::cout << "count_tmp=" << *count_tmp << std::endl;
                         for(unsigned int i = 0; i < 5; i++){
                             mask_mask_shifted.emplace_front(((*count_tmp) >> i) & 1);
                         }

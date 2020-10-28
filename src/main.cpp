@@ -142,6 +142,32 @@ int main(int argc, char* argv[]){
         );
         pocketplus::utils::zero_stuffing(new_output_vector);
         std::move(new_output_vector.begin(), new_output_vector.end(), std::back_inserter(output_vector));
+        pocketplus::utils::print_vector(output_vector);
+
+        // 6
+        std::cout << "#### 6" << std::endl;
+        new_mask_flag = std::make_unique<bool>(0);
+        send_mask_flag = std::make_unique<bool>(1);
+        uncompressed_flag = std::make_unique<bool>(0);
+        send_changes_flag = std::make_unique<bool>(1);
+
+        input = std::make_unique<long int>(3333333334);
+        new_input_vector = pocketplus::utils::number_to_deque_bool(input, input_vector_length);
+        std::cout << "INPUT: " << std::endl;
+        pocketplus::utils::print_vector(new_input_vector);
+
+        input_vector.insert(input_vector.end(), new_input_vector.begin(), new_input_vector.end());
+        new_output_vector = compressor.compress(
+            new_input_vector, 
+            robustness_level,
+            new_mask_flag,
+            send_mask_flag,
+            uncompressed_flag,
+            send_changes_flag,
+            send_input_length_flag
+        );
+        pocketplus::utils::zero_stuffing(new_output_vector);
+        std::move(new_output_vector.begin(), new_output_vector.end(), std::back_inserter(output_vector));
 
         pocketplus::utils::zero_stuffing(input_vector);
         std::cout << "OUTPUT: " << std::endl;
@@ -158,36 +184,15 @@ int main(int argc, char* argv[]){
 
         pocketplus::decompressor::PocketPlusDecompressor decompressor(input_vector_length);
 
-        auto first_data = decompressor.decompress(read_compressed);
-        //pocketplus::utils::print_vector(first_data);
-
-        auto first_data_int = std::make_unique<long int>(pocketplus::utils::deque_bool_to_number(first_data));
-        std::cout << "Decompressed #1: " << *first_data_int << std::endl;
-
-        auto second_data = decompressor.decompress(read_compressed);
-        //pocketplus::utils::print_vector(second_data);
-
-        auto second_data_int = std::make_unique<long int>(pocketplus::utils::deque_bool_to_number(second_data));
-        std::cout << "Decompressed #2: " << *second_data_int << std::endl;
-
-        auto third_data = decompressor.decompress(read_compressed);
-        //pocketplus::utils::print_vector(third_data);
-
-        auto third_data_int = std::make_unique<long int>(pocketplus::utils::deque_bool_to_number(third_data));
-        std::cout << "Decompressed #3: " << *third_data_int << std::endl;
-
-        auto fourth_data = decompressor.decompress(read_compressed);
-        // pocketplus::utils::print_vector(fourth_data);
-
-        auto fourth_data_int = std::make_unique<long int>(pocketplus::utils::deque_bool_to_number(fourth_data));
-        std::cout << "Decompressed #4: " << *fourth_data_int << std::endl;
-
-         pocketplus::utils::print_vector(read_compressed);
-        auto fifth_data = decompressor.decompress(read_compressed);
-        // pocketplus::utils::print_vector(fifth_data);
-
-        auto fifth_data_int = std::make_unique<long int>(pocketplus::utils::deque_bool_to_number(fifth_data));
-        std::cout << "Decompressed #5: " << *fifth_data_int << std::endl;
+        auto i = std::make_unique<unsigned int>(1);
+        std::deque<bool> data;
+        auto data_int = std::make_unique<long int>(0);
+        while(read_compressed.size() > 0){
+            data = decompressor.decompress(read_compressed);
+            *data_int = pocketplus::utils::deque_bool_to_number(data);
+            std::cout << "Decompressed #" << *i << ": " << *data_int << std::endl;
+            *i += 1;
+        }
     }
     catch(const std::exception& e)
     {
