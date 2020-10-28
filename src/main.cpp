@@ -177,6 +177,13 @@ int main(int argc, char* argv[]){
         pocketplus::utils::write_bool_deque_to_file("original.bin", input_vector);
         pocketplus::utils::write_bool_deque_to_file("compressed.bin", output_vector);
 
+        // Compression ratio
+        auto compression_ratio = std::make_unique<float>((float)input_vector.size() / (float)output_vector.size());
+        std::cout << "Input vector size: " << input_vector.size() << " bits" << std::endl;
+        std::cout << "Output vector size: " << output_vector.size() << " bits" << std::endl;
+        std::cout << "Compression ratio: " << *compression_ratio << std::endl;
+
+        // Decompression
         std::cout << "############# DECOMPRESSION #############" << std::endl;
         std::cout << "INPUT: " << std::endl;
         auto read_compressed = pocketplus::utils::read_bool_deque_from_file("compressed.bin");
