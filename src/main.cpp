@@ -55,6 +55,7 @@ int main(int argc, char* argv[]){
         *send_mask_flag = 1;
         *uncompressed_flag = 0;
         *send_changes_flag = 1;
+        *send_input_length_flag = 0;
 
         input_vector.insert(input_vector.end(), new_input_vector.begin(), new_input_vector.end());
         new_output_vector = compressor.compress(
@@ -72,6 +73,11 @@ int main(int argc, char* argv[]){
 
         // 3
         std::cout << "#### 3" << std::endl;
+        *new_mask_flag = 0;
+        *send_mask_flag = 0;
+        *uncompressed_flag = 0;
+        *send_changes_flag = 1;
+        *send_input_length_flag = 0;
         input_vector.insert(input_vector.end(), new_input_vector.begin(), new_input_vector.end());
         new_output_vector = compressor.compress(
             new_input_vector, 

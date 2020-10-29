@@ -99,7 +99,7 @@ std::deque<bool> PocketPlusCompressor::compress(
         throw std::out_of_range("0 <= robustness_level <= 7");
     }
     if(!*send_changes_flag && !*uncompressed_flag){
-        throw std::invalid_argument("if send_mask_flag == false -> uncompressed_flag != true");
+        throw std::invalid_argument("if send_changes_flag == false -> uncompressed_flag != true");
     }
     if(*t == 0){
         if(*send_mask_flag){
@@ -135,13 +135,6 @@ std::deque<bool> PocketPlusCompressor::compress(
     second_binary_vector.clear();
     third_binary_vector.clear();
     output.clear();
-
-    // ToDo handle the new mask flag correctly ##############################
-    //mask_flag.resize(*robustness_level + 1);
-    //mask_flag.back() = *new_mask_flag; // User defined value
-    //if((*robustness_level > 0) && mask_flag.back() == true){
-    //    std::fill(mask_flag.begin()+1, mask_flag.end(), 0);
-    //}
 
     // Section 4.2 Mask update    
     // Section 4.2.1
