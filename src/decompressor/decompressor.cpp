@@ -146,7 +146,6 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
         std::cout << "End of RLE!" << std::endl;
         bit_position += 2;
         pocketplus::utils::pop_n_from_front(input, 2);
-        pocketplus::utils::print_vector(input);
         // Undo BIT_3(robustness_level)
         robustness_level = std::make_unique<unsigned int>(0);
         auto bit_shift = std::make_unique<unsigned int>(0);

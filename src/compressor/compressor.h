@@ -27,12 +27,12 @@ class PocketPlusCompressor{
     // Define inputs and parameters
     std::unique_ptr<unsigned int> t;
     std::unique_ptr<unsigned int> input_vector_length; // F // User defined value
+    std::unique_ptr<bool> send_changes_flag_old;
     std::deque<bool> input_vector_length_count;
     std::deque<bool> initial_mask_vector;
 
-    std::deque<bool> mask_flag; // p_t
-
     // Vectors
+    std::deque<bool> mask_flag; // p_t
     std::deque<bool> input_old;
     std::deque<bool> mask_new; // M_t
     std::deque<bool> mask_old;
@@ -68,8 +68,7 @@ class PocketPlusCompressor{
             input_vector_length_count = count(*input_vector_length);
             initial_mask_vector.assign(*input_vector_length, 0); // M_0 = 0 // ############ ToDo: Make initial mask user defined
             mask_new = initial_mask_vector;
-            input_old.assign(*input_vector_length, 0);
-
+            send_changes_flag_old = std::make_unique<bool>(0);
             input_old.assign(*input_vector_length, 0);
             mask_old.assign(*input_vector_length, 0); // M_t
             mask_build_old.assign(*input_vector_length, 0); // B_t // B_0 = 0

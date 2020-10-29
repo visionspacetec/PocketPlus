@@ -98,28 +98,54 @@ std::deque<bool> PocketPlusCompressor::compress(
     if ((*robustness_level < *robustness_level_min) || (*robustness_level > *robustness_level_max)){
         throw std::out_of_range("0 <= robustness_level <= 7");
     }
-    if(!*send_mask_flag && !*uncompressed_flag){
+    if(!*send_changes_flag && !*uncompressed_flag){
         throw std::invalid_argument("if send_mask_flag == false -> uncompressed_flag != true");
     }
-    if(*send_changes_flag && (*t == 0)){
-        throw std::invalid_argument("if send_changes_flag == true -> t > 0");
+    if(*t == 0){
+        if(*send_mask_flag){
+            throw std::invalid_argument("send_mask_flag for t=0 must be false");
+        }
+        if(*send_changes_flag){
+            throw std::invalid_argument("send_changes_flag for t=0 must be false");
+        }
     }
-
+    else{
+        if(!*send_changes_flag_old && *send_changes_flag && !*send_mask_flag){
+            throw std::invalid_argument("send_mask_flag must be true if send_changes flag is true and send_changes_flag_old is false");
+        }
+    }
+    if(mask_flag.size() > 0){
+        if((*robustness_level == 0)){
+            mask_flag.clear();
+            mask_flag.emplace_back(*new_mask_flag);
+        }
+        else{
+            if(!mask_flag.back() && *new_mask_flag){
+                throw std::invalid_argument("new_mask_flag must be false due to recent mask update");
+            }
+        }
+    }
+    else{
+        mask_flag.emplace_back(*new_mask_flag);
+        for(auto i = 0; i < *robustness_level; i++){
+            mask_flag.emplace_back(0);
+        }
+    }
     first_binary_vector.clear();
     second_binary_vector.clear();
     third_binary_vector.clear();
     output.clear();
 
     // ToDo handle the new mask flag correctly ##############################
-    mask_flag.resize(*robustness_level + 1);
-    mask_flag.at(0) = *new_mask_flag; // User defined value
-    if((*robustness_level > 0) && mask_flag.at(0) == true){
-        std::fill(mask_flag.begin()+1, mask_flag.end(), 0);
-    }
+    //mask_flag.resize(*robustness_level + 1);
+    //mask_flag.back() = *new_mask_flag; // User defined value
+    //if((*robustness_level > 0) && mask_flag.back() == true){
+    //    std::fill(mask_flag.begin()+1, mask_flag.end(), 0);
+    //}
 
     // Section 4.2 Mask update    
     // Section 4.2.1
-    if(!(*t == 0) && !mask_flag.at(0)){
+    if(!(*t == 0) && !mask_flag.back()){
         std::generate(
             mask_build_new.begin(), 
             mask_build_new.end(), 
@@ -141,7 +167,7 @@ std::deque<bool> PocketPlusCompressor::compress(
     mask_change_vector.emplace_front(mask_change_0);
 
     if(!(*t == 0)){
-        if(!mask_flag.at(0)){
+        if(!mask_flag.back()){
             std::generate(
                 mask_new.begin(), 
                 mask_new.end(), 
@@ -151,7 +177,6 @@ std::deque<bool> PocketPlusCompressor::compress(
                     return out;
                 }
             );
-            
         }
         else{
             std::generate(
@@ -175,6 +200,7 @@ std::deque<bool> PocketPlusCompressor::compress(
             }
         );
     }
+    mask_flag.pop_front();
     std::cout << "All mask change vectors:" << std::endl;
     for(auto vec: mask_change_vector){
         pocketplus::utils::print_vector(vec);
@@ -225,7 +251,7 @@ std::deque<bool> PocketPlusCompressor::compress(
 
         std::cout << "mask_new:" << std::endl;
         pocketplus::utils::print_vector(mask_new);
-        
+
         e_t.clear();
         if((*robustness_level == 0) || (hamming_weight(X_t) == 0)){}
         else if(((hamming_weight(y_t) == 0) && (*robustness_level > 0)) && (hamming_weight(X_t) != 0)){
@@ -259,6 +285,7 @@ std::deque<bool> PocketPlusCompressor::compress(
         first_binary_vector.emplace_back(*d_t);
         pocketplus::utils::print_vector(first_binary_vector);
     }
+    *send_changes_flag_old = *send_changes_flag;
 
     // 5.3.2.3 Second binary vector
     // Second vector: ['1', RLE(< mask ^ mask_<< >), '10']
