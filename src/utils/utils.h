@@ -18,7 +18,7 @@ void zero_stuffing(std::deque<bool>& in);
 void print_vector(const std::deque<bool>& in);
 
 // Converts a long integer to a size n boolean deque
-std::deque<bool> number_to_deque_bool(std::unique_ptr<long int>& input, std::unique_ptr<unsigned int>& length);
+std::deque<bool> number_to_deque_bool(long int& input, std::unique_ptr<unsigned int>& length);
 
 // Converts a boolean deque to long int
 long int deque_bool_to_number(const std::deque<bool>& input);

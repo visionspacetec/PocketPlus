@@ -13,182 +13,70 @@ int main(int argc, char* argv[]){
 
     pocketplus::compressor::PocketPlusCompressor compressor(input_vector_length);
 
-    auto robustness_level = std::make_unique<unsigned int>(1); // R_t
-    auto new_mask_flag = std::make_unique<bool>(1);            // p_t
-    auto send_mask_flag = std::make_unique<bool>(0);           // f_t // f_0 = 0
-    auto uncompressed_flag = std::make_unique<bool>(1);        // r_t // if n_t == 0 -> r_t = 1 --> r_0 = 1
-    auto send_changes_flag = std::make_unique<bool>(0);        // n_t // n_0 = 0
-    auto send_input_length_flag = std::make_unique<bool>(1);   // v_t // v_0 = 1
-
-    auto input = std::make_unique<long int>(3333333333);
-
-    std::deque<bool> input_vector;
-    std::deque<bool> new_input_vector = pocketplus::utils::number_to_deque_bool(input, input_vector_length);
-    std::deque<bool> output_vector;
-    std::deque<bool> new_output_vector;
-
-    std::cout << "INPUT: " << std::endl;
-    pocketplus::utils::print_vector(new_input_vector);
+    std::deque<unsigned int> robustness_level       = {1, 1, 1, 1, 1, 1, 1}; // R_t
+    std::deque<bool> new_mask_flag          = {1, 0, 0, 0, 1, 0, 0}; // p_t
+    std::deque<bool> send_mask_flag         = {0, 1, 0, 0, 0, 0, 0}; // f_t // f_0 = 0
+    std::deque<bool> uncompressed_flag      = {1, 0, 0, 0, 0, 0, 0}; // r_t // if n_t == 0 -> r_t = 1 --> r_0 = 1
+    std::deque<bool> send_changes_flag      = {0, 1, 1, 1, 1, 1, 1}; // n_t // n_0 = 0
+    std::deque<bool> send_input_length_flag = {1, 0, 0, 0, 0, 0, 0}; // v_t // v_0 = 1
+    std::deque<long int> input = {
+        3333333333, // 1
+        3333333333, // 2
+        3333333333, // 3
+        3333333334, // 4
+        3333333334, // 5
+        3333333334, // 6
+        3333333737  // 7
+    };
 
     try{
-        // 1
-        std::cout << "#### 1" << std::endl;
-        input_vector.insert(input_vector.end(), new_input_vector.begin(), new_input_vector.end());
-        new_output_vector = compressor.compress(
-            new_input_vector, 
-            robustness_level,
-            new_mask_flag,
-            send_mask_flag,
-            uncompressed_flag,
-            send_changes_flag,
-            send_input_length_flag
-        );
-        pocketplus::utils::zero_stuffing(new_output_vector);
-        std::move(new_output_vector.begin(), new_output_vector.end(), std::back_inserter(output_vector));
+        std::deque<std::deque<bool>> input_vector;
+        std::deque<bool> total_input_vector;
+        std::deque<bool> total_output_vector;
+        std::deque<bool> new_output_vector;
+        for(auto in: input){
+            input_vector.emplace_back(pocketplus::utils::number_to_deque_bool(in, input_vector_length));
+        }
+        auto counter = std::make_unique<unsigned int>(1);
+        for(auto in: input_vector){
+            std::cout << "Compressing data frame ###" << *counter << std::endl;
+            std::cout << "INPUT: " << std::endl;
+            pocketplus::utils::print_vector(in);
+
+            total_input_vector.insert(total_input_vector.end(), in.begin(), in.end());
+            new_output_vector = compressor.compress(
+                in, 
+                robustness_level.front(),
+                new_mask_flag.front(),
+                send_mask_flag.front(),
+                uncompressed_flag.front(),
+                send_changes_flag.front(),
+                send_input_length_flag.front()
+            );
+            pocketplus::utils::zero_stuffing(new_output_vector);
+            std::move(new_output_vector.begin(), new_output_vector.end(), std::back_inserter(total_output_vector));
+            
+            robustness_level.pop_front();
+            new_mask_flag.pop_front();
+            send_mask_flag.pop_front();
+            uncompressed_flag.pop_front();
+            send_changes_flag.pop_front();
+            send_input_length_flag.pop_front();
+
+            *counter += 1;
+        }
 
         std::cout << "OUTPUT: " << std::endl;
-        pocketplus::utils::print_vector(output_vector);
-
-        // 2
-        std::cout << "#### 2" << std::endl;
-        *new_mask_flag = 0;
-        *send_mask_flag = 1;
-        *uncompressed_flag = 0;
-        *send_changes_flag = 1;
-        *send_input_length_flag = 0;
-
-        input_vector.insert(input_vector.end(), new_input_vector.begin(), new_input_vector.end());
-        new_output_vector = compressor.compress(
-            new_input_vector, 
-            robustness_level,
-            new_mask_flag,
-            send_mask_flag,
-            uncompressed_flag,
-            send_changes_flag,
-            send_input_length_flag
-        );
-        pocketplus::utils::zero_stuffing(new_output_vector);
-        std::move(new_output_vector.begin(), new_output_vector.end(), std::back_inserter(output_vector));
-        pocketplus::utils::print_vector(output_vector);
-
-        // 3
-        std::cout << "#### 3" << std::endl;
-        *new_mask_flag = 0;
-        *send_mask_flag = 0;
-        *uncompressed_flag = 0;
-        *send_changes_flag = 1;
-        *send_input_length_flag = 0;
-        input_vector.insert(input_vector.end(), new_input_vector.begin(), new_input_vector.end());
-        new_output_vector = compressor.compress(
-            new_input_vector, 
-            robustness_level,
-            new_mask_flag,
-            send_mask_flag,
-            uncompressed_flag,
-            send_changes_flag,
-            send_input_length_flag
-        );
-        pocketplus::utils::zero_stuffing(new_output_vector);
-        std::move(new_output_vector.begin(), new_output_vector.end(), std::back_inserter(output_vector));
-        pocketplus::utils::print_vector(output_vector);
-
-        // 4
-        std::cout << "#### 4" << std::endl;
-        *input = 3333333334;
-        new_input_vector = pocketplus::utils::number_to_deque_bool(input, input_vector_length);
-        std::cout << "INPUT: " << std::endl;
-        pocketplus::utils::print_vector(new_input_vector);
-
-        input_vector.insert(input_vector.end(), new_input_vector.begin(), new_input_vector.end());
-        new_output_vector = compressor.compress(
-            new_input_vector, 
-            robustness_level,
-            new_mask_flag,
-            send_mask_flag,
-            uncompressed_flag,
-            send_changes_flag,
-            send_input_length_flag
-        );
-        pocketplus::utils::zero_stuffing(new_output_vector);
-        std::move(new_output_vector.begin(), new_output_vector.end(), std::back_inserter(output_vector));
-        pocketplus::utils::print_vector(output_vector);
-
-        // 5
-        std::cout << "#### 5" << std::endl;
-        *input = 3333333334;
-        *new_mask_flag = 1;
-        new_input_vector = pocketplus::utils::number_to_deque_bool(input, input_vector_length);
-        std::cout << "INPUT: " << std::endl;
-        pocketplus::utils::print_vector(new_input_vector);
-
-        input_vector.insert(input_vector.end(), new_input_vector.begin(), new_input_vector.end());
-        new_output_vector = compressor.compress(
-            new_input_vector, 
-            robustness_level,
-            new_mask_flag,
-            send_mask_flag,
-            uncompressed_flag,
-            send_changes_flag,
-            send_input_length_flag
-        );
-        pocketplus::utils::zero_stuffing(new_output_vector);
-        std::move(new_output_vector.begin(), new_output_vector.end(), std::back_inserter(output_vector));
-        pocketplus::utils::print_vector(output_vector);
-
-        // 6
-        std::cout << "#### 6" << std::endl;
-        *input = 3333333334;
-        *new_mask_flag = 0;
-        new_input_vector = pocketplus::utils::number_to_deque_bool(input, input_vector_length);
-        std::cout << "INPUT: " << std::endl;
-        pocketplus::utils::print_vector(new_input_vector);
-
-        input_vector.insert(input_vector.end(), new_input_vector.begin(), new_input_vector.end());
-        new_output_vector = compressor.compress(
-            new_input_vector, 
-            robustness_level,
-            new_mask_flag,
-            send_mask_flag,
-            uncompressed_flag,
-            send_changes_flag,
-            send_input_length_flag
-        );
-        pocketplus::utils::zero_stuffing(new_output_vector);
-        std::move(new_output_vector.begin(), new_output_vector.end(), std::back_inserter(output_vector));
-        pocketplus::utils::print_vector(output_vector);
-
-        // 7
-        std::cout << "#### 7" << std::endl;
-        *input = 3333333737;
-        new_input_vector = pocketplus::utils::number_to_deque_bool(input, input_vector_length);
-        std::cout << "INPUT: " << std::endl;
-        pocketplus::utils::print_vector(new_input_vector);
-
-        input_vector.insert(input_vector.end(), new_input_vector.begin(), new_input_vector.end());
-        new_output_vector = compressor.compress(
-            new_input_vector, 
-            robustness_level,
-            new_mask_flag,
-            send_mask_flag,
-            uncompressed_flag,
-            send_changes_flag,
-            send_input_length_flag
-        );
-        pocketplus::utils::zero_stuffing(new_output_vector);
-        std::move(new_output_vector.begin(), new_output_vector.end(), std::back_inserter(output_vector));
-
-        pocketplus::utils::zero_stuffing(input_vector);
-        std::cout << "OUTPUT: " << std::endl;
-        pocketplus::utils::print_vector(output_vector);
+        pocketplus::utils::print_vector(total_output_vector);
 
         // Save the total input and output to separate files
-        pocketplus::utils::write_bool_deque_to_file("original.bin", input_vector);
-        pocketplus::utils::write_bool_deque_to_file("compressed.bin", output_vector);
+        pocketplus::utils::write_bool_deque_to_file("original.bin", total_input_vector);
+        pocketplus::utils::write_bool_deque_to_file("compressed.bin", total_output_vector);
 
         // Compression ratio
-        auto compression_ratio = std::make_unique<float>((float)input_vector.size() / (float)output_vector.size());
-        std::cout << "Input vector size: " << input_vector.size() << " bits" << std::endl;
-        std::cout << "Output vector size: " << output_vector.size() << " bits" << std::endl;
+        auto compression_ratio = std::make_unique<float>((float)total_input_vector.size() / (float)total_output_vector.size());
+        std::cout << "Input vector size: " << total_input_vector.size() << " bits" << std::endl;
+        std::cout << "Output vector size: " << total_output_vector.size() << " bits" << std::endl;
         std::cout << "Compression ratio: " << *compression_ratio << std::endl;
 
         // Decompression

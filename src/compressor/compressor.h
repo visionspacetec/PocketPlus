@@ -78,12 +78,12 @@ class PocketPlusCompressor{
         // Public functions
         std::deque<bool> compress(
             const std::deque<bool>& input_new, 
-            std::unique_ptr<unsigned int>& robustness_level,
-            std::unique_ptr<bool>& new_mask_flag,
-            std::unique_ptr<bool>& send_mask_flag,
-            std::unique_ptr<bool>& uncompressed_flag,
-            std::unique_ptr<bool>& send_changes_flag,
-            std::unique_ptr<bool>& send_input_length_flag
+            unsigned int& robustness_level,
+            bool& new_mask_flag,
+            bool& send_mask_flag,
+            bool& uncompressed_flag,
+            bool& send_changes_flag,
+            bool& send_input_length_flag
         );
         std::deque<bool> add_termination_sequence(const std::deque<bool>&);
 };

@@ -30,7 +30,6 @@ void PocketPlusDecompressor::undo_rle(std::deque<bool>& in, std::deque<bool>& ou
             in.pop_front();
         }
         else if(hamming_weight_in_range(it, it + 2) == 2){
-            std::cout << "2<=input_vector_length<=33" << std::endl;
             it += 3;
             pocketplus::utils::pop_n_from_front(in, 3);
             // Undo BIT_5(A - 2)
@@ -50,7 +49,7 @@ void PocketPlusDecompressor::undo_rle(std::deque<bool>& in, std::deque<bool>& ou
             out.emplace_back(1);
         }
         else if(hamming_weight_in_range(it, it + 2) == 3){ // ToDo ### Check if working!
-            std::cout << "input_vector_length>=34" << std::endl;
+            std::cout << "WARNING: input_vector_length>=34" << std::endl;
             it += 3;
             pocketplus::utils::pop_n_from_front(in, 3);
             // Undo BIT_E(A - 2)
@@ -76,7 +75,6 @@ void PocketPlusDecompressor::undo_rle(std::deque<bool>& in, std::deque<bool>& ou
             for(unsigned int i = 0; i < *count_size + 1; i++){
                 out.emplace_front(((*count_tmp) >> i) & 1);
             }
-            std::cout << "count_tmp=" << *count_tmp << std::endl;
         }
         else{
             throw std::invalid_argument("Revert of COUNT(X) failed");
@@ -163,18 +161,15 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
         bit_position += 3;
         pocketplus::utils::pop_n_from_front(input, 3);
         std::deque<bool> e_t;
-        //auto y_t = std::make_unique<bool>(0); // ############ ToDo!!!!!!!!!!!!!!!!!
         
         if((*robustness_level == 0) || (*X_t_weight == 0)){
             // e_t is empty
-            //*y_t = 0;
         }
         else{
             if(input.front() == 0){
                 e_t.emplace_back(0);
                 bit_position += 1;
                 input.pop_front();
-                //*y_t = 0;
                 for(auto i = 0; i < *X_t_weight; i++){
                     y_t.emplace_back(0);
                 }
@@ -183,7 +178,6 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
                 e_t.emplace_back(1);
                 bit_position += 1;
                 input.pop_front();
-                //*y_t = 1;
             }
         }
         std::cout << "y_t.size(): " << y_t.size() << std::endl;
@@ -195,7 +189,6 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
         }
         if((*robustness_level == 0) || (*X_t_weight == 0) || (y_t.size() > 0)){
             // k_t is empty
-            std::cout << "k_t is empty" << std::endl;
         }
         else{
             // k_t = BE( ~M_t, <X_t> )
@@ -496,7 +489,6 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
         pocketplus::utils::print_vector(output);
     }
     *t += 1;
-    std::cout << "POP ZEROS: " << (8 - ((*input_vector_size_before_processing - input.size()) % 8)) % 8 << std::endl;
     pocketplus::utils::pop_n_from_front(input, (8 - ((*input_vector_size_before_processing - input.size()) % 8)) % 8);
     std::cout << "INPUT remaining:" << std::endl;
     pocketplus::utils::print_vector(input);
