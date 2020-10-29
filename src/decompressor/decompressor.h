@@ -14,7 +14,9 @@ class PocketPlusDecompressor{
     // Private functions
     // Hamming weight - Number of ones in vector
     unsigned int hamming_weight_in_range(std::deque<bool>::iterator start, std::deque<bool>::iterator stop);
+    // Outputs the reverse of an boolean deque
     std::deque<bool> reverse(const std::deque<bool>& a);
+    void undo_rle(std::deque<bool>& in, std::deque<bool>& out, std::deque<bool>::iterator& it);
 
     // Constants
     std::unique_ptr<const unsigned int> minimum_size;
