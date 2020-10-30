@@ -8,9 +8,11 @@ project( pocket_plus_cpp VERSION 0.0.1 DESCRIPTION "PocketPlus" )
 set( CMAKE_CXX_STANDARD 17 )
 
 # Includes
-include( CTest )
+# include( CTest )
 enable_testing()
 find_package( Threads REQUIRED )
+find_package( GTest REQUIRED )
+include_directories( ${GTEST_INCLUDE_DIRS} )
 
 # Include source folders
 include_directories(
@@ -18,6 +20,7 @@ include_directories(
     ./src/compressor
     ./src/decompressor
     ./src/utils
+    ./tests
 )
 
 # Declare source files
@@ -30,9 +33,16 @@ set(SOURCES
     ./src/utils/utils.h
     ./src/utils/utils.cpp
 )
+set(TEST_SOURCES
+    ./tests/tests.cpp
+)
 
 # Declare target
 add_executable( PocketPlus ${SOURCES} )
+add_library( PocketPlus_lib STATIC ${SOURCES} )
+add_executable( PocketPlus_tests ${TEST_SOURCES} )
+target_link_libraries( PocketPlus_tests PUBLIC ${GTEST_LIBRARIES} pthread PocketPlus_lib )
+add_test( PocketPlus_tests DivideUp )
 
 # Install
 install( TARGETS PocketPlus DESTINATION bin )

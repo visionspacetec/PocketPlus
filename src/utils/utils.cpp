@@ -42,6 +42,9 @@ long int pocketplus::utils::deque_bool_to_number(const std::deque<bool>& input){
 
 // Helper function for bool_to_string
 std::size_t pocketplus::utils::divide_up(std::size_t dividend, std::size_t divisor){
+    if(divisor == 0){
+        throw std::invalid_argument("Division by zero!");
+    }
     return (dividend + divisor - 1) / divisor;
 }
 
