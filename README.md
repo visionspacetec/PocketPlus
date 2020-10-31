@@ -12,15 +12,14 @@ This repository contains a c++ implementation of the Pocket+ compression algorit
 ## Installation 
 
 ### Run tests
-This project uses Google Test (GTest) with CMake for testing.
-To install on Ubuntu run:
+This project uses Google Test (GTest) with CMake for testing. To install on Ubuntu run:
 ```bash
 sudo apt-get install libgtest-dev
 sudo apt-get cmake
 cd /usr/src/gtest
 sudo cmake CMakeLists.txt
 sudo make
-sudo cp*.a /usr/lib
+sudo cp *.a /usr/lib
 ```
 
 ## Usage

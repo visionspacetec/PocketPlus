@@ -49,19 +49,17 @@ void PocketPlusDecompressor::undo_rle(std::deque<bool>& in, std::deque<bool>& ou
             out.emplace_back(1);
         }
         else if(hamming_weight_in_range(it, it + 2) == 3){ // ToDo ### Check if working!
-            std::cout << "WARNING: input_vector_length>=34" << std::endl;
+            std::cout << "count_tmp>=34" << std::endl;
             it += 3;
             pocketplus::utils::pop_n_from_front(in, 3);
             // Undo BIT_E(A - 2)
-            auto one_detected = std::make_unique<bool>(1);
-            auto count_size = std::make_unique<unsigned int>(0);
-            while(*one_detected){
-                if(*(it + *count_size)){
-                    *one_detected = 0;
-                }
+            auto count_size = std::make_unique<unsigned int>(5);
+            while(!*it){
                 *count_size += 1;
+                it++;
+                in.pop_front();
             }
-            *count_size += 4;
+            std::cout << "COUNT size " << *count_size << std::endl;
             auto count_tmp = std::make_unique<unsigned int>(0);
             auto bit_shift = std::make_unique<unsigned int>(0);
             for(auto ite = it + *count_size; ite >= it; ite--, *bit_shift += 1){
@@ -72,6 +70,7 @@ void PocketPlusDecompressor::undo_rle(std::deque<bool>& in, std::deque<bool>& ou
             *count_tmp += 2;
             it += *count_size + 1;
             pocketplus::utils::pop_n_from_front(in, *count_size + 1);
+            std::cout << "count_tmp=" << *count_tmp << std::endl;
             for(unsigned int i = 0; i < *count_size + 1; i++){
                 out.emplace_front(((*count_tmp) >> i) & 1);
             }
@@ -398,24 +397,22 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
             pocketplus::utils::pop_n_from_front(input, 5);
             std::cout << "input_vector_length=" << *input_vector_length << std::endl;
         }
-        else if(hamming_weight_in_range(bit_position, bit_position + 2) == 3){ // ToDo ### Check if working!
+        else if(hamming_weight_in_range(bit_position, bit_position + 2) == 3){
             std::cout << "input_vector_length>=34" << std::endl;
             bit_position += 3;
             pocketplus::utils::pop_n_from_front(input, 3);
             // Undo BIT_E(A - 2)
-            auto one_detected = std::make_unique<bool>(1);
-            auto count_size = std::make_unique<unsigned int>(0);
-            while(*one_detected){
-                if(*(bit_position + *count_size)){
-                    *one_detected = 0;
-                }
+            auto count_size = std::make_unique<unsigned int>(5);
+            while(!*bit_position){
                 *count_size += 1;
+                bit_position++;
+                input.pop_front();
             }
-            *count_size += 4;
+            std::cout << "COUNT size " << *count_size << std::endl;
             input_vector_length = std::make_unique<unsigned int>(0);
             auto bit_shift = std::make_unique<unsigned int>(0);
-            for(auto it = bit_position + *count_size; it >= bit_position; it--, *bit_shift += 1){
-                if(*it){
+            for(auto ite = bit_position + *count_size; ite >= bit_position; ite--, *bit_shift += 1){
+                if(*ite){
                     *input_vector_length |= 1 << *bit_shift;
                 }
             }
