@@ -33,7 +33,7 @@ set(SOURCES
     ./src/utils/utils.cpp
 )
 set(TEST_SOURCES
-    ./tests/tests.cpp
+    ./tests/utils_tests.cpp
 )
 
 # Declare target

@@ -57,11 +57,9 @@ std::size_t pocketplus::utils::divide_up(std::size_t dividend, std::size_t divis
 std::string pocketplus::utils::bool_to_string(std::deque<bool> const& boolvector){
     std::string ret(pocketplus::utils::divide_up(boolvector.size(), 8), 0);
     auto counter = 0;
-    auto out = ret.rbegin(); //big endian
-    //auto out = ret.begin();     // little endian
+    auto out = ret.rbegin();
     int shift = 0;
-    for(auto it = boolvector.rbegin(); it != boolvector.rend(); it++){ //big
-    //for(auto it = boolvector.begin(); it != boolvector.end(); it++){ // little
+    for(auto it = boolvector.rbegin(); it != boolvector.rend(); it++){
         *out |= *it << shift;
         if(++shift == 8){
             ++out;
