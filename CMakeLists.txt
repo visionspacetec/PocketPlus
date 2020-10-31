@@ -1,5 +1,5 @@
 # CMake version
-cmake_minimum_required( VERSION 3.0.0 )
+cmake_minimum_required( VERSION 3.1.0 )
 
 # Project name
 project( pocket_plus_cpp VERSION 0.0.1 DESCRIPTION "PocketPlus" )
@@ -8,7 +8,6 @@ project( pocket_plus_cpp VERSION 0.0.1 DESCRIPTION "PocketPlus" )
 set( CMAKE_CXX_STANDARD 17 )
 
 # Includes
-# include( CTest )
 enable_testing()
 find_package( Threads REQUIRED )
 find_package( GTest REQUIRED )
@@ -40,9 +39,19 @@ set(TEST_SOURCES
 # Declare target
 add_executable( PocketPlus ${SOURCES} )
 add_library( PocketPlus_lib STATIC ${SOURCES} )
+
+# Declare tests
 add_executable( PocketPlus_tests ${TEST_SOURCES} )
-target_link_libraries( PocketPlus_tests PUBLIC ${GTEST_LIBRARIES} pthread PocketPlus_lib )
-add_test( PocketPlus_tests DivideUp )
+target_link_libraries( 
+    PocketPlus_tests 
+    gtest 
+    gtest_main
+    pthread 
+    PocketPlus_lib 
+)
+
+# Discover test cases
+gtest_discover_tests( PocketPlus_tests )
 
 # Install
 install( TARGETS PocketPlus DESTINATION bin )
