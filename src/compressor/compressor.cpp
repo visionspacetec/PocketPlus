@@ -88,13 +88,16 @@ std::deque<bool> PocketPlusCompressor::inverse(const std::deque<bool>& a){
 // Performs the actual compression
 std::deque<bool> PocketPlusCompressor::compress(
     const std::deque<bool>& input_new, 
-    unsigned int& robustness_level, // R_t // User defined value
-    bool& new_mask_flag,
-    bool& send_mask_flag,
-    bool& uncompressed_flag,
-    bool& send_changes_flag,
-    bool& send_input_length_flag
+    const unsigned int& robustness_level, // R_t // User defined value
+    const bool& new_mask_flag,
+    const bool& send_mask_flag,
+    const bool& uncompressed_flag,
+    const bool& send_changes_flag,
+    const bool& send_input_length_flag
     ){
+    if(*input_vector_length != input_new.size()){
+        throw std::invalid_argument("Input vector must have the predefined input_vector_length");
+    }
     if ((robustness_level < *robustness_level_min) || (robustness_level > *robustness_level_max)){
         throw std::out_of_range("0 <= robustness_level <= 7");
     }

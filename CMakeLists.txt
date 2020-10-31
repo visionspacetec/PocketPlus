@@ -34,6 +34,8 @@ set(SOURCES
 )
 set(TEST_SOURCES
     ./tests/utils_tests.cpp
+    ./tests/compressor_tests.cpp 
+    ./tests/decompressor_tests.cpp
 )
 
 # Declare target
