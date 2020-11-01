@@ -18,7 +18,7 @@ void zero_stuffing(std::deque<bool>& in);
 void print_vector(const std::deque<bool>& in);
 
 // Converts a long integer to a size n boolean deque
-std::deque<bool> number_to_deque_bool(long int& input, std::unique_ptr<unsigned int>& length);
+std::deque<bool> number_to_deque_bool(long int& input, unsigned int& length);
 
 // Converts a boolean deque to long int
 long int deque_bool_to_number(const std::deque<bool>& input);
@@ -36,7 +36,7 @@ void write_bool_deque_to_file(const std::string& file_name, const std::deque<boo
 std::deque<bool> read_bool_deque_from_file(const std::string& file_name);
 
 // Pops n elements from the front of a boolean deque
-void pop_n_from_front(std::deque<bool>& in, unsigned int n);
+void pop_n_from_front(std::deque<bool>& in, const unsigned int& n);
 
 }
 }

@@ -35,7 +35,7 @@ int main(int argc, char* argv[]){
         std::deque<bool> total_output_vector;
         std::deque<bool> new_output_vector;
         for(auto in: input){
-            input_vector.emplace_back(pocketplus::utils::number_to_deque_bool(in, input_vector_length));
+            input_vector.emplace_back(pocketplus::utils::number_to_deque_bool(in, *input_vector_length));
         }
         auto counter = std::make_unique<unsigned int>(1);
         for(auto in: input_vector){
