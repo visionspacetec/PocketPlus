@@ -9,17 +9,22 @@
 ### Introduction
 This repository contains a c++ implementation of the Pocket+ compression algorithm described in the CCSDS 124.0-W-4 standard.
 
-## Installation 
-
-### Run tests
-This project uses Google Test (GTest) with CMake for testing. To install on Ubuntu run:
+## Installation
+This project uses Google Test (GTest) with CMake for testing and building.
 ```bash
-sudo apt-get install libgtest-dev
-sudo apt-get cmake
+sudo apt-get install cmake git libgtest-dev
 cd /usr/src/gtest
-sudo cmake CMakeLists.txt
-sudo make
-sudo cp *.a /usr/lib
+cmake CMakeLists.txt
+make
+cp *.a /usr/lib
+cd ~
+git clone https://github.com/visionspacetec/PocketPlus.git
+cd PocketPlus
+mkdir build
+cd build
+cmake ..
+make
+make test
 ```
 
 ## Usage
