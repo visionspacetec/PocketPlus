@@ -220,8 +220,6 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
     std::cout << "Second vector" << std::endl;
     std::unique_ptr<bool> send_input_length_flag;
     if(*t == 0){
-        //std::cout << "d_t = 0" << std::endl;
-        //d_t = std::make_unique<bool>(0);
         std::cout << "send_input_length_flag (v_t) = 1" << std::endl;
         send_input_length_flag = std::make_unique<bool>(1);
         std::cout << "send_mask_flag (f_t) = 0" << std::endl;
