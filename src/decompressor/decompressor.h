@@ -36,8 +36,8 @@ class PocketPlusDecompressor{
 
     public:
         PocketPlusDecompressor(std::unique_ptr<unsigned int>& vector_length){
-            if ((*vector_length < 8) || (*vector_length > 65535)){ // ############ ToDo: check if this is still the case after the review
-                throw std::out_of_range("8 <= input_vector_length <= 2^16-1 (65535");
+            if ((*vector_length < 1) || (*vector_length > 65535)){
+                throw std::out_of_range("1 <= input_vector_length <= 2^16-1 (65535");
             }
             input_vector_length = std::make_unique<unsigned int>(*vector_length);
             minimum_size = std::make_unique<const unsigned int>(10); // ToDo: check the actual minimum size!
