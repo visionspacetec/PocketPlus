@@ -9,7 +9,7 @@ int main(int argc, char* argv[]){
 
     std::cout << "Welcome to PocketPlus in c++" << std::endl;
 
-    auto input_vector_length = std::make_unique<unsigned int>(128); // In bits
+    auto input_vector_length = std::make_unique<unsigned int>(32); // In bits
 
     pocketplus::compressor::PocketPlusCompressor compressor(input_vector_length);
 
