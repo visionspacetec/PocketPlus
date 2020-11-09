@@ -5,8 +5,8 @@ using namespace pocketplus::compressor;
 // 5.3.1.1 Counter encoding function
 std::deque<bool> PocketPlusCompressor::count(const unsigned int& a){
     std::deque<bool> output_vector;
-    if((a == 0) || (a >= 65536)){
-        throw std::out_of_range("1 <= a <= 2^16 = 65536");
+    if((a == 0) || (a > 65535)){
+        throw std::out_of_range("1 <= a <= 2^16 - 1 = 65535");
     }
     else if(a == 1){
         output_vector.insert(output_vector.begin(), {0});
@@ -89,32 +89,23 @@ std::deque<bool> PocketPlusCompressor::inverse(const std::deque<bool>& a){
 std::deque<bool> PocketPlusCompressor::compress(
     const std::deque<bool>& input_new, 
     const unsigned int& robustness_level, // R_t // User defined value
-    const bool& new_mask_flag,
-    const bool& send_mask_flag,
-    const bool& uncompressed_flag,
-    const bool& send_changes_flag,
-    const bool& send_input_length_flag
+    const bool& new_mask_flag, // p_t
+    const bool& send_mask_flag, // f_t
+    const bool& uncompressed_flag // r_t
     ){
+    // Section 3.3.2 Compressor parameters
     if(*input_vector_length != input_new.size()){
         throw std::invalid_argument("Input vector must have the predefined input_vector_length");
     }
     if ((robustness_level < *robustness_level_min) || (robustness_level > *robustness_level_max)){
         throw std::out_of_range("0 <= robustness_level <= 7");
     }
-    if(!send_changes_flag && !uncompressed_flag){
-        throw std::invalid_argument("if send_changes_flag == false -> uncompressed_flag != true");
-    }
-    if(*t == 0){
-        if(send_mask_flag){
-            throw std::invalid_argument("send_mask_flag for t=0 must be false");
+    if(*t <= robustness_level){
+        if(!send_mask_flag){
+            throw std::invalid_argument("For t <= robustness level, send mask flag must be true");
         }
-        if(send_changes_flag){
-            throw std::invalid_argument("send_changes_flag for t=0 must be false");
-        }
-    }
-    else{
-        if(!*send_changes_flag_old && send_changes_flag && !send_mask_flag){
-            throw std::invalid_argument("send_mask_flag must be true if send_changes flag is true and send_changes_flag_old is false");
+        if(!uncompressed_flag){
+            throw std::invalid_argument("For t <= robustness level, uncompressed flag must be true");
         }
     }
     if(mask_flag.size() > 0){
@@ -124,7 +115,7 @@ std::deque<bool> PocketPlusCompressor::compress(
         }
         else{
             if(mask_flag.back() && new_mask_flag){
-                throw std::invalid_argument("new_mask_flag must be false due to recent mask update");
+                throw std::invalid_argument("New mask flag must be false due to recent mask update");
             }
         }
     }
@@ -207,85 +198,71 @@ std::deque<bool> PocketPlusCompressor::compress(
     else{
         d_t = std::make_unique<bool>(0);
     }
+
     // 5.3.2.2 first binary vector
-    if(!send_changes_flag){
-        first_binary_vector = {1, 0, 0, 0, 0, 0};
+    // Equation (15)
+    X_t.resize(*input_vector_length);
+    if(robustness_level == 0){
+        // X_t = <D_t>
+        X_t = reverse(mask_change_vector.at(0));
+    }
+    else if((int)(*t - robustness_level) <= 0){
+        // X_t = [<D_1 OR D_2 OR ... OR D_t>]
+        X_t.assign(*input_vector_length, 0);
+        for(unsigned int i = 0; i < mask_change_vector.size(); i++){
+            for(unsigned int index = 0; index < mask_change_vector.at(i).size(); index++){
+                X_t.at(index) = mask_change_vector.at(i).at(index) || X_t.at(index);
+            }
+        }
+        X_t = reverse(X_t); // ToDo: Just go the other way thru the for loop to avoid this step
     }
     else{
-        X_t.resize(*input_vector_length);
-        if(robustness_level == 0){
-            X_t = reverse(mask_change_vector.at(0));
-        }
-        else if((int)(*t - robustness_level) <= 0){
-            // X_t = [<D_1 OR D_2 OR ... OR D_t>]
-            X_t.assign(*input_vector_length, 0);
-            for(unsigned int i = 0; i < mask_change_vector.size(); i++){
-                for(unsigned int index = 0; index < mask_change_vector.at(i).size(); index++){
-                    X_t.at(index) = mask_change_vector.at(i).at(index) || X_t.at(index);
-                }
+        // X_t = [<D_(t-robustness_level) OR D_(t-robustness_level)+1 OR ... OR D_t>]
+        X_t.assign(*input_vector_length, 0); 
+        for(unsigned int i = 0; i < robustness_level + 1; i++){
+            for(unsigned int index = 0; index < mask_change_vector.at(i).size(); index++){
+                X_t.at(index) = mask_change_vector.at(i).at(index) || X_t.at(index);
             }
-            X_t = reverse(X_t); // ToDo: Just go the other way thru the for loop to avoid this step
         }
-        else{
-            // X_t = [<D_(t-robustness_level) OR D_(t-robustness_level)+1 OR ... OR D_t>]
-            X_t.assign(*input_vector_length, 0); 
-            for(unsigned int i = 0; i < robustness_level + 1; i++){
-                for(unsigned int index = 0; index < mask_change_vector.at(i).size(); index++){
-                    X_t.at(index) = mask_change_vector.at(i).at(index) || X_t.at(index);
-                }
-            }
-            X_t = reverse(X_t); // ToDo: Just go the other way thru the for loop to avoid this step
-            std::cout << "X_t case 3" << std::endl;
-        }
-
-        y_t = bit_extraction(inverse(mask_new), reverse(X_t));
-
-        std::cout << "mask_new:" << std::endl;
-        pocketplus::utils::print_vector(mask_new);
-
-        e_t.clear();
-        if((robustness_level == 0) || (hamming_weight(X_t) == 0)){}
-        else if(((hamming_weight(y_t) == 0) && (robustness_level > 0)) && (hamming_weight(X_t) != 0)){
-            e_t = {0};
-        }
-        else{
-            e_t = {1};
-        }
-
-        if(!((robustness_level == 0) || (hamming_weight(X_t) == 0) || (hamming_weight(y_t) == 0))){
-            k_t = bit_extraction(inverse(mask_new), reverse(X_t));
-        }
-
-        //first_binary_vector = [RLE(X_t), '10', BIT_3(robustness_level), e_t, k_t, d_t]
-        std::cout << "X_t: " << std::endl;
-        pocketplus::utils::print_vector(X_t);
-        X_t_rle = run_length_encoding(X_t);
-        std::cout << "X_t_rle: " << std::endl;
-        pocketplus::utils::print_vector(X_t_rle);
-        first_binary_vector.insert(first_binary_vector.end(), X_t_rle.begin(), X_t_rle.end());
-        first_binary_vector.insert(first_binary_vector.end(), {1, 0});
-        robustness_level_bit_3 = std::deque<bool>();
-        for(unsigned int i = 0; i < 3; i++){
-            robustness_level_bit_3.emplace_front((robustness_level >> i) & 1);
-        }
-        
-        first_binary_vector.insert(first_binary_vector.end(), robustness_level_bit_3.begin(), robustness_level_bit_3.end());
-        first_binary_vector.insert(first_binary_vector.end(), e_t.begin(), e_t.end());
-        first_binary_vector.insert(first_binary_vector.end(), k_t.begin(), k_t.end());
-        pocketplus::utils::print_vector(first_binary_vector);
-        first_binary_vector.emplace_back(*d_t);
-        pocketplus::utils::print_vector(first_binary_vector);
+        X_t = reverse(X_t); // ToDo: Just go the other way thru the for loop to avoid this step
+        std::cout << "X_t case 3" << std::endl;
     }
-    *send_changes_flag_old = send_changes_flag;
+    // Equation (16)
+    y_t = bit_extraction(inverse(mask_new), reverse(X_t));
+    // Equation (17)
+    e_t.clear();
+    if((robustness_level == 0) || (hamming_weight(X_t) == 0)){}
+    else if(((hamming_weight(y_t) == 0) && (robustness_level > 0)) && (hamming_weight(X_t) != 0)){
+        e_t = {0};
+    }
+    else{
+        e_t = {1};
+    }
+    // Equation (18)
+    if(!((robustness_level == 0) || (hamming_weight(X_t) == 0) || (hamming_weight(y_t) == 0))){
+        k_t = bit_extraction(inverse(mask_new), reverse(X_t));
+    }
+    // Equation (14)
+    X_t_rle = run_length_encoding(X_t);
+    robustness_level_bit_3.clear();
+    for(unsigned int i = 0; i < 3; i++){
+        robustness_level_bit_3.emplace_front((robustness_level >> i) & 1);
+    }
+    first_binary_vector.clear();
+    first_binary_vector.insert(first_binary_vector.end(), X_t_rle.begin(), X_t_rle.end());
+    first_binary_vector.insert(first_binary_vector.end(), {1, 0});
+    first_binary_vector.insert(first_binary_vector.end(), robustness_level_bit_3.begin(), robustness_level_bit_3.end());
+    first_binary_vector.insert(first_binary_vector.end(), e_t.begin(), e_t.end());
+    first_binary_vector.insert(first_binary_vector.end(), k_t.begin(), k_t.end());
+    first_binary_vector.emplace_back(*d_t);
 
     // 5.3.2.3 Second binary vector
-    // Second vector: ['1', RLE(< mask ^ mask_<< >), '10']
+    // Equation (19)
+    second_binary_vector.clear();
     if(*d_t == 1){
-        second_binary_vector = std::deque<bool>();
+        // Empty second binary vector
     }
     else if(send_mask_flag == 1){
-        second_binary_vector = std::deque<bool>();
-        second_binary_vector.insert(second_binary_vector.end(), {1});
         mask_shifted_rle = mask_new;
         mask_shifted_rle.pop_front();
         mask_shifted_rle.emplace_back(0);
@@ -300,42 +277,39 @@ std::deque<bool> PocketPlusCompressor::compress(
         );
         mask_shifted_rle = reverse(mask_shifted_rle);
         mask_shifted_rle = run_length_encoding(mask_shifted_rle);
+        second_binary_vector.emplace_back(1);
         second_binary_vector.insert(second_binary_vector.end(), mask_shifted_rle.begin(), mask_shifted_rle.end());
         second_binary_vector.insert(second_binary_vector.end(), {1, 0});
     }
     else{
-        second_binary_vector = std::deque<bool>({0});
+        second_binary_vector.emplace_back(0);
     }
 
     // 5.3.2.4 Third binary vector
-    third_binary_vector = std::deque<bool>();
+    // Equation (20)
+    third_binary_vector.clear();
     if(*d_t == 1){
         input_mask_bit_extraction = bit_extraction(input_new , mask_new);
         third_binary_vector.insert(third_binary_vector.end(), input_mask_bit_extraction.begin(), input_mask_bit_extraction.end());
     }
-    else if((uncompressed_flag == 1) && (send_input_length_flag == 1)){
-        third_binary_vector.insert(third_binary_vector.end(), {1, 1});
+    else if(uncompressed_flag){
+        third_binary_vector.emplace_back(1);
         third_binary_vector.insert(third_binary_vector.end(), input_vector_length_count.begin(), input_vector_length_count.end());
         third_binary_vector.insert(third_binary_vector.end(), input_new.begin(), input_new.end());
-        third_binary_vector.insert(third_binary_vector.end(), {send_mask_flag});
-    }
-    else if((uncompressed_flag == 1) && (send_input_length_flag == 0)){
-        third_binary_vector.insert(third_binary_vector.end(), {1, 0});
-        third_binary_vector.insert(third_binary_vector.end(), input_new.begin(), input_new.end());
-        third_binary_vector.insert(third_binary_vector.end(), {send_mask_flag});
     }
     else{
-        third_binary_vector.insert(third_binary_vector.end(), {0});
+        third_binary_vector.emplace_back(0);
         input_mask_bit_extraction = bit_extraction(input_new , mask_new);
         third_binary_vector.insert(third_binary_vector.end(), input_mask_bit_extraction.begin(), input_mask_bit_extraction.end());
     }
 
-    // Output vector: [first, second, third]
+    // Output vector
+    // Equation (9)
     output.insert(output.end(), first_binary_vector.begin(), first_binary_vector.end());
     output.insert(output.end(), second_binary_vector.begin(), second_binary_vector.end());
     output.insert(output.end(), third_binary_vector.begin(), third_binary_vector.end());
 
-    t = std::make_unique<unsigned int>(*t + 1); 
+    *t = *t + 1;
     input_old = input_new;
     mask_old = mask_new;
     mask_build_old = mask_build_new;
@@ -347,13 +321,5 @@ std::deque<bool> PocketPlusCompressor::compress(
     std::cout << "Third:" << std::endl;
     pocketplus::utils::print_vector(third_binary_vector);
 
-    return output;
-}
-
-std::deque<bool> PocketPlusCompressor::add_termination_sequence(const std::deque<bool>& in){
-    // 5.4 Termination
-    // 5.4.1.1
-    auto w_t = count(*input_vector_length + 1);
-    output.insert(output.end(), w_t.begin(), w_t.end());
     return output;
 }

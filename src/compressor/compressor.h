@@ -27,7 +27,6 @@ class PocketPlusCompressor{
     // Define inputs and parameters
     std::unique_ptr<unsigned int> t;
     std::unique_ptr<unsigned int> input_vector_length; // F // User defined value
-    std::unique_ptr<bool> send_changes_flag_old;
     std::deque<bool> input_vector_length_count;
     std::deque<bool> initial_mask_vector;
 
@@ -57,18 +56,16 @@ class PocketPlusCompressor{
     std::deque<bool> output;
     public:
         PocketPlusCompressor(std::unique_ptr<unsigned int>& vector_length){
-            if ((*vector_length < 8) || (*vector_length > 65535)){ // ############ ToDo: check if this is still the case after the review
-                throw std::out_of_range("8 <= input_vector_length <= 2^16-1 (65535");
+            if ((*vector_length < 8) || (*vector_length > 65535)){ 
+                throw std::out_of_range("1 <= input_vector_length <= 2^16-1 (65535");
             }
             robustness_level_min = std::make_unique<const unsigned int>(0);
             robustness_level_max = std::make_unique<const unsigned int>(7);
-
             t = std::make_unique<unsigned int>(0);
             input_vector_length = std::make_unique<unsigned int>(*vector_length); // F // User defined value
             input_vector_length_count = count(*input_vector_length);
             initial_mask_vector.assign(*input_vector_length, 0); // M_0 = 0 // ############ ToDo: Make initial mask user defined
             mask_new = initial_mask_vector;
-            send_changes_flag_old = std::make_unique<bool>(0);
             input_old.assign(*input_vector_length, 0);
             mask_old.assign(*input_vector_length, 0); // M_t
             mask_build_old.assign(*input_vector_length, 0); // B_t // B_0 = 0
@@ -81,11 +78,8 @@ class PocketPlusCompressor{
             const unsigned int& robustness_level,
             const bool& new_mask_flag,
             const bool& send_mask_flag,
-            const bool& uncompressed_flag,
-            const bool& send_changes_flag,
-            const bool& send_input_length_flag
+            const bool& uncompressed_flag
         );
-        std::deque<bool> add_termination_sequence(const std::deque<bool>&);
 };
 
 };

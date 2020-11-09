@@ -13,12 +13,10 @@ int main(int argc, char* argv[]){
 
     pocketplus::compressor::PocketPlusCompressor compressor(input_vector_length);
 
-    std::deque<unsigned int> robustness_level = {0, 0, 1, 1, 1, 1, 1}; // R_t
-    std::deque<bool> new_mask_flag            = {1, 1, 0, 0, 1, 0, 0}; // p_t
-    std::deque<bool> send_mask_flag           = {0, 0, 1, 0, 0, 1, 0}; // f_t // f_0 = 0
-    std::deque<bool> uncompressed_flag        = {1, 1, 0, 0, 0, 1, 0}; // r_t // if n_t == 0 -> r_t = 1 --> r_0 = 1
-    std::deque<bool> send_changes_flag        = {0, 0, 1, 1, 1, 1, 1}; // n_t // n_0 = 0
-    std::deque<bool> send_input_length_flag   = {1, 1, 0, 0, 0, 0, 0}; // v_t // v_0 = 1
+    std::deque<unsigned int> robustness_level = {1, 1, 1, 1, 1, 1, 1}; // R_t
+    std::deque<bool> new_mask_flag            = {1, 0, 0, 0, 1, 0, 0}; // p_t
+    std::deque<bool> send_mask_flag           = {1, 0, 1, 0, 0, 1, 0}; // f_t // if t <= R_t then f_t = 1
+    std::deque<bool> uncompressed_flag        = {1, 0, 0, 0, 0, 1, 0}; // r_t // if t <= R_t then r_t = 1
     std::deque<long int> input = {
         3333333333, // 1
         3333333333, // 2
@@ -49,9 +47,7 @@ int main(int argc, char* argv[]){
                 robustness_level.front(),
                 new_mask_flag.front(),
                 send_mask_flag.front(),
-                uncompressed_flag.front(),
-                send_changes_flag.front(),
-                send_input_length_flag.front()
+                uncompressed_flag.front()
             );
             pocketplus::utils::zero_stuffing(new_output_vector);
             std::move(new_output_vector.begin(), new_output_vector.end(), std::back_inserter(total_output_vector));
@@ -60,8 +56,6 @@ int main(int argc, char* argv[]){
             new_mask_flag.pop_front();
             send_mask_flag.pop_front();
             uncompressed_flag.pop_front();
-            send_changes_flag.pop_front();
-            send_input_length_flag.pop_front();
 
             *counter += 1;
         }

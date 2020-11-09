@@ -20,14 +20,14 @@ TEST(compress, InputVectorSizeInvalid){
     std::deque<bool> input_vector = {1, 0, 1, 0};
     auto input_vector_length = std::make_unique<unsigned int>(8);
     pocketplus::compressor::PocketPlusCompressor compressor(input_vector_length);
-    ASSERT_THROW(compressor.compress(input_vector, 1, 1, 0, 1, 0, 1), std::invalid_argument);
+    ASSERT_THROW(compressor.compress(input_vector, 1, 1, 0, 1), std::invalid_argument);
 }
 
 TEST(compress, CompressFirstDataFrame){
     std::deque<bool> input_vector = {1, 0, 1, 0, 1, 0, 1, 0};
     auto input_vector_length = std::make_unique<unsigned int>(8);
     pocketplus::compressor::PocketPlusCompressor compressor(input_vector_length);
-    auto output_vector = compressor.compress(input_vector, 1, 1, 0, 1, 0, 1);
+    auto output_vector = compressor.compress(input_vector, 1, 1, 0, 1);
     std::deque<bool> ref = {1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0};
     ASSERT_EQ(ref, output_vector);
 }
