@@ -2,7 +2,7 @@
 cmake_minimum_required( VERSION 3.1.0 )
 
 # Project name
-project( pocket_plus_cpp VERSION 0.0.1 DESCRIPTION "PocketPlus" )
+project( pocket_plus_cpp VERSION 0.1.0 DESCRIPTION "PocketPlus" )
 
 # Compiler flags
 set( CMAKE_CXX_STANDARD 17 )

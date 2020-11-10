@@ -27,5 +27,10 @@ make
 make test
 ```
 
+To install the library:
+```bash
+sudo make install
+```
+
 ## Usage
 

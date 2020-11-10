@@ -1,4 +1,3 @@
-#include <fstream>
 #include <iterator>
 
 #include "./compressor/compressor.h"
@@ -9,14 +8,14 @@ int main(int argc, char* argv[]){
 
     std::cout << "Welcome to PocketPlus in c++" << std::endl;
 
-    auto input_vector_length = std::make_unique<unsigned int>(32); // In bits
+    auto input_vector_length = std::make_unique<unsigned int>(16); // In bits
 
     pocketplus::compressor::PocketPlusCompressor compressor(input_vector_length);
 
     std::deque<unsigned int> robustness_level = {1, 1, 1, 1, 1, 1, 1}; // R_t
-    std::deque<bool> new_mask_flag            = {1, 0, 0, 0, 1, 0, 0}; // p_t
-    std::deque<bool> send_mask_flag           = {1, 1, 1, 0, 0, 1, 0}; // f_t // if t <= R_t then f_t = 1
-    std::deque<bool> uncompressed_flag        = {1, 1, 0, 0, 0, 1, 0}; // r_t // if t <= R_t then r_t = 1
+    std::deque<bool> new_mask_flag            = {1, 0, 0, 0, 0, 0, 0}; // p_t
+    std::deque<bool> send_mask_flag           = {1, 1, 0, 0, 0, 0, 0}; // f_t // if t <= R_t then f_t = 1
+    std::deque<bool> uncompressed_flag        = {1, 1, 0, 0, 0, 0, 0}; // r_t // if t <= R_t then r_t = 1
     std::deque<long int> input = {
         3333333333, // 1
         3333333333, // 2
