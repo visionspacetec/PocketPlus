@@ -2,7 +2,7 @@
 cmake_minimum_required( VERSION 3.1.0 )
 
 # Project name
-project( pocket_plus_cpp VERSION 0.1.0 DESCRIPTION "PocketPlus" )
+project( pocket_plus VERSION 0.1.0 DESCRIPTION "PocketPlus" )
 
 # Compiler flags
 set( CMAKE_CXX_STANDARD 17 )
@@ -39,8 +39,8 @@ set(TEST_SOURCES
 )
 
 # Declare target
-add_executable( PocketPlus ${SOURCES} )
-add_library( PocketPlus_lib STATIC ${SOURCES} )
+add_executable( PocketPlus.exe ${SOURCES} )
+add_library( PocketPlus STATIC ${SOURCES} )
 
 # Declare tests
 add_executable( PocketPlus_tests ${TEST_SOURCES} )
@@ -49,14 +49,14 @@ target_link_libraries(
     gtest 
     gtest_main
     pthread 
-    PocketPlus_lib 
+    PocketPlus 
 )
 
 # Discover test cases
 gtest_discover_tests( PocketPlus_tests )
 
 # Install
-install( TARGETS PocketPlus DESTINATION bin )
-set( CPACK_PROJECT_NAME ${PROJECT_NAME} )
-set( CPACK_PROJECT_VERSION ${PROJECT_VERSION} )
-include( CPack )
+install( TARGETS PocketPlus 
+         ARCHIVE DESTINATION lib 
+         LIBRARY DESTINATION lib 
+         RUNTIME DESTINATION bin)

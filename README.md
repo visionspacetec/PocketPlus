@@ -34,3 +34,7 @@ sudo make install
 
 ## Usage
 
+When using the installed PocketPlus library in another c++ project, include it with cmake:
+```
+find_library( PocketPlus REQUIRED )
+```
