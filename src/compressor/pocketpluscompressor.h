@@ -21,12 +21,12 @@ class PocketPlusCompressor{
     std::deque<bool> inverse(const std::deque<bool>&);
 
     // Constants
-    std::unique_ptr<const unsigned int> robustness_level_min;
-    std::unique_ptr<const unsigned int> robustness_level_max;
+    std::shared_ptr<const unsigned int> robustness_level_min;
+    std::shared_ptr<const unsigned int> robustness_level_max;
 
     // Define inputs and parameters
-    std::unique_ptr<unsigned int> t;
-    std::unique_ptr<unsigned int> input_vector_length; // F // User defined value
+    std::shared_ptr<unsigned int> t;
+    std::shared_ptr<unsigned int> input_vector_length; // F // User defined value
     std::deque<bool> input_vector_length_count;
     std::deque<bool> initial_mask_vector;
 
@@ -56,9 +56,9 @@ class PocketPlusCompressor{
     std::deque<bool> output;
     public:
         PocketPlusCompressor(){
-            robustness_level_min = std::make_unique<const unsigned int>(0);
-            robustness_level_max = std::make_unique<const unsigned int>(7);
-            t = std::make_unique<unsigned int>(0);
+            robustness_level_min = std::make_shared<const unsigned int>(0);
+            robustness_level_max = std::make_shared<const unsigned int>(7);
+            t = std::make_shared<unsigned int>(0);
             /*
             input_vector_length = std::make_unique<unsigned int>(*vector_length); // F // User defined value
             input_vector_length_count = count(*input_vector_length);
@@ -70,6 +70,22 @@ class PocketPlusCompressor{
             mask_build_new.assign(*input_vector_length, 0); // B_t // B_0 = 0
             mask_change_0.assign(*input_vector_length, 0); 
             */
+        }
+        PocketPlusCompressor(const PocketPlusCompressor& old){
+            robustness_level_min = std::make_shared<const unsigned int>(0);
+            robustness_level_max = std::make_shared<const unsigned int>(7);
+            t = std::make_shared<unsigned int>(*old.t);
+            input_vector_length = std::make_shared<unsigned int>(*old.input_vector_length);
+            input_vector_length_count = old.input_vector_length_count;
+            initial_mask_vector = old.initial_mask_vector;
+            mask_flag = old.mask_flag;
+            input_old = old.input_old;
+            mask_new = old.mask_new;
+            mask_old = old.mask_old;
+            mask_build_old = old.mask_build_old;
+            mask_build_new = old.mask_build_new;
+            mask_change_vector = old.mask_change_vector;
+            mask_change_0 = old.mask_change_0;
         }
         // Public functions
         void set_input_vector_length(const unsigned int& vector_length);
