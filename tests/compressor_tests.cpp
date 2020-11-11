@@ -1,4 +1,4 @@
-#include "../src/compressor/compressor.h"
+#include "pocketpluscompressor.h"
 #include <gtest/gtest.h>
 
 TEST(PocketPlusCompressor, LengthValid){

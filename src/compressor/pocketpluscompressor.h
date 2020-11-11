@@ -6,7 +6,7 @@
 #include <algorithm>
 #include <cmath>
 
-#include "../utils/utils.h"
+#include "pocketplusutils.h"
 
 namespace pocketplus {
 namespace compressor {
@@ -56,12 +56,10 @@ class PocketPlusCompressor{
     std::deque<bool> output;
     public:
         PocketPlusCompressor(std::unique_ptr<unsigned int>& vector_length){
-            if ((*vector_length < 8) || (*vector_length > 65535)){ 
-                throw std::out_of_range("1 <= input_vector_length <= 2^16-1 (65535");
-            }
             robustness_level_min = std::make_unique<const unsigned int>(0);
             robustness_level_max = std::make_unique<const unsigned int>(7);
             t = std::make_unique<unsigned int>(0);
+            /*
             input_vector_length = std::make_unique<unsigned int>(*vector_length); // F // User defined value
             input_vector_length_count = count(*input_vector_length);
             initial_mask_vector.assign(*input_vector_length, 0); // M_0 = 0 // ############ ToDo: Make initial mask user defined
@@ -71,8 +69,10 @@ class PocketPlusCompressor{
             mask_build_old.assign(*input_vector_length, 0); // B_t // B_0 = 0
             mask_build_new.assign(*input_vector_length, 0); // B_t // B_0 = 0
             mask_change_0.assign(*input_vector_length, 0); 
+            */
         }
         // Public functions
+        void set_input_vector_length(const unsigned int& vector_length);
         std::deque<bool> compress(
             const std::deque<bool>& input_new, 
             const unsigned int& robustness_level,

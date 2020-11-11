@@ -23,40 +23,45 @@ include_directories(
 )
 
 # Declare source files
-set(SOURCES 
+set(SOURCES
     ./src/main.cpp
-    ./src/compressor/compressor.h
-    ./src/compressor/compressor.cpp 
-    ./src/decompressor/decompressor.h
-    ./src/decompressor/decompressor.cpp
-    ./src/utils/utils.h
-    ./src/utils/utils.cpp
+    #./src/compressor/compressor.h
+    ./src/compressor/pocketpluscompressor.cpp
+    #./src/decompressor/decompressor.h
+    ./src/decompressor/pocketplusdecompressor.cpp
+    #./src/utils/utils.h
+    ./src/utils/pocketplusutils.cpp
 )
 set(TEST_SOURCES
     ./tests/utils_tests.cpp
-    ./tests/compressor_tests.cpp 
+    ./tests/compressor_tests.cpp
     ./tests/decompressor_tests.cpp
 )
 
-# Declare target
-add_executable( PocketPlus.exe ${SOURCES} )
-add_library( PocketPlus STATIC ${SOURCES} )
+# Declare library target
+add_library( PocketPlus SHARED ${SOURCES} )
+set_target_properties( PocketPlus PROPERTIES VERSION ${PROJECT_VERSION} )
+set_target_properties( PocketPlus PROPERTIES PUBLIC_HEADER 
+    "src/compressor/pocketpluscompressor.h;src/decompressor/pocketplusdecompressor.h;src/utils/pocketplusutils.h"
+)
 
-# Declare tests
-add_executable( PocketPlus_tests ${TEST_SOURCES} )
-target_link_libraries( 
-    PocketPlus_tests 
-    gtest 
+# Declare binary target
+add_executable( PocketPlus.exe ${SOURCES} )#PocketPlus )
+
+# Declare test target
+add_executable( PocketPlus_tests ${TEST_SOURCES} )# PocketPlus )
+target_link_libraries(
+    PocketPlus_tests
+    gtest
     gtest_main
-    pthread 
-    PocketPlus 
+    pthread
+    PocketPlus
 )
 
 # Discover test cases
 gtest_discover_tests( PocketPlus_tests )
 
 # Install
-install( TARGETS PocketPlus 
-         ARCHIVE DESTINATION lib 
-         LIBRARY DESTINATION lib 
-         RUNTIME DESTINATION bin)
+install( TARGETS PocketPlus LIBRARY DESTINATION lib PUBLIC_HEADER DESTINATION include )
+         #ARCHIVE DESTINATION lib
+#RUNTIME DESTINATION bin)

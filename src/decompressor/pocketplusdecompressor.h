@@ -5,7 +5,7 @@
 #include <memory>
 #include <iterator>
 
-#include "../utils/utils.h"
+#include "pocketplusutils.h"
 
 namespace pocketplus {
 namespace decompressor {

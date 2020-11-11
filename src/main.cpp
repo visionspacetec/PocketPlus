@@ -1,8 +1,8 @@
 #include <iterator>
 
-#include "./compressor/compressor.h"
-#include "./decompressor/decompressor.h"
-#include "./utils/utils.h"
+#include "compressor.h"
+#include "decompressor.h"
+#include "utils.h"
 
 int main(int argc, char* argv[]){
 

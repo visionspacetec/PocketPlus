@@ -1,4 +1,4 @@
-#include "decompressor.h"
+#include "pocketplusdecompressor.h"
 
 using namespace pocketplus::decompressor;
 
