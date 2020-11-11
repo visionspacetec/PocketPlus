@@ -55,7 +55,7 @@ class PocketPlusCompressor{
     std::deque<bool> third_binary_vector ; // u_t either unpredictable bits or the original input I_t
     std::deque<bool> output;
     public:
-        PocketPlusCompressor(std::unique_ptr<unsigned int>& vector_length){
+        PocketPlusCompressor(){
             robustness_level_min = std::make_unique<const unsigned int>(0);
             robustness_level_max = std::make_unique<const unsigned int>(7);
             t = std::make_unique<unsigned int>(0);

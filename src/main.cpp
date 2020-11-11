@@ -1,16 +1,16 @@
 #include <iterator>
 
-#include "compressor.h"
-#include "decompressor.h"
-#include "utils.h"
+#include "pocketpluscompressor.h"
+#include "pocketplusdecompressor.h"
+#include "pocketplusutils.h"
 
 int main(int argc, char* argv[]){
 
     std::cout << "Welcome to PocketPlus in c++" << std::endl;
 
-    auto input_vector_length = std::make_unique<unsigned int>(16); // In bits
-
-    pocketplus::compressor::PocketPlusCompressor compressor(input_vector_length);
+    auto compressor = pocketplus::compressor::PocketPlusCompressor();
+    auto input_vector_length = std::make_unique<unsigned int>(16);
+    compressor.set_input_vector_length(*input_vector_length);
 
     std::deque<unsigned int> robustness_level = {1, 1, 1, 1, 1, 1, 1}; // R_t
     std::deque<bool> new_mask_flag            = {1, 0, 0, 0, 0, 0, 0}; // p_t

@@ -4,7 +4,7 @@ using namespace pocketplus::compressor;
 
 void PocketPlusCompressor::set_input_vector_length(const unsigned int& vector_length){
     if(input_vector_length){
-
+        throw std::invalid_argument("Input vector length alrady set");
     }
     if ((vector_length < 8) || (vector_length > 65535)){ 
         throw std::out_of_range("1 <= input_vector_length <= 2^16-1 (65535");
@@ -111,6 +111,9 @@ std::deque<bool> PocketPlusCompressor::compress(
     const bool& send_mask_flag, // f_t
     const bool& uncompressed_flag // r_t
     ){
+    if(!input_vector_length){
+        throw std::invalid_argument("Input vector length must be set before calling compress");
+    }
     // Section 3.3.2 Compressor parameters
     if(*input_vector_length != input_new.size()){
         throw std::invalid_argument("Input vector must have the predefined input_vector_length");
