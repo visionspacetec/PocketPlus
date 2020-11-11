@@ -27,10 +27,12 @@ make
 make test
 ```
 
-To install the library:
+To install the library in /usr/local/lib run:
 ```bash
 sudo make install
+sudo ldconfig
 ```
+If you forget to run ldconfig, the programm links but does not run.
 
 ## Usage
 
