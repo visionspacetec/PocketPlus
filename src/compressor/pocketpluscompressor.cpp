@@ -246,7 +246,7 @@ std::deque<bool> PocketPlusCompressor::compress(
             }
         }
         X_t = reverse(X_t); // ToDo: Just go the other way thru the for loop to avoid this step
-        std::cout << "X_t case 3" << std::endl;
+        //std::cout << "X_t case 3" << std::endl;
     }
     // Equation (16)
     y_t = bit_extraction(inverse(mask_new), reverse(X_t));
@@ -310,7 +310,7 @@ std::deque<bool> PocketPlusCompressor::compress(
     // Equation (20)
     third_binary_vector.clear();
     if(*d_t == 1){
-        input_mask_bit_extraction = bit_extraction(input_new , mask_new);
+        input_mask_bit_extraction = bit_extraction(reverse(input_new), reverse(mask_new));
         third_binary_vector.insert(third_binary_vector.end(), input_mask_bit_extraction.begin(), input_mask_bit_extraction.end());
     }
     else if(uncompressed_flag){
@@ -320,7 +320,7 @@ std::deque<bool> PocketPlusCompressor::compress(
     }
     else{
         third_binary_vector.emplace_back(0);
-        input_mask_bit_extraction = bit_extraction(input_new , mask_new);
+        input_mask_bit_extraction = bit_extraction(reverse(input_new), reverse(mask_new));
         third_binary_vector.insert(third_binary_vector.end(), input_mask_bit_extraction.begin(), input_mask_bit_extraction.end());
     }
 
@@ -335,12 +335,12 @@ std::deque<bool> PocketPlusCompressor::compress(
     mask_old = mask_new;
     mask_build_old = mask_build_new;
 
-    std::cout << "First:" << std::endl;
-    pocketplus::utils::print_vector(first_binary_vector);
-    std::cout << "Second:" << std::endl;
-    pocketplus::utils::print_vector(second_binary_vector);
-    std::cout << "Third:" << std::endl;
-    pocketplus::utils::print_vector(third_binary_vector);
+    //std::cout << "First:" << std::endl;
+    //pocketplus::utils::print_vector(first_binary_vector);
+    //std::cout << "Second:" << std::endl;
+    //pocketplus::utils::print_vector(second_binary_vector);
+    //std::cout << "Third:" << std::endl;
+    //pocketplus::utils::print_vector(third_binary_vector);
 
     return output;
 }
