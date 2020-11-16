@@ -89,6 +89,7 @@ class PocketPlusCompressor{
         }
         // Public functions
         void set_input_vector_length(const unsigned int& vector_length);
+        unsigned int get_input_vector_length();
         std::deque<bool> compress(
             const std::deque<bool>& input_new, 
             const unsigned int& robustness_level,
