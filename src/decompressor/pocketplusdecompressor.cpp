@@ -125,8 +125,8 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
     }
     else{
         D_t = reverse(X_t);
-        //std::cout << "D_t: ";
-        //pocketplus::utils::print_vector(D_t);
+        std::cout << "D_t: ";
+        pocketplus::utils::print_vector(D_t);
     }
     auto X_t_weight = std::make_unique<unsigned int>(hamming_weight_in_range(X_t.begin(), X_t.end()));
     //std::cout << "X_t_weight: " << *X_t_weight << std::endl;
@@ -208,10 +208,10 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
         auto it_D_t = D_t.begin();
         auto it_M_t = M_t.begin();
         auto it_old_mask = mask_vector.back().begin();
-        //std::cout << "k_t: " << std::endl;
-        //pocketplus::utils::print_vector(k_t);
-        //std::cout << "y_t: " << std::endl;
-        //pocketplus::utils::print_vector(y_t);
+        std::cout << "k_t: " << std::endl;
+        pocketplus::utils::print_vector(k_t);
+        std::cout << "y_t: " << std::endl;
+        pocketplus::utils::print_vector(y_t);
         if(y_t.size() > 0){
             auto it_y_t = y_t.begin();
             while(it_M_t != M_t.end()){
@@ -236,9 +236,16 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
                 it_old_mask++;
             }
         }
+        else{ // R_t = 0
+            while(it_M_t != M_t.end()){
+                *it_M_t = *it_M_t ^ *it_D_t;
+                it_M_t++;
+                it_D_t++;
+            }
+        }
         mask_vector.push_back(M_t);
-        //std::cout << "M_t: " << std::endl;
-        //pocketplus::utils::print_vector(M_t);
+        std::cout << "M_t: " << std::endl;
+        pocketplus::utils::print_vector(M_t);
     }
     else{
         if(input.front() == 1){ // send_mask_flag (f_t) = 1
@@ -299,6 +306,7 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
     // Process third sub vector
     // 5.3.2.4
     if(*d_t == 1){ // d_t = 1
+    std::cout << "d_t = 1" << std::endl;
         output.assign(*input_vector_length, 0); // Fill the output vector with zeros
         auto it_mask = mask_vector.back().rbegin();
         auto it_output = output.rbegin();
