@@ -9,13 +9,13 @@ int main(int argc, char* argv[]){
     std::cout << "Welcome to PocketPlus in c++" << std::endl;
 
     auto compressor = pocketplus::compressor::PocketPlusCompressor();
-    auto input_vector_length = std::make_unique<unsigned int>(16);
+    auto input_vector_length = std::make_unique<unsigned int>(32);
     compressor.set_input_vector_length(*input_vector_length);
 
-    std::deque<unsigned int> robustness_level = {1, 1, 1, 1, 1, 1, 1}; // R_t
+    std::deque<unsigned int> robustness_level = {0, 0, 0, 0, 0, 0, 0}; // R_t
     std::deque<bool> new_mask_flag            = {1, 0, 0, 0, 0, 0, 0}; // p_t
-    std::deque<bool> send_mask_flag           = {1, 1, 0, 0, 0, 0, 0}; // f_t // if t <= R_t then f_t = 1
-    std::deque<bool> uncompressed_flag        = {1, 1, 0, 0, 0, 0, 0}; // r_t // if t <= R_t then r_t = 1
+    std::deque<bool> send_mask_flag           = {1, 0, 0, 0, 0, 0, 0}; // f_t // if t <= R_t then f_t = 1
+    std::deque<bool> uncompressed_flag        = {1, 0, 0, 0, 0, 0, 0}; // r_t // if t <= R_t then r_t = 1
     std::deque<long int> input = {
         3333333333, // 1
         3333333333, // 2
@@ -49,6 +49,7 @@ int main(int argc, char* argv[]){
                 uncompressed_flag.front()
             );
             pocketplus::utils::zero_stuffing(new_output_vector);
+            pocketplus::utils::print_vector(new_output_vector);
             std::move(new_output_vector.begin(), new_output_vector.end(), std::back_inserter(total_output_vector));
             
             robustness_level.pop_front();
@@ -60,7 +61,7 @@ int main(int argc, char* argv[]){
         }
 
         std::cout << "OUTPUT: " << std::endl;
-        pocketplus::utils::print_vector(total_output_vector);
+        //pocketplus::utils::print_vector(total_output_vector);
 
         // Save the total input and output to separate files
         pocketplus::utils::write_bool_deque_to_file("original.bin", total_input_vector);
