@@ -9,7 +9,7 @@ void PocketPlusCompressor::set_input_vector_length(const unsigned int& vector_le
     if ((vector_length < 8) || (vector_length > 65535)){ 
         throw std::out_of_range("1 <= input_vector_length <= 2^16-1 (65535");
     }
-    input_vector_length = std::make_unique<unsigned int>(vector_length); // F // User defined value
+    input_vector_length = std::make_shared<unsigned int>(vector_length); // F // User defined value
     input_vector_length_count = count(*input_vector_length);
     initial_mask_vector.assign(*input_vector_length, 0); // M_0 = 0 // ############ ToDo: Make initial mask user defined
     mask_new = initial_mask_vector;
@@ -18,6 +18,15 @@ void PocketPlusCompressor::set_input_vector_length(const unsigned int& vector_le
     mask_build_old.assign(*input_vector_length, 0); // B_t // B_0 = 0
     mask_build_new.assign(*input_vector_length, 0); // B_t // B_0 = 0
     mask_change_0.assign(*input_vector_length, 0); 
+}
+
+unsigned int PocketPlusCompressor::get_input_vector_length(){
+    if(input_vector_length){
+        return *input_vector_length;
+    }
+    else{
+        return 0;
+    }
 }
 
 // 5.3.1.1 Counter encoding function
