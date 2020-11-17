@@ -307,10 +307,10 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
     // 5.3.2.4
     if(*d_t == 1){ // d_t = 1
         output.assign(*input_vector_length, 0); // Fill the output vector with zeros
-        auto it_mask = mask_vector.back().rbegin();
-        auto it_output = output.rbegin();
-        auto it_last_input = input_vector.back().rbegin();
-        for(; it_mask != mask_vector.back().rend();){
+        auto it_mask = mask_vector.back().begin();
+        auto it_output = output.begin();
+        auto it_last_input = input_vector.back().begin();
+        for(; it_mask != mask_vector.back().end();){
             if(*it_mask == 1){
                 *it_output = input.front();
                 input.pop_front();
@@ -387,10 +387,10 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
         bit_position += 1;
         input.pop_front();
         output.assign(*input_vector_length, 0); // Fill the output vector with zeros
-        auto it_mask = mask_vector.back().rbegin();
-        auto it_output = output.rbegin();
-        auto it_last_input = input_vector.back().rbegin();
-        for(; it_mask != mask_vector.back().rend();){
+        auto it_mask = mask_vector.back().begin();
+        auto it_output = output.begin();
+        auto it_last_input = input_vector.back().begin();
+        for(; it_mask != mask_vector.back().end();){
             if(*it_mask == 1){
                 *it_output = input.front();
                 input.pop_front();

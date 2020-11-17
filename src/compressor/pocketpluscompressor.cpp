@@ -319,7 +319,7 @@ std::deque<bool> PocketPlusCompressor::compress(
     // Equation (20)
     third_binary_vector.clear();
     if(*d_t == 1){
-        input_mask_bit_extraction = bit_extraction(reverse(input_new), reverse(mask_new));
+        input_mask_bit_extraction = bit_extraction(input_new, mask_new);
         third_binary_vector.insert(third_binary_vector.end(), input_mask_bit_extraction.begin(), input_mask_bit_extraction.end());
     }
     else if(uncompressed_flag){
@@ -329,7 +329,7 @@ std::deque<bool> PocketPlusCompressor::compress(
     }
     else{
         third_binary_vector.emplace_back(0);
-        input_mask_bit_extraction = bit_extraction(reverse(input_new), reverse(mask_new));
+        input_mask_bit_extraction = bit_extraction(input_new, mask_new);
         third_binary_vector.insert(third_binary_vector.end(), input_mask_bit_extraction.begin(), input_mask_bit_extraction.end());
     }
 
