@@ -258,7 +258,9 @@ std::deque<bool> PocketPlusCompressor::compress(
         //std::cout << "X_t case 3" << std::endl;
     }
     // Equation (16)
-    y_t = bit_extraction(inverse(mask_new), reverse(X_t));
+    y_t = bit_extraction(reverse(inverse(mask_new)), X_t);
+    std::cout<< "y_t" << std::endl;
+    pocketplus::utils::print_vector(y_t);
     // Equation (17)
     e_t.clear();
     if((robustness_level == 0) || (hamming_weight(X_t) == 0)){}
@@ -269,7 +271,10 @@ std::deque<bool> PocketPlusCompressor::compress(
         e_t = {1};
     }
     // Equation (18)
-    if(!((robustness_level == 0) || (hamming_weight(X_t) == 0) || (hamming_weight(y_t) == 0))){
+    if((robustness_level == 0) || (hamming_weight(X_t) == 0) || (hamming_weight(y_t) == 0)){
+        // k_t = empty
+    }
+    else{
         k_t = bit_extraction(inverse(mask_new), reverse(X_t));
     }
     // Equation (14)
@@ -344,12 +349,12 @@ std::deque<bool> PocketPlusCompressor::compress(
     mask_old = mask_new;
     mask_build_old = mask_build_new;
 
-    //std::cout << "First:" << std::endl;
-    //pocketplus::utils::print_vector(first_binary_vector);
-    //std::cout << "Second:" << std::endl;
-    //pocketplus::utils::print_vector(second_binary_vector);
-    //std::cout << "Third:" << std::endl;
-    //pocketplus::utils::print_vector(third_binary_vector);
+    std::cout << "First:" << std::endl;
+    pocketplus::utils::print_vector(first_binary_vector);
+    std::cout << "Second:" << std::endl;
+    pocketplus::utils::print_vector(second_binary_vector);
+    std::cout << "Third:" << std::endl;
+    pocketplus::utils::print_vector(third_binary_vector);
 
     return output;
 }
