@@ -12,8 +12,8 @@ int main(int argc, char* argv[]){
     auto input_vector_length = std::make_unique<unsigned int>(32);
     compressor.set_input_vector_length(*input_vector_length);
 
-    std::deque<unsigned int> robustness_level = {2, 2, 2, 2, 2, 2, 2}; // R_t
-    std::deque<bool> new_mask_flag            = {1, 0, 0, 0, 0, 1, 0}; // p_t
+    std::deque<unsigned int> robustness_level = {0, 2, 2, 2, 2, 2, 2}; // R_t
+    std::deque<bool> new_mask_flag            = {1, 0, 0, 1, 0, 0, 1}; // p_t
     std::deque<bool> send_mask_flag           = {1, 1, 1, 0, 0, 0, 0}; // f_t // if t <= R_t then f_t = 1
     std::deque<bool> uncompressed_flag        = {1, 1, 1, 0, 0, 0, 0}; // r_t // if t <= R_t then r_t = 1
     std::deque<long int> input = {
@@ -60,7 +60,7 @@ int main(int argc, char* argv[]){
             *counter += 1;
         }
 
-        std::cout << "OUTPUT: " << std::endl;
+        //std::cout << "OUTPUT: " << std::endl;
         //pocketplus::utils::print_vector(total_output_vector);
 
         // Save the total input and output to separate files

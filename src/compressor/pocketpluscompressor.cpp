@@ -138,22 +138,20 @@ std::deque<bool> PocketPlusCompressor::compress(
             throw std::invalid_argument("For t <= robustness level, uncompressed flag must be true");
         }
     }
-    if(mask_flag.size() > 0){
-        if((robustness_level == 0)){
-            mask_flag.clear();
-            mask_flag.emplace_back(new_mask_flag);
-        }
-        else{
-            if(mask_flag.back() && new_mask_flag){
-                throw std::invalid_argument("New mask flag must be false due to recent mask update");
-            }
-        }
+    mask_flag.emplace_back(new_mask_flag);
+    auto it_mask_flag = mask_flag.rbegin();
+    auto mask_flag_weight = std::make_unique<unsigned int>(0);
+    auto robustness_level_counter = std::make_unique<unsigned int>(0);
+    while((it_mask_flag != mask_flag.rend()) && (*robustness_level_counter <= robustness_level)){
+        *mask_flag_weight += *it_mask_flag;
+        it_mask_flag++;
+        *robustness_level_counter += 1;
     }
-    else{
-        mask_flag.emplace_back(new_mask_flag);
-        for(auto i = 0; i < robustness_level; i++){
-            mask_flag.emplace_back(0);
-        }
+    if(*mask_flag_weight > 1){
+        throw std::invalid_argument("New mask flag must be false due to recent mask update");
+    }
+    if(mask_flag.size() > 7){
+        mask_flag.pop_front();
     }
     first_binary_vector.clear();
     second_binary_vector.clear();
@@ -217,7 +215,6 @@ std::deque<bool> PocketPlusCompressor::compress(
             }
         );
     }
-    mask_flag.pop_front();
     
     // 5.3.2 Encoding step
     // 5.3.2.1
@@ -259,8 +256,8 @@ std::deque<bool> PocketPlusCompressor::compress(
     }
     // Equation (16)
     y_t = bit_extraction(reverse(inverse(mask_new)), X_t);
-    std::cout<< "y_t" << std::endl;
-    pocketplus::utils::print_vector(y_t);
+    //std::cout<< "y_t" << std::endl;
+    //pocketplus::utils::print_vector(y_t);
     // Equation (17)
     e_t.clear();
     if((robustness_level == 0) || (hamming_weight(X_t) == 0)){}
@@ -349,12 +346,12 @@ std::deque<bool> PocketPlusCompressor::compress(
     mask_old = mask_new;
     mask_build_old = mask_build_new;
 
-    std::cout << "First:" << std::endl;
-    pocketplus::utils::print_vector(first_binary_vector);
-    std::cout << "Second:" << std::endl;
-    pocketplus::utils::print_vector(second_binary_vector);
-    std::cout << "Third:" << std::endl;
-    pocketplus::utils::print_vector(third_binary_vector);
+    //std::cout << "First:" << std::endl;
+    //pocketplus::utils::print_vector(first_binary_vector);
+    //std::cout << "Second:" << std::endl;
+    //pocketplus::utils::print_vector(second_binary_vector);
+    //std::cout << "Third:" << std::endl;
+    //pocketplus::utils::print_vector(third_binary_vector);
 
     return output;
 }
