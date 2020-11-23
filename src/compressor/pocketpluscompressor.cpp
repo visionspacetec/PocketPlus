@@ -6,7 +6,7 @@ void PocketPlusCompressor::set_input_vector_length(const unsigned int& vector_le
     if(input_vector_length){
         throw std::invalid_argument("Input vector length alrady set");
     }
-    if ((vector_length < 8) || (vector_length > 65535)){ 
+    if ((vector_length < 1) || (vector_length > 65535)){ 
         throw std::out_of_range("1 <= input_vector_length <= 2^16-1 (65535");
     }
     input_vector_length = std::make_shared<unsigned int>(vector_length); // F // User defined value
@@ -346,12 +346,12 @@ std::deque<bool> PocketPlusCompressor::compress(
     mask_old = mask_new;
     mask_build_old = mask_build_new;
 
-    //std::cout << "First:" << std::endl;
-    //pocketplus::utils::print_vector(first_binary_vector);
-    //std::cout << "Second:" << std::endl;
-    //pocketplus::utils::print_vector(second_binary_vector);
-    //std::cout << "Third:" << std::endl;
-    //pocketplus::utils::print_vector(third_binary_vector);
+    std::cout << "First:" << std::endl;
+    pocketplus::utils::print_vector(first_binary_vector);
+    std::cout << "Second:" << std::endl;
+    pocketplus::utils::print_vector(second_binary_vector);
+    std::cout << "Third:" << std::endl;
+    pocketplus::utils::print_vector(third_binary_vector);
 
     return output;
 }

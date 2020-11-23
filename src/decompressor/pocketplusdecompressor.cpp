@@ -357,6 +357,9 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
         // Revert COUNT(input_vector_length) operation
         if(*bit_position == 0){
             input_vector_length = std::make_unique<unsigned int>(1);
+            bit_position += 1;
+            pocketplus::utils::pop_n_from_front(input, 1);
+            std::cout << "bing" << std::endl;
         }
         else if(hamming_weight_in_range(bit_position, bit_position + 2) == 2){
             bit_position += 3;
