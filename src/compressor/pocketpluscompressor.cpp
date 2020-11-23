@@ -46,7 +46,7 @@ std::deque<bool> PocketPlusCompressor::count(const unsigned int& a){
         output_vector.insert(output_vector.begin(), {1, 1, 0});
     }
     else{
-        auto length = std::make_unique<unsigned int>(2 * std::floor(std::log2(a - 2) + 1) - 6);
+        auto length = std::make_unique<unsigned int>((2 * std::floor(std::log2(a - 2) + 1)) - 6);
         for(unsigned int i = 0; i < *length; i++){
             output_vector.emplace_front(((a - 2) >> i) & 1);
         }
@@ -346,12 +346,12 @@ std::deque<bool> PocketPlusCompressor::compress(
     mask_old = mask_new;
     mask_build_old = mask_build_new;
 
-    std::cout << "First:" << std::endl;
-    pocketplus::utils::print_vector(first_binary_vector);
-    std::cout << "Second:" << std::endl;
-    pocketplus::utils::print_vector(second_binary_vector);
-    std::cout << "Third:" << std::endl;
-    pocketplus::utils::print_vector(third_binary_vector);
+    //std::cout << "First:" << std::endl;
+    //pocketplus::utils::print_vector(first_binary_vector);
+    //std::cout << "Second:" << std::endl;
+    //pocketplus::utils::print_vector(second_binary_vector);
+    //std::cout << "Third:" << std::endl;
+    //pocketplus::utils::print_vector(third_binary_vector);
 
     return output;
 }

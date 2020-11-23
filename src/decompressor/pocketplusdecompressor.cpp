@@ -5,7 +5,7 @@ using namespace pocketplus::decompressor;
 // Hamming weight in range - Number of ones in boolean deque in the given range
 unsigned int PocketPlusDecompressor::hamming_weight_in_range(std::deque<bool>::iterator start, std::deque<bool>::iterator stop){
     unsigned int output = 0;
-    for(auto i = start; i != stop; i++){
+    for(auto i = start; i <= stop; i++){
         output += *i;
     }
     return output;
@@ -329,6 +329,7 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
             //pocketplus::utils::print_vector(M_t);
         }
     }
+    pocketplus::utils::print_vector(input);
 
     // Process third sub vector
     // 5.3.2.4
@@ -359,7 +360,6 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
             input_vector_length = std::make_unique<unsigned int>(1);
             bit_position += 1;
             pocketplus::utils::pop_n_from_front(input, 1);
-            std::cout << "bing" << std::endl;
         }
         else if(hamming_weight_in_range(bit_position, bit_position + 2) == 2){
             bit_position += 3;
