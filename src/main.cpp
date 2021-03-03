@@ -4,6 +4,13 @@
 #include "pocketplusdecompressor.h"
 #include "pocketplusutils.h"
 
+//! Main function, called on application startup
+/*!
+	This main function provied a simple setup to test the compression and decompression of consecutive data packets.
+	\param argc Number of call arguments
+    \param argv Content of the call arguments
+	\return Execution result code
+*/
 int main(int argc, char* argv[]){
 
     std::cout << "Welcome to PocketPlus in c++" << std::endl;

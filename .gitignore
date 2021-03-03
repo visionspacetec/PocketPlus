@@ -45,3 +45,6 @@
 **/dist
 
 **/external
+
+# Documentation
+/docs
