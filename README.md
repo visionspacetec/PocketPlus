@@ -20,6 +20,7 @@ sudo apt-get install cmake git libgtest-dev
 cd /usr/src/gtest
 cmake CMakeLists.txt
 make
+cd lib
 cp *.a /usr/lib
 cd ~
 git clone https://github.com/visionspacetec/PocketPlus.git
