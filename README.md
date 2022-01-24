@@ -39,6 +39,20 @@ sudo ldconfig
 ```
 If you forget to run ldconfig, the programm links but does not run.
 
+## Documentation
+
+Install [Doxygen](https://www.doxygen.nl) and [Graphviz](https://graphviz.org/):
+```bash
+sudo apt install doxygen graphviz
+```
+
+Build documentation:
+```bash
+doxygen Doxyfile
+```
+
+Open ./docs/index.html with your favorite web browser.
+
 ## Usage
 
 When using the installed PocketPlus library in another C++ project, include it with CMake:
