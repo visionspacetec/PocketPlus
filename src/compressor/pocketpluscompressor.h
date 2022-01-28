@@ -45,9 +45,9 @@ class PocketPlusCompressor{
 	/*!
 		Private Hamming weight calculation, this is equal to the number of ones in the given vector
 		\param a Boolean deque to count number of ones inside
-		\return Unsigned integer returning the number of ones found
+		\return Unique pointer to unsigned integer returning the number of ones found
 	*/
-	unsigned int hamming_weight(const std::deque<bool>& a);
+	std::unique_ptr<unsigned int> hamming_weight(const std::deque<bool>& a);
 
 	//! Private function that reverses the given boolean deque
 	/*!
@@ -106,10 +106,18 @@ class PocketPlusCompressor{
 	std::deque<bool> e_t;
 	//! k_t is either empty or containing y_t
 	std::deque<bool> k_t;
+	//! c_t signals mask resets in relation to the effective robustness level
+	std::deque<bool> c_t;
 	//! Run length encoded X_t
 	std::deque<bool> X_t_rle;
-	//! Robustness level in three bit representation
-	std::deque<bool> robustness_level_bit_3;
+	//! Counte rof no mask changes
+	std::unique_ptr<unsigned int> no_mask_changes;
+	//! Consecutive occurences of no mask changes, from the first iteration not covered by the minimum reqired robustness level
+	std::unique_ptr<unsigned int> C_t;
+	//! Effective robustness level
+	std::unique_ptr<unsigned int> V_t;
+	//! Effective robustness level in four bit representation
+	std::deque<bool> V_t_bit_4;
 	//! Run length encoded mask XORed with itself
 	std::deque<bool> mask_shifted_rle;
 	//! First part of the output vector h_t with the mask change information
@@ -163,6 +171,9 @@ class PocketPlusCompressor{
 			mask_build_new = old.mask_build_new;
 			mask_change_vector = old.mask_change_vector;
 			mask_change_0 = old.mask_change_0;
+			no_mask_changes = std::make_unique<unsigned int>(*old.no_mask_changes);
+			C_t = std::make_unique<unsigned int>(*old.C_t);
+			V_t = std::make_unique<unsigned int>(*old.V_t);
 		}
 
 		//! Public function to set the input vector length
