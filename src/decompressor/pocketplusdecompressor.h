@@ -19,9 +19,9 @@ class PocketPlusDecompressor{
 	/*!
 		Private Hamming weight calculation, this is equal to the number of ones in the given vector
 		\param a Boolean deque to count number of ones inside
-		\return Unique pointer to unsigned integer returning the number of ones found
+		\return Unsigned integer equal to the number of ones found
 	*/
-	unsigned int hamming_weight(const std::deque<bool>& a);
+	static unsigned int hamming_weight(const std::deque<bool>& a);
 
 	//! Private Hamming weight calculation function
 	/*! 
@@ -30,7 +30,7 @@ class PocketPlusDecompressor{
 		\param stop Itterator for the stop position
 		\return Returns the unsigned integer number of ones in the selected range
 	*/
-	unsigned int hamming_weight_in_range(std::deque<bool>::iterator start, std::deque<bool>::iterator stop);
+	static unsigned int hamming_weight_in_range(std::deque<bool>::iterator start, std::deque<bool>::iterator stop);
 	
 	//! Private function to reverse a boolean deque
 	/*!
@@ -38,7 +38,7 @@ class PocketPlusDecompressor{
 		\param a Boolen deque to revert
 		\return The reverted boolen deque
 	*/
-	std::deque<bool> reverse(const std::deque<bool>& a);
+	static std::deque<bool> reverse(const std::deque<bool>& a);
 
 	//! Private function to undo the run length encoding
 	/*!
@@ -47,11 +47,10 @@ class PocketPlusDecompressor{
 		\param out Decoded values extracted from the input
 		\param it Processing itterator
 	*/
-	void undo_rle(std::deque<bool>& in, std::deque<bool>& out, std::deque<bool>::iterator& it);
+	static void undo_rle(std::deque<bool>& in, std::deque<bool>& out, std::deque<bool>::iterator& it);
 
 	//! Constant minimum supported input vector size
 	std::unique_ptr<const unsigned int> minimum_size;
-
 	//! Size of the input boolen deque, before trying to extract the front compressed packet from it
 	std::unique_ptr<unsigned int> input_vector_size_before_processing;
 	//! Counter for successful decompressions
@@ -90,6 +89,14 @@ class PocketPlusDecompressor{
 			initial_mask_vector.assign(*input_vector_length, 0); // M_0 = 0 // ToDo: Make initial mask user defined
 			mask_vector.push_back(initial_mask_vector);
 		}
+
+		//! Public function to get the input vector length for the first frame
+		/*!
+			Public function to get the input vector length for the first frame
+			\param input Boolean deque containing the compressed frame
+			\return Unsigned integer with the uncompressed input vector length
+		*/
+		static unsigned int get_input_vector_length(const std::deque<bool>& input);
 
 		//! Public function to decompress a given boolen deque
 		/*!

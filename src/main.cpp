@@ -92,6 +92,7 @@ int main(int argc, char* argv[]){
 		std::deque<bool> data;
 		auto data_int = std::make_unique<long int>(0);
 		while(read_compressed.size() > 0){
+			std::cout << "input_vector_length: " << pocketplus::decompressor::PocketPlusDecompressor::get_input_vector_length(read_compressed) << std::endl;
 			data = decompressor.decompress(read_compressed);
 			*data_int = pocketplus::utils::deque_bool_to_number(data);
 			std::cout << "Decompressed #" << *i << ": " << *data_int << std::endl;
