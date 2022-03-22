@@ -9,7 +9,7 @@
 ### Introduction
 POCKET+ is a lossless compression algorithm for fixed length time series data.
 
-This repository contains a C++17 based implementation of a variety of the POCKET+ compression algorithm, described in the CCSDS 124.0-W-4 standard (version November 2020).
+This repository contains a C++17 based implementation of a variety of the POCKET+ compression algorithm, described in the CCSDS 124.0-W-6 standard (version June 2021).
 The implementation was done to validate the compression performance and properties of the algorithm.
 Since the standard was not yet released, some changes might happen before the final release.
 
@@ -68,6 +68,15 @@ In you code, import the compressor, decompressor and the utility functions as ne
 ```
 
 A simple example can be found in the provided [main function](https://github.com/visionspacetec/PocketPlus/blob/master/src/main.cpp), which is only ment to showcase and test the algorithm.
+
+## Develpment
+
+```bash
+valgrind --tool=callgrind ./PocketPlus.exe 
+gprof2dot --format=callgrind --output=out.dot ./callgrind.out.[xxx]
+dot -Tpng out.dot -o graph.png
+# Or, open with KCachegrind/QCachegrind
+```
 
 ## Find out more
 
