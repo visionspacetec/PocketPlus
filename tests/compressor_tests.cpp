@@ -33,6 +33,6 @@ TEST(compress, CompressFirstDataFrame){
 	auto compressor = pocketplus::compressor::PocketPlusCompressor();
 	compressor.set_input_vector_length(*input_vector_length);
 	auto output_vector = compressor.compress(input_vector, 1, 1, 1, 1);
-	std::deque<bool> ref = {1, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0};
+	std::deque<bool> ref = {1, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0};
 	ASSERT_EQ(ref, output_vector);
 }

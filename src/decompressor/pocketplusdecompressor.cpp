@@ -2,6 +2,15 @@
 
 using namespace pocketplus::decompressor;
 
+// Hamming weight - Number of ones in vector
+unsigned int PocketPlusDecompressor::hamming_weight(const std::deque<bool>& a){
+	auto output = std::make_unique<unsigned int>(0);
+	for(size_t i = 0; i < a.size(); i++){
+		*output += a.at(i);
+	}
+	return *output;
+}
+
 // Hamming weight in range - Number of ones in boolean deque in the given range
 unsigned int PocketPlusDecompressor::hamming_weight_in_range(std::deque<bool>::iterator start, std::deque<bool>::iterator stop){
 	unsigned int output = 0;
@@ -99,10 +108,14 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
 		return output;
 	}
 
+	//std::cout << "Input:" << std::endl;
+	//pocketplus::utils::print_vector(input);
+
 	// Process first sub vector
-	// 5.3.2.2
+	// 5.3.3.1
 	std::unique_ptr<bool> uncompressed_flag;
 	std::unique_ptr<bool> send_mask_flag;
+	std::unique_ptr<bool> c_t;
 	std::unique_ptr<bool> d_t;
 	std::deque<bool> D_t;
 	std::deque<bool> k_t;
@@ -132,17 +145,17 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
 	//std::cout << "X_t_weight: " << *X_t_weight << std::endl;
 	bit_position += 2;
 	pocketplus::utils::pop_n_from_front(input, 2);
-	// Undo BIT_3(robustness_level)
+	// Undo BIT_4(V_t)
 	robustness_level = std::make_unique<unsigned int>(0);
 	auto bit_shift = std::make_unique<unsigned int>(0);
-	for(auto it = bit_position + 2; it >= bit_position; it--, *bit_shift += 1){
+	for(auto it = bit_position + 3; it >= bit_position; it--, *bit_shift += 1){
 		if(*it){
 			*robustness_level |= 1 << *bit_shift;
 		}
 	}
 	//std::cout << "Robustness level: " << *robustness_level << std::endl;
-	bit_position += 3;
-	pocketplus::utils::pop_n_from_front(input, 3);
+	bit_position += 4;
+	pocketplus::utils::pop_n_from_front(input, 4);
 	std::deque<bool> e_t;
 	
 	if((*robustness_level == 0) || (*X_t_weight == 0)){
@@ -177,11 +190,9 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
 	else{
 		//std::cout << "e_t: " << e_t.at(0) << std::endl;
 	}
-	//std::cout << (*robustness_level == 0) << (*X_t_weight == 0) << (hamming_weight_in_range(y_t.begin(), y_t.end()) == 0) << std::endl;
-	//std::cout << hamming_weight_in_range(y_t.begin(), y_t.end()) << std::endl;
-	//std::cout << "y_t: " << std::endl;
-	//pocketplus::utils::print_vector(y_t);
-	if((*robustness_level == 0) || (*X_t_weight == 0) || (hamming_weight_in_range(y_t.begin(), y_t.end()) == 0)){
+	//std::cout << (*robustness_level == 0) << (*X_t_weight == 0) << (hamming_weight(y_t) == 0) << std::endl;
+	//std::cout << hamming_weight(y_t) << std::endl;
+	if((*robustness_level == 0) || (*X_t_weight == 0) || (hamming_weight(y_t) == 0)){
 		// k_t is empty
 		//std::cout << "must print" << std::endl;
 	}
@@ -195,9 +206,12 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
 		}
 		//std::cout << "k_t: " << std::endl;
 		//pocketplus::utils::print_vector(k_t);
+		c_t = std::make_unique<bool>(input.front());
+		bit_position += 1;
+		input.pop_front();
+		//std::cout << "c_t: " << *c_t << std::endl;
 	}
 	//std::cout << "k_t.size(): " << k_t.size() << std::endl;
-	
 	d_t = std::make_unique<bool>(input.front());
 	bit_position += 1;
 	input.pop_front();
@@ -205,13 +219,16 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
 	if(*d_t == 1){
 		send_mask_flag = std::make_unique<bool>(0);
 		uncompressed_flag = std::make_unique<bool>(0);
-		//std::cout << "send_mask_flag (f_t) = 0" << std::endl;
-		//std::cout << "uncompressed_flag (r_t) = 0" << std::endl;
+	}
+	else{
+		uncompressed_flag = std::make_unique<bool>(1);
 	}
 
 	// Process second sub vector
-	// 5.3.2.3
+	// 5.3.3.2
 	//std::cout << "Second vector" << std::endl;
+	//std::cout << "Input:" << std::endl;
+	//pocketplus::utils::print_vector(input);
 	std::deque<bool> q_t;
 	if(*d_t == 1){
 		// q_t is empty
@@ -329,28 +346,78 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
 			//pocketplus::utils::print_vector(M_t);
 		}
 	}
-	pocketplus::utils::print_vector(input);
 
 	// Process third sub vector
-	// 5.3.2.4
+	// 5.3.3.3
+	//std::cout << "Third vector" << std::endl;
 	if(*d_t == 1){ // d_t = 1
-		output.assign(*input_vector_length, 0); // Fill the output vector with zeros
-		auto it_mask = mask_vector.back().begin();
-		auto it_output = output.begin();
-		auto it_last_input = input_vector.back().begin();
-		for(; it_mask != mask_vector.back().end();){
-			if(*it_mask == 1){
-				*it_output = input.front();
-				input.pop_front();
+		if(c_t){
+			if(*c_t == 1){ // c_t = 1
+				// BE(I_t, (X_t OR M_t))
+				output.assign(*input_vector_length, 0); // Fill the output vector with zeros
+				auto it_mask = mask_vector.back().begin();
+				auto it_X_t = X_t.begin();
+				auto it_output = output.begin();
+				auto it_last_input = input_vector.back().begin();
+				for(; it_mask != mask_vector.back().end();){
+					if((*it_mask || *it_X_t) == 1){
+						*it_output = input.front();
+						input.pop_front();
+					}
+					else{
+						*it_output = *it_last_input;
+					}
+					it_mask++;
+					it_X_t++;
+					it_output++;
+					it_last_input++;
+				}
+				input_vector.push_back(output);
 			}
-			else{
-				*it_output = *it_last_input;
+			else{ // c_t /= 1
+				std::cout << "2" << std::endl;
+				// BE(I_t, M_t) values of I_t at the positions where M_t is one
+				// Evaluate mask and add bits in predictable positions from previous input_vector
+				output.assign(*input_vector_length, 0); // Fill the output vector with zeros
+				auto it_mask = mask_vector.back().begin();
+				auto it_output = output.begin();
+				auto it_last_input = input_vector.back().begin();
+				for(; it_mask != mask_vector.back().end();){
+					if(*it_mask == 1){
+						*it_output = input.front();
+						input.pop_front();
+					}
+					else{
+						*it_output = *it_last_input;
+					}
+					it_mask++;
+					it_output++;
+					it_last_input++;
+				}
+				input_vector.push_back(output);
 			}
-			it_mask++;
-			it_output++;
-			it_last_input++;
 		}
-		input_vector.push_back(output);
+		else{ // c_t /= 1
+			// BE(I_t, M_t) values of I_t at the positions where M_t is one
+			// Evaluate mask and add bits in predictable positions from previous input_vector
+			output.assign(*input_vector_length, 0); // Fill the output vector with zeros
+			auto it_mask = mask_vector.back().begin();
+			auto it_output = output.begin();
+			auto it_last_input = input_vector.back().begin();
+			for(; it_mask != mask_vector.back().end();){
+				if(*it_mask == 1){
+					*it_output = input.front();
+					input.pop_front();
+				}
+				else{
+					*it_output = *it_last_input;
+				}
+				it_mask++;
+				it_output++;
+				it_last_input++;
+			}
+			input_vector.push_back(output);
+		}
 	}
 	else if(*bit_position){ // rt = 1
 		bit_position += 1;
@@ -412,27 +479,76 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
 		}
 	}
 	else{
-		// BE(I_t, M_t) values of I_t at the positions where M_t is one
-		// Evaluate mask and add bits in predictable positions from previous input_vector
-		bit_position += 1;
-		input.pop_front();
-		output.assign(*input_vector_length, 0); // Fill the output vector with zeros
-		auto it_mask = mask_vector.back().begin();
-		auto it_output = output.begin();
-		auto it_last_input = input_vector.back().begin();
-		for(; it_mask != mask_vector.back().end();){
-			if(*it_mask == 1){
-				*it_output = input.front();
-				input.pop_front();
+		if(uncompressed_flag && send_mask_flag && c_t){
+			if((*uncompressed_flag == 0) && (*send_mask_flag == 1) && (*c_t == 1)){
+				// BE(I_t, (X_t OR M_t))
+				output.assign(*input_vector_length, 0); // Fill the output vector with zeros
+				auto it_mask = mask_vector.back().begin();
+				auto it_X_t = X_t.begin();
+				auto it_output = output.begin();
+				auto it_last_input = input_vector.back().begin();
+				for(; it_mask != mask_vector.back().end();){
+					if((*it_mask || *it_X_t) == 1){
+						*it_output = input.front();
+						input.pop_front();
+					}
+					else{
+						*it_output = *it_last_input;
+					}
+					it_mask++;
+					it_X_t++;
+					it_output++;
+					it_last_input++;
+				}
+				input_vector.push_back(output);
 			}
 			else{
-				*it_output = *it_last_input;
+				// BE(I_t, M_t) values of I_t at the positions where M_t is one
+				// Evaluate mask and add bits in predictable positions from previous input_vector
+				bit_position += 1;
+				input.pop_front();
+				output.assign(*input_vector_length, 0); // Fill the output vector with zeros
+				auto it_mask = mask_vector.back().begin();
+				auto it_output = output.begin();
+				auto it_last_input = input_vector.back().begin();
+				for(; it_mask != mask_vector.back().end();){
+					if(*it_mask == 1){
+						*it_output = input.front();
+						input.pop_front();
+					}
+					else{
+						*it_output = *it_last_input;
+					}
+					it_mask++;
+					it_output++;
+					it_last_input++;
+				}
+				input_vector.push_back(output);
 			}
-			it_mask++;
-			it_output++;
-			it_last_input++;
 		}
-		input_vector.push_back(output);
+		else{
+			// BE(I_t, M_t) values of I_t at the positions where M_t is one
+			// Evaluate mask and add bits in predictable positions from previous input_vector
+			bit_position += 1;
+			input.pop_front();
+			output.assign(*input_vector_length, 0); // Fill the output vector with zeros
+			auto it_mask = mask_vector.back().begin();
+			auto it_output = output.begin();
+			auto it_last_input = input_vector.back().begin();
+			for(; it_mask != mask_vector.back().end();){
+				if(*it_mask == 1){
+					*it_output = input.front();
+					input.pop_front();
+				}
+				else{
+					*it_output = *it_last_input;
+				}
+				it_mask++;
+				it_output++;
+				it_last_input++;
+			}
+			input_vector.push_back(output);
+		}
 	}
 	//std::cout << "Extracted:" << std::endl;
 	//pocketplus::utils::print_vector(output);

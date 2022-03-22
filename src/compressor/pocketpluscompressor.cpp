@@ -11,13 +11,16 @@ void PocketPlusCompressor::set_input_vector_length(const unsigned int& vector_le
 	}
 	input_vector_length = std::make_shared<unsigned int>(vector_length); // F // User defined value
 	input_vector_length_count = count(*input_vector_length);
-	initial_mask_vector.assign(*input_vector_length, 0); // M_0 = 0 // ############ ToDo: Make initial mask user defined
+	initial_mask_vector.assign(*input_vector_length, 0); // M_0 = 0 // ToDo: Make initial mask user defined
 	mask_new = initial_mask_vector;
 	input_old.assign(*input_vector_length, 0);
 	mask_old.assign(*input_vector_length, 0); // M_t
 	mask_build_old.assign(*input_vector_length, 0); // B_t // B_0 = 0
 	mask_build_new.assign(*input_vector_length, 0); // B_t // B_0 = 0
 	mask_change_0.assign(*input_vector_length, 0); 
+	no_mask_changes = std::make_unique<unsigned int>(0);
+	C_t = std::make_unique<unsigned int>(0);
+	V_t = std::make_unique<unsigned int>(0);
 }
 
 unsigned int PocketPlusCompressor::get_input_vector_length(){
@@ -29,7 +32,7 @@ unsigned int PocketPlusCompressor::get_input_vector_length(){
 	}
 }
 
-// 5.3.1.1 Counter encoding function
+// 5.2.1 Counter encoding function
 std::deque<bool> PocketPlusCompressor::count(const unsigned int& a){
 	std::deque<bool> output_vector;
 	if((a == 0) || (a > 65535)){
@@ -55,7 +58,7 @@ std::deque<bool> PocketPlusCompressor::count(const unsigned int& a){
 	return output_vector;
 }
 
-// 5.3.1.2 Run length encoding
+// 5.2.2 Run length encoding
 std::deque<bool> PocketPlusCompressor::run_length_encoding(const std::deque<bool>& a){
 	std::deque<bool> output_vector;
 	std::deque<bool> count_value;
@@ -71,7 +74,7 @@ std::deque<bool> PocketPlusCompressor::run_length_encoding(const std::deque<bool
 	return output_vector;
 }
 
-// 5.3.1.3 Bit extraction function
+// 5.2.3 Bit extraction function
 std::deque<bool> PocketPlusCompressor::bit_extraction(const std::deque<bool>& a, const std::deque<bool>& b){
 	if(!(a.size() == b.size())){
 		throw std::invalid_argument("a.size() == b.size()");
@@ -86,10 +89,10 @@ std::deque<bool> PocketPlusCompressor::bit_extraction(const std::deque<bool>& a,
 }
 
 // Hamming weight - Number of ones in vector
-unsigned int PocketPlusCompressor::hamming_weight(const std::deque<bool>& a){
-	unsigned int output = 0;
+std::unique_ptr<unsigned int> PocketPlusCompressor::hamming_weight(const std::deque<bool>& a){
+	auto output = std::make_unique<unsigned int>(0);
 	for(size_t i = 0; i < a.size(); i++){
-		output += a.at(i);
+		*output += a.at(i);
 	}
 	return output;
 }
@@ -139,18 +142,8 @@ std::deque<bool> PocketPlusCompressor::compress(
 		}
 	}
 	mask_flag.emplace_back(new_mask_flag);
-	auto it_mask_flag = mask_flag.rbegin();
-	auto mask_flag_weight = std::make_unique<unsigned int>(0);
-	auto robustness_level_counter = std::make_unique<unsigned int>(0);
-	while((it_mask_flag != mask_flag.rend()) && (*robustness_level_counter <= robustness_level)){
-		*mask_flag_weight += *it_mask_flag;
-		it_mask_flag++;
-		*robustness_level_counter += 1;
-	}
-	if(*mask_flag_weight > 1){
-		throw std::invalid_argument("New mask flag must be false due to recent mask update");
-	}
-	if(mask_flag.size() > 7){
+
+	if(mask_flag.size() > 15){
 		mask_flag.pop_front();
 	}
 	first_binary_vector.clear();
@@ -214,9 +207,30 @@ std::deque<bool> PocketPlusCompressor::compress(
 				return out;
 			}
 		);
+		// 5.3.2.2
+		if(hamming_weight(mask_change_vector.at(0)) == 0){
+			*no_mask_changes += 1;
+			if(*no_mask_changes > robustness_level){
+				*C_t = *no_mask_changes - robustness_level;
+				if(*C_t > 15){
+					*C_t = 15;
+				}
+			}
+			*V_t = *C_t + robustness_level;
+		}
+		else{
+			*no_mask_changes = 0;
+			*C_t = 0;
+			*V_t = robustness_level;
+		}
+	}
+	else{
+		*no_mask_changes = 0;
+		*C_t = 0;
+		*V_t = robustness_level;
 	}
 	
-	// 5.3.2 Encoding step
+	// 5.3 Encoding step
 	// 5.3.2.1
 	std::unique_ptr<bool> d_t;
 	if(!send_mask_flag && !uncompressed_flag){
@@ -226,14 +240,21 @@ std::deque<bool> PocketPlusCompressor::compress(
 		d_t = std::make_unique<bool>(0);
 	}
 
-	// 5.3.2.2 first binary vector
-	// Equation (15)
+	// 5.3.3.1
+	V_t_bit_4.clear();
+	for(unsigned int i = 0; i < 4; i++){
+		V_t_bit_4.emplace_front((*V_t >> i) & 1);
+	}
+
+	// 5.3.3 Output vector components
+	// 5.3.3.1 First binary vector
+	// Equation (16)
 	X_t.resize(*input_vector_length);
-	if(robustness_level == 0){
+	if(*V_t == 0){
 		// X_t = <D_t>
 		X_t = reverse(mask_change_vector.at(0));
 	}
-	else if((int)(*t - robustness_level) <= 0){
+	else if((int)(*t - *V_t) <= 0){
 		// X_t = [<D_1 OR D_2 OR ... OR D_t>]
 		X_t.assign(*input_vector_length, 0);
 		for(unsigned int i = 0; i < mask_change_vector.size(); i++){
@@ -254,42 +275,59 @@ std::deque<bool> PocketPlusCompressor::compress(
 		X_t = reverse(X_t); // ToDo: Just go the other way thru the for loop to avoid this step
 		//std::cout << "X_t case 3" << std::endl;
 	}
-	// Equation (16)
+	// Equation (17)
 	y_t = bit_extraction(reverse(inverse(mask_new)), X_t);
 	//std::cout<< "y_t" << std::endl;
 	//pocketplus::utils::print_vector(y_t);
-	// Equation (17)
+	// Equation (18)
 	e_t.clear();
-	if((robustness_level == 0) || (hamming_weight(X_t) == 0)){}
-	else if(((hamming_weight(y_t) == 0) && (robustness_level > 0)) && (hamming_weight(X_t) != 0)){
+	if((*V_t == 0) || (*hamming_weight(X_t) == 0)){} // ToDo: calculate hamming_weight X_t only once
+	else if(((*hamming_weight(y_t) == 0) && (*V_t > 0)) && (*hamming_weight(X_t) != 0)){ // ToDo: calculate hamming_weight y_t only once
 		e_t = {0};
 	}
 	else{
 		e_t = {1};
 	}
-	// Equation (18)
-	if((robustness_level == 0) || (hamming_weight(X_t) == 0) || (hamming_weight(y_t) == 0)){
+	// Equation (19)
+	if((*V_t == 0) || (*hamming_weight(X_t) == 0) || (*hamming_weight(y_t) == 0)){
 		// k_t = empty
 	}
 	else{
 		k_t = bit_extraction(inverse(mask_new), reverse(X_t));
 	}
-	// Equation (14)
-	X_t_rle = run_length_encoding(X_t);
-	robustness_level_bit_3.clear();
-	for(unsigned int i = 0; i < 3; i++){
-		robustness_level_bit_3.emplace_front((robustness_level >> i) & 1);
+
+	// Equation (20)
+	auto it_mask_flag = mask_flag.rbegin();
+	auto mask_flag_weight = std::make_unique<unsigned int>(0);
+	auto robustness_level_counter = std::make_unique<unsigned int>(0);
+	while((it_mask_flag != mask_flag.rend()) && (*robustness_level_counter <= *V_t)){
+		*mask_flag_weight += *it_mask_flag;
+		it_mask_flag++;
+		*robustness_level_counter += 1;
 	}
+	c_t.clear();
+	if(k_t.size() != 0){
+		if(*mask_flag_weight > 1){
+			c_t = {1};
+		}
+		else{
+			c_t = {0};
+		}
+	}
+
+	// Equation (15)
+	X_t_rle = run_length_encoding(X_t);
 	first_binary_vector.clear();
 	first_binary_vector.insert(first_binary_vector.end(), X_t_rle.begin(), X_t_rle.end());
 	first_binary_vector.insert(first_binary_vector.end(), {1, 0});
-	first_binary_vector.insert(first_binary_vector.end(), robustness_level_bit_3.begin(), robustness_level_bit_3.end());
+	first_binary_vector.insert(first_binary_vector.end(), V_t_bit_4.begin(), V_t_bit_4.end());
 	first_binary_vector.insert(first_binary_vector.end(), e_t.begin(), e_t.end());
 	first_binary_vector.insert(first_binary_vector.end(), k_t.begin(), k_t.end());
+	first_binary_vector.insert(first_binary_vector.end(), c_t.begin(), c_t.end());
 	first_binary_vector.emplace_back(*d_t);
 
-	// 5.3.2.3 Second binary vector
-	// Equation (19)
+	// 5.3.3.2 Second binary vector
+	// Equation (21)
 	second_binary_vector.clear();
 	if(*d_t == 1){
 		// Empty second binary vector
@@ -317,19 +355,55 @@ std::deque<bool> PocketPlusCompressor::compress(
 		second_binary_vector.emplace_back(0);
 	}
 
-	// 5.3.2.4 Third binary vector
-	// Equation (20)
+	// 5.3.3.3 Third binary vector
+	// Equation (22)
 	third_binary_vector.clear();
-	if(*d_t == 1){
+	if((*d_t == 1) && (c_t.front() == 1)){
+		// BE(I_t,(X_t OR M_t))
+		std::deque<bool> X_t_or_M_t;
+		X_t_or_M_t.assign(*input_vector_length, 0);
+		std::generate(
+			X_t_or_M_t.begin(), 
+			X_t_or_M_t.end(), 
+			[m=mask_new, x=X_t, n = 0]() mutable {
+				auto out = m.at(n) || x.at(n);
+				n++;
+				return out;
+			}
+		);
+		input_mask_bit_extraction = bit_extraction(input_new, X_t_or_M_t);
+		third_binary_vector.insert(third_binary_vector.end(), input_mask_bit_extraction.begin(), input_mask_bit_extraction.end());
+	}
+	else if(*d_t == 1){
+		// BE(I_t,M_t)
 		input_mask_bit_extraction = bit_extraction(input_new, mask_new);
 		third_binary_vector.insert(third_binary_vector.end(), input_mask_bit_extraction.begin(), input_mask_bit_extraction.end());
 	}
-	else if(uncompressed_flag){
+	else if(uncompressed_flag == 1){
+		// '1' || COUNT(F) || I_t
 		third_binary_vector.emplace_back(1);
 		third_binary_vector.insert(third_binary_vector.end(), input_vector_length_count.begin(), input_vector_length_count.end());
 		third_binary_vector.insert(third_binary_vector.end(), input_new.begin(), input_new.end());
 	}
+	else if((uncompressed_flag == 0) && (send_mask_flag == 1) && (c_t.front() == 1)){
+		// '0' || BE(I_t,(X_t OR M_t))
+		third_binary_vector.emplace_back(0);
+		std::deque<bool> X_t_or_M_t;
+		X_t_or_M_t.assign(*input_vector_length, 0);
+		std::generate(
+			X_t_or_M_t.begin(), 
+			X_t_or_M_t.end(), 
+			[m=mask_new, x=X_t, n = 0]() mutable {
+				auto out = m.at(n) || x.at(n);
+				n++;
+				return out;
+			}
+		);
+		input_mask_bit_extraction = bit_extraction(input_new, X_t_or_M_t);
+		third_binary_vector.insert(third_binary_vector.end(), input_mask_bit_extraction.begin(), input_mask_bit_extraction.end());
+	}
 	else{
+		// '0' || BE(I_t,M_t)
 		third_binary_vector.emplace_back(0);
 		input_mask_bit_extraction = bit_extraction(input_new, mask_new);
 		third_binary_vector.insert(third_binary_vector.end(), input_mask_bit_extraction.begin(), input_mask_bit_extraction.end());
