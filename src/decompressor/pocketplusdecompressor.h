@@ -15,6 +15,14 @@ namespace decompressor {
 	This class implements the implicitly provided decompression for the CCSDS draft standard for housekeeping telemetry data compression
 */
 class PocketPlusDecompressor{
+	//! Private function to calculate the Hamming weight for a boolean deque
+	/*!
+		Private Hamming weight calculation, this is equal to the number of ones in the given vector
+		\param a Boolean deque to count number of ones inside
+		\return Unique pointer to unsigned integer returning the number of ones found
+	*/
+	unsigned int hamming_weight(const std::deque<bool>& a);
+
 	//! Private Hamming weight calculation function
 	/*! 
 		Counts the number of ones in vector range, defined by the two input parameters
