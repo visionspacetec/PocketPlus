@@ -141,7 +141,7 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
 		//std::cout << "D_t: ";
 		//pocketplus::utils::print_vector(D_t);
 	}
-	auto X_t_weight = std::make_unique<unsigned int>(hamming_weight_in_range(X_t.begin(), X_t.end()));
+	auto X_t_weight = std::make_unique<unsigned int>(hamming_weight(X_t));
 	//std::cout << "X_t_weight: " << *X_t_weight << std::endl;
 	bit_position += 2;
 	pocketplus::utils::pop_n_from_front(input, 2);
