@@ -16,6 +16,12 @@ namespace compressor {
 	This class implements the latest CCSDS draft standard for housekeeping telemetry data compression
 */
 class PocketPlusCompressor{
+	FRIEND_TEST(count, InputValid1);
+	FRIEND_TEST(count, InputTooSmall);
+	FRIEND_TEST(count, InputTooLarge);
+	FRIEND_TEST(bit_extraction, InputValid);
+	FRIEND_TEST(bit_extraction, InputInvalid);
+
 	//! Private COUNT encoding function implementation
 	/*!
 		Private function to set the input vector length of this class
