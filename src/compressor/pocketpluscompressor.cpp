@@ -208,7 +208,8 @@ std::deque<bool> PocketPlusCompressor::compress(
 			}
 		);
 		// 5.3.2.2
-		if(hamming_weight(mask_change_vector.at(0)) == 0){
+		auto mask_change_weight = hamming_weight(mask_change_vector.at(0));
+		if(*mask_change_weight == 0){
 			*no_mask_changes += 1;
 			if(*no_mask_changes > robustness_level){
 				*C_t = *no_mask_changes - robustness_level;
