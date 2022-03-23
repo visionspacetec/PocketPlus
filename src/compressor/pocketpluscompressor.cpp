@@ -282,15 +282,17 @@ std::deque<bool> PocketPlusCompressor::compress(
 	//pocketplus::utils::print_vector(y_t);
 	// Equation (18)
 	e_t.clear();
-	if((*V_t == 0) || (*hamming_weight(X_t) == 0)){} // ToDo: calculate hamming_weight X_t only once
-	else if(((*hamming_weight(y_t) == 0) && (*V_t > 0)) && (*hamming_weight(X_t) != 0)){ // ToDo: calculate hamming_weight y_t only once
+	auto X_t_weight = hamming_weight(X_t);
+	auto y_t_weight = hamming_weight(y_t);
+	if((*V_t == 0) || (*X_t_weight == 0)){}
+	else if(((*y_t_weight == 0) && (*V_t > 0)) && (*X_t_weight != 0)){
 		e_t = {0};
 	}
 	else{
 		e_t = {1};
 	}
 	// Equation (19)
-	if((*V_t == 0) || (*hamming_weight(X_t) == 0) || (*hamming_weight(y_t) == 0)){
+	if((*V_t == 0) || (*X_t_weight == 0) || (*y_t_weight == 0)){
 		// k_t = empty
 	}
 	else{
