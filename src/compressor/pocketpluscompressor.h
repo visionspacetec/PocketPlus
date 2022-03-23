@@ -5,6 +5,7 @@
 #include <memory>
 #include <algorithm>
 #include <cmath>
+#include <gtest/gtest_prod.h>
 
 #include "pocketplusutils.h"
 
