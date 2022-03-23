@@ -106,15 +106,15 @@ FUNCTION(SETUP_TARGET_FOR_COVERAGE _targetname _testrunner _outputname)
 	ADD_CUSTOM_TARGET(${_targetname}
 		
 		# Cleanup lcov
-		${LCOV_PATH} --directory . --zerocounters
+		${LCOV_PATH} --directory . --zerocounters --rc lcov_branch_coverage=1
 		
 		# Run tests
 		COMMAND ${_testrunner} ${ARGV3}
 		
 		# Capturing lcov counters and generating report
-		COMMAND ${LCOV_PATH} --directory . --capture --output-file ${_outputname}.info
-		COMMAND ${LCOV_PATH} --remove ${_outputname}.info 'build/*' 'tests/*' '/usr/*' --output-file ${_outputname}.info.cleaned
-		COMMAND ${GENHTML_PATH} -o ${_outputname} ${_outputname}.info.cleaned
+		COMMAND ${LCOV_PATH} --directory . --capture --output-file ${_outputname}.info --rc lcov_branch_coverage=1
+		COMMAND ${LCOV_PATH} --remove ${_outputname}.info 'build/*' 'tests/*' '/usr/*' --output-file ${_outputname}.info.cleaned --rc lcov_branch_coverage=1
+		COMMAND ${GENHTML_PATH} -o ${_outputname} ${_outputname}.info.cleaned --branch-coverage
 		COMMAND ${CMAKE_COMMAND} -E remove ${_outputname}.info ${_outputname}.info.cleaned
 		
 		WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
