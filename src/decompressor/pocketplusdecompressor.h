@@ -4,6 +4,7 @@
 #include <deque>
 #include <memory>
 #include <iterator>
+#include <gtest/gtest_prod.h>
 
 #include "pocketplusutils.h"
 
@@ -15,6 +16,11 @@ namespace decompressor {
 	This class implements the implicitly provided decompression for the CCSDS draft standard for housekeeping telemetry data compression
 */
 class PocketPlusDecompressor{
+	FRIEND_TEST(hamming_weight, InputValid);
+	FRIEND_TEST(hamming_weight_in_range, InputValid);
+	FRIEND_TEST(reverse, InputValid);
+	FRIEND_TEST(undo_rle, InputValidEmptyResult);
+	
 	//! Private function to calculate the Hamming weight for a boolean deque
 	/*!
 		Private Hamming weight calculation, this is equal to the number of ones in the given vector
