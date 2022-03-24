@@ -132,15 +132,18 @@ TEST(compress, CompressTwoIdenticalDataFrames){
 	ASSERT_EQ(ref, output_vector_2);
 }
 
-TEST(compress, CompressThreeIdenticalDataFrames){
+TEST(compress, CompressFourIdenticalDataFrames){
 	std::deque<bool> input_vector = {1, 0, 1, 0, 1, 0, 1, 0};
 	auto compressor = pocketplus::compressor::PocketPlusCompressor();
 	compressor.set_input_vector_length(8);
 	auto output_vector_1 = compressor.compress(input_vector, 0, 1, 1, 1);
 	auto output_vector_2 = compressor.compress(input_vector, 0, 0, 0, 0);
 	auto output_vector_3 = compressor.compress(input_vector, 0, 0, 0, 0);
-	std::deque<bool> ref = {1, 0, 0, 0, 1, 0, 1};
-	ASSERT_EQ(ref, output_vector_3);
+	auto output_vector_4 = compressor.compress(input_vector, 0, 0, 0, 0);
+	std::deque<bool> ref3 = {1, 0, 0, 0, 1, 0, 1}; // V_t = 2
+	ASSERT_EQ(ref3, output_vector_3);
+	std::deque<bool> ref4 = {1, 0, 0, 0, 1, 1, 1}; // V_t = 3
+	ASSERT_EQ(ref4, output_vector_4);
 }
 
 TEST(compress, CompressTwoDataFramesChangeInOneLSB){
