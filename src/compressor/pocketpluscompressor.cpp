@@ -369,7 +369,7 @@ std::deque<bool> PocketPlusCompressor::compress(
 			X_t_or_M_t.begin(), 
 			X_t_or_M_t.end(), 
 			[m=mask_new, x=X_t, n = 0]() mutable {
-				auto out = m.at(n) || x.at(n);
+				auto out = m.at(n) || x.at(x.size() - 1 - n);
 				n++;
 				return out;
 			}
@@ -397,7 +397,7 @@ std::deque<bool> PocketPlusCompressor::compress(
 			X_t_or_M_t.begin(), 
 			X_t_or_M_t.end(), 
 			[m=mask_new, x=X_t, n = 0]() mutable {
-				auto out = m.at(n) || x.at(n);
+				auto out = m.at(n) || x.at(x.size() - 1 - n);
 				n++;
 				return out;
 			}
