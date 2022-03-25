@@ -284,8 +284,10 @@ std::deque<bool> PocketPlusCompressor::compress(
 	e_t.clear();
 	auto X_t_weight = hamming_weight(X_t);
 	auto y_t_weight = hamming_weight(y_t);
-	if((*V_t == 0) || (*X_t_weight == 0)){}
-	else if(((*y_t_weight == 0) && (*V_t > 0)) && (*X_t_weight != 0)){
+	if((*V_t == 0) || (*X_t_weight == 0)){
+		// e_t = empty
+	}
+	else if((*y_t_weight == 0) && (*V_t > 0) && (*X_t_weight > 0)){
 		e_t = {0};
 	}
 	else{
