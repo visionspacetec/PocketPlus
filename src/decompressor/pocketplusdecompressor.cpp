@@ -112,8 +112,7 @@ unsigned int PocketPlusDecompressor::get_input_vector_length(const std::deque<bo
 	pocketplus::utils::pop_n_from_front(input_copy, 2);
 	// Undo BIT_4(V_t)
 	auto robustness_level = std::make_unique<unsigned int>(0);
-	auto bit_shift = std::make_unique<unsigned int>(0);
-	for(auto it = bit_position + 3; it >= bit_position; it--, *bit_shift += 1){
+	for(auto [it, bit_shift] = std::tuple{bit_position + 3, std::make_unique<unsigned int>(0)}; it >= bit_position; it--, *bit_shift += 1){
 		if(*it){
 			*robustness_level |= 1 << *bit_shift;
 		}
@@ -558,8 +557,7 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
 			pocketplus::utils::pop_n_from_front(input, 3);
 			// Undo BIT_5(A - 2)
 			input_vector_length = std::make_unique<unsigned int>(0);
-			auto bit_shift = std::make_unique<unsigned int>(0);
-			for(auto it = bit_position + 4; it >= bit_position; it--, *bit_shift += 1){
+			for(auto [it, bit_shift] = std::tuple{bit_position + 4, std::make_unique<unsigned int>(0)}; it >= bit_position; it--, *bit_shift += 1){
 				if(*it){
 					*input_vector_length |= 1 << *bit_shift;
 				}
@@ -580,9 +578,8 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
 				input.pop_front();
 			}
 			input_vector_length = std::make_unique<unsigned int>(0);
-			auto bit_shift = std::make_unique<unsigned int>(0);
-			for(auto ite = bit_position + *count_size; ite >= bit_position; ite--, *bit_shift += 1){
-				if(*ite){
+			for(auto [it, bit_shift] = std::tuple{bit_position + *count_size, std::make_unique<unsigned int>(0)}; it >= bit_position; it--, *bit_shift += 1){
+				if(*it){
 					*input_vector_length |= 1 << *bit_shift;
 				}
 			}
