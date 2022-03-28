@@ -108,7 +108,7 @@ TEST(compress, PopMaskFlag){
 	auto compressor = pocketplus::compressor::PocketPlusCompressor();
 	compressor.set_input_vector_length(8);
 	ASSERT_NO_THROW(compressor.compress(input_vector, 0, 1, 1, 1));
-	for(unsigned int i; i < 16; i++){
+	for(unsigned int i = 0; i < 16; i++){
 		ASSERT_NO_THROW(compressor.compress(input_vector, 0, 0, 0, 0));
 	}
 }
