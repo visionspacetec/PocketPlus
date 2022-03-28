@@ -82,11 +82,11 @@ class PocketPlusDecompressor{
 			The PocketPlusDecompressor performs the stateful decompression according to the CCSDS draft standard for housekeeping telemetry data compresison
 			\param vector_length Defines the expected input vector length of the compressed data packets
 		*/
-		PocketPlusDecompressor(std::unique_ptr<unsigned int>& vector_length){
-			if ((*vector_length < 1) || (*vector_length > 65535)){
+		explicit PocketPlusDecompressor(const unsigned int& vector_length){
+			if ((vector_length < 1) || (vector_length > 65535)){
 				throw std::out_of_range("1 <= input_vector_length <= 2^16-1 (65535");
 			}
-			input_vector_length = std::make_unique<unsigned int>(*vector_length);
+			input_vector_length = std::make_unique<unsigned int>(vector_length);
 			minimum_size = std::make_unique<const unsigned int>(8);
 			input_vector_size_before_processing = std::make_unique<unsigned int>(0);
 			t = std::make_unique<unsigned int>(0);
