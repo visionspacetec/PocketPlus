@@ -38,9 +38,7 @@ int main(__attribute__((unused))int argc, __attribute__((unused)) char* argv[]){
 		std::deque<bool> total_input_vector;
 		std::deque<bool> total_output_vector;
 		std::deque<bool> new_output_vector;
-		for(auto in: input){
-			input_vector.emplace_back(pocketplus::utils::number_to_deque_bool(in, *input_vector_length));
-		}
+		std::transform(input.begin(), input.end(), std::back_inserter(input_vector), [&input_vector_length](const long int i) {return pocketplus::utils::number_to_deque_bool(i, *input_vector_length);});
 		auto counter = std::make_unique<unsigned int>(1);
 		for(auto in: input_vector){
 			std::cout << "Compressing data frame ###" << *counter << std::endl;
