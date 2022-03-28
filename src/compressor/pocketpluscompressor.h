@@ -73,14 +73,14 @@ class PocketPlusCompressor{
 	std::deque<bool> inverse(const std::deque<bool>& a);
 
 	//! Constant minimum allowed robustness level
-	std::shared_ptr<const unsigned int> robustness_level_min;
+	std::unique_ptr<const unsigned int> robustness_level_min;
 	//! Constant maximum allowed robustness level
-	std::shared_ptr<const unsigned int> robustness_level_max;
+	std::unique_ptr<const unsigned int> robustness_level_max;
 
 	//! Internal time counter which is equavalent to a processed packet counter
-	std::shared_ptr<unsigned int> t;
+	std::unique_ptr<unsigned int> t;
 	//! The currently set input vector length F
-	std::shared_ptr<unsigned int> input_vector_length;
+	std::unique_ptr<unsigned int> input_vector_length;
 	//! The input vector length F, encoded usign the COUNT function
 	std::deque<bool> input_vector_length_count;
 	//! The initial mask vector

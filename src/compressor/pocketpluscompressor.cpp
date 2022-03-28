@@ -9,7 +9,7 @@ void PocketPlusCompressor::set_input_vector_length(const unsigned int& vector_le
 	if ((vector_length < 1) || (vector_length > 65535)){ 
 		throw std::out_of_range("1 <= input_vector_length <= 2^16-1 (65535");
 	}
-	input_vector_length = std::make_shared<unsigned int>(vector_length); // F // User defined value
+	input_vector_length = std::make_unique<unsigned int>(vector_length); // F // User defined value
 	input_vector_length_count = count(*input_vector_length);
 	initial_mask_vector.assign(*input_vector_length, 0); // M_0 = 0 // ToDo: Make initial mask user defined
 	mask_new = initial_mask_vector;
