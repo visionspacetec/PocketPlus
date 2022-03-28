@@ -7,6 +7,7 @@
 #include <cstddef>
 #include <fstream>
 #include <iterator>
+#include <filesystem>
 
 namespace pocketplus {
 namespace utils {
