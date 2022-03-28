@@ -11,7 +11,7 @@
 	\param argv Content of the call arguments
 	\return Execution result code
 */
-int main(int argc, char* argv[]){
+int main(__attribute__((unused))int argc, __attribute__((unused)) char* argv[]){
 
 	std::cout << "Welcome to PocketPlus in c++" << std::endl;
 
