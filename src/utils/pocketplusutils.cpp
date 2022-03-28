@@ -24,7 +24,7 @@ std::deque<bool> pocketplus::utils::number_to_deque_bool(long int& input, unsign
 		out.emplace_front((input >> i) & 1);
 	}
 	if(length > 32){
-		for(auto i = 32; i < length; i++){
+		for(unsigned int i = 32; i < length; i++){
 			out.emplace_front(0);
 		}
 	}
@@ -105,7 +105,7 @@ std::deque<bool> pocketplus::utils::read_bool_deque_from_file(const std::string&
 
 // Pops n elements from the front of a boolean deque
 void pocketplus::utils::pop_n_from_front(std::deque<bool>& in, const unsigned int& n){
-	for(auto i = 0; i < n; i++){
+	for(unsigned int i = 0; i < n; i++){
 		if(in.size() > 0){
 			in.pop_front();
 		}
