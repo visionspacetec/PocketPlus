@@ -353,9 +353,7 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
 	//std::cout << "Second vector" << std::endl;
 	//std::cout << "Input:" << std::endl;
 	//pocketplus::utils::print_vector(input);
-	std::deque<bool> q_t;
 	if(*d_t == 1){
-		// q_t is empty
 		std::deque<bool> M_t = mask_vector.back();
 		//build mask from old mask and mask changes D_t with values k_t inserted
 		auto it_D_t = D_t.begin();
