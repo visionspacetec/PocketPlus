@@ -126,7 +126,7 @@ TEST(compress, CompressTwoIdenticalDataFrames){
 	std::deque<bool> input_vector = {1, 0, 1, 0, 1, 0, 1, 0};
 	auto compressor = pocketplus::compressor::PocketPlusCompressor();
 	compressor.set_input_vector_length(8);
-	auto output_vector_1 = compressor.compress(input_vector, 0, 1, 1, 1);
+	compressor.compress(input_vector, 0, 1, 1, 1);
 	auto output_vector_2 = compressor.compress(input_vector, 0, 0, 0, 0);
 	std::deque<bool> ref = {1, 0, 0, 0, 0, 1, 1};
 	ASSERT_EQ(ref, output_vector_2);
@@ -136,8 +136,8 @@ TEST(compress, CompressFourIdenticalDataFrames){
 	std::deque<bool> input_vector = {1, 0, 1, 0, 1, 0, 1, 0};
 	auto compressor = pocketplus::compressor::PocketPlusCompressor();
 	compressor.set_input_vector_length(8);
-	auto output_vector_1 = compressor.compress(input_vector, 0, 1, 1, 1);
-	auto output_vector_2 = compressor.compress(input_vector, 0, 0, 0, 0);
+	compressor.compress(input_vector, 0, 1, 1, 1);
+	compressor.compress(input_vector, 0, 0, 0, 0);
 	auto output_vector_3 = compressor.compress(input_vector, 0, 0, 0, 0);
 	auto output_vector_4 = compressor.compress(input_vector, 0, 0, 0, 0);
 	std::deque<bool> ref3 = {1, 0, 0, 0, 1, 0, 1}; // V_t = 2
@@ -151,7 +151,7 @@ TEST(compress, CompressTwoDataFramesChangeInOneLSB){
 	std::deque<bool> input_vector_2 = {1, 0, 1, 0, 1, 0, 1, 1};
 	auto compressor = pocketplus::compressor::PocketPlusCompressor();
 	compressor.set_input_vector_length(8);
-	auto output_vector_1 = compressor.compress(input_vector_1, 0, 1, 1, 1);
+	compressor.compress(input_vector_1, 0, 1, 1, 1);
 	auto output_vector_2 = compressor.compress(input_vector_2, 0, 0, 0, 0);
 	std::deque<bool> ref = {0, 1, 0, 0, 0, 0, 0, 1, 1};
 	ASSERT_EQ(ref, output_vector_2);
@@ -162,8 +162,8 @@ TEST(compress, CompressThreeDataFramesChangeInOneLSB){
 	std::deque<bool> input_vector_2 = {1, 0, 1, 0, 1, 0, 1, 1};
 	auto compressor = pocketplus::compressor::PocketPlusCompressor();
 	compressor.set_input_vector_length(8);
-	auto output_vector_1 = compressor.compress(input_vector_1, 0, 1, 1, 1);
-	auto output_vector_2 = compressor.compress(input_vector_2, 0, 0, 0, 0);
+	compressor.compress(input_vector_1, 0, 1, 1, 1);
+	compressor.compress(input_vector_2, 0, 0, 0, 0);
 	auto output_vector_3 = compressor.compress(input_vector_1, 0, 0, 0, 0);
 	std::deque<bool> ref = {1, 0, 0, 0, 0, 1, 1, 0};
 	ASSERT_EQ(ref, output_vector_3);
@@ -174,7 +174,7 @@ TEST(compress, CompressTwoDataFramesNewMaskFlag){
 	std::deque<bool> input_vector_2 = {1, 0, 1, 0, 1, 0, 1, 1};
 	auto compressor = pocketplus::compressor::PocketPlusCompressor();
 	compressor.set_input_vector_length(8);
-	auto output_vector_1 = compressor.compress(input_vector_1, 0, 1, 1, 1);
+	compressor.compress(input_vector_1, 0, 1, 1, 1);
 	auto output_vector_2 = compressor.compress(input_vector_2, 0, 1, 0, 0);
 	std::deque<bool> ref = {0, 1, 0, 0, 0, 0, 0, 1, 1};
 	ASSERT_EQ(ref, output_vector_2);
@@ -186,7 +186,7 @@ TEST(compress, CompressThreeDataFramesChangeInLSBNewMaskFlag){
 	std::deque<bool> input_vector_3 = {1, 0, 1, 0, 1, 1, 1, 1};
 	auto compressor = pocketplus::compressor::PocketPlusCompressor();
 	compressor.set_input_vector_length(8);
-	auto output_vector_1 = compressor.compress(input_vector_1, 0, 1, 1, 1);
+	compressor.compress(input_vector_1, 0, 1, 1, 1);
 	auto output_vector_2 = compressor.compress(input_vector_2, 0, 1, 0, 0);
 	auto output_vector_3 = compressor.compress(input_vector_3, 1, 1, 0, 0);
 	std::deque<bool> ref2 = {0, 1, 0, 0, 0, 0, 0, 1, 1};
@@ -201,7 +201,7 @@ TEST(compress, CompressThreeDataFramesChangeInLSBSendMaskFlag){
 	std::deque<bool> input_vector_3 = {1, 0, 1, 0, 1, 1, 1, 1};
 	auto compressor = pocketplus::compressor::PocketPlusCompressor();
 	compressor.set_input_vector_length(8);
-	auto output_vector_1 = compressor.compress(input_vector_1, 0, 1, 1, 1);
+	compressor.compress(input_vector_1, 0, 1, 1, 1);
 	auto output_vector_2 = compressor.compress(input_vector_2, 0, 1, 0, 0);
 	auto output_vector_3 = compressor.compress(input_vector_3, 1, 1, 1, 0);
 	std::deque<bool> ref2 = {0, 1, 0, 0, 0, 0, 0, 1, 1};
@@ -216,7 +216,7 @@ TEST(compress, CompressThreeDataFramesChangeInLSBUncompressedFlag){
 	std::deque<bool> input_vector_3 = {1, 0, 1, 0, 1, 0, 1, 1};
 	auto compressor = pocketplus::compressor::PocketPlusCompressor();
 	compressor.set_input_vector_length(8);
-	auto output_vector_1 = compressor.compress(input_vector_1, 0, 1, 1, 1);
+	compressor.compress(input_vector_1, 0, 1, 1, 1);
 	auto output_vector_2 = compressor.compress(input_vector_2, 0, 0, 0, 0);
 	auto output_vector_3 = compressor.compress(input_vector_3, 0, 0, 1, 0);
 	std::deque<bool> ref2 = {0, 1, 0, 0, 0, 0, 0, 1, 1};
@@ -230,7 +230,7 @@ TEST(compress, e_t_zero){
 	std::deque<bool> input_vector_2 = {1, 0, 1, 0, 1, 0, 1, 1};
 	auto compressor = pocketplus::compressor::PocketPlusCompressor();
 	compressor.set_input_vector_length(8);
-	auto output_vector_1 = compressor.compress(input_vector_1, 1, 1, 1, 1);
+	compressor.compress(input_vector_1, 1, 1, 1, 1);
 	auto output_vector_2 = compressor.compress(input_vector_2, 1, 0, 1, 1);
 	std::deque<bool> ref2 = {0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1};
 	ASSERT_EQ(ref2, output_vector_2);
@@ -243,9 +243,9 @@ TEST(compress, c_t_zero){
 	std::deque<bool> input_vector_4 = {1, 0, 1, 0, 1, 1, 1, 1};
 	auto compressor = pocketplus::compressor::PocketPlusCompressor();
 	compressor.set_input_vector_length(8);
-	auto output_vector_1 = compressor.compress(input_vector_1, 0, 1, 1, 1);
-	auto output_vector_2 = compressor.compress(input_vector_2, 0, 1, 0, 0);
-	auto output_vector_3 = compressor.compress(input_vector_3, 1, 1, 1, 0);
+	compressor.compress(input_vector_1, 0, 1, 1, 1);
+	compressor.compress(input_vector_2, 0, 1, 0, 0);
+	compressor.compress(input_vector_3, 1, 1, 1, 0);
 	auto output_vector_4 = compressor.compress(input_vector_4, 1, 0, 0, 0);
 	std::deque<bool> ref4 = {0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1, 1};
 	ASSERT_EQ(ref4, output_vector_4);
@@ -255,7 +255,7 @@ TEST(compress, second_vector_zero){
 	std::deque<bool> input_vector = {1, 0, 1, 0, 1, 0, 1, 0};
 	auto compressor = pocketplus::compressor::PocketPlusCompressor();
 	compressor.set_input_vector_length(8);
-	auto output_vector_1 = compressor.compress(input_vector, 0, 1, 1, 1);
+	compressor.compress(input_vector, 0, 1, 1, 1);
 	auto output_vector_2 = compressor.compress(input_vector, 0, 0, 0, 1);
 	std::deque<bool> ref2 = {1, 0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0};
 	ASSERT_EQ(ref2, output_vector_2);
