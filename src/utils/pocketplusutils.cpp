@@ -18,7 +18,7 @@ void pocketplus::utils::print_vector(const std::deque<bool>& in){
 }
 
 // Converts a long integer to a size n boolean vector
-std::deque<bool> pocketplus::utils::number_to_deque_bool(long int& input, unsigned int& length){
+std::deque<bool> pocketplus::utils::number_to_deque_bool(const long int& input, const unsigned int& length){
 	std::deque<bool> out;
 	for(unsigned int i = 0; (i < length) && (i < 32); i++){
 		out.emplace_front((input >> i) & 1);

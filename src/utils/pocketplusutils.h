@@ -33,7 +33,7 @@ void print_vector(const std::deque<bool>& in);
 	\param length The wanted size of the resulting boolean deque
 	\return The long integer of requested length represented as boolean deque
 */
-std::deque<bool> number_to_deque_bool(long int& input, unsigned int& length);
+std::deque<bool> number_to_deque_bool(const long int& input, const unsigned int& length);
 
 //! Converts a boolean deque back to the long integer format
 /*!
