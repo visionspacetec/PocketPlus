@@ -459,7 +459,7 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
 			auto it_y_t = y_t.begin();
 			while(it_D_t != D_t.rend()){
 				if(*it_D_t){
-					*it_M_t = *it_M_t ^ !*it_y_t;
+					*it_M_t = *it_M_t ^ (!*it_y_t);
 					it_y_t++;
 				}
 				it_D_t++;
