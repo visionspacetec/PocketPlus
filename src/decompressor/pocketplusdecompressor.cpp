@@ -131,7 +131,7 @@ unsigned int PocketPlusDecompressor::get_input_vector_length(const std::deque<bo
 		// k_t is empty
 	}
 	else{
-		for(auto i = 0; i < *X_t_weight; i++){
+		for(unsigned int i = 0; i < *X_t_weight; i++){
 			bit_position += 1;
 			input_copy.pop_front();
 		}
@@ -284,7 +284,7 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
 	
 	if((*robustness_level == 0) || (*X_t_weight == 0)){
 		// e_t is empty
-		for(auto i = 0; i < *X_t_weight; i++){
+		for(unsigned int i = 0; i < *X_t_weight; i++){
 			//*bit_position += 1;
 			//y_t.emplace_back(input.front());
 			y_t.emplace_back(0);
@@ -296,7 +296,7 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
 			e_t.emplace_back(0);
 			bit_position += 1;
 			input.pop_front();
-			for(auto i = 0; i < *X_t_weight; i++){
+			for(unsigned int i = 0; i < *X_t_weight; i++){
 				y_t.emplace_back(0);
 			}
 		}
@@ -323,7 +323,7 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
 	else{
 		// k_t = BE( <~M_t>, X_t )
 		//std::cout << "X_t_weight: " << *X_t_weight << std::endl;
-		for(auto i = 0; i < *X_t_weight; i++){
+		for(unsigned int i = 0; i < *X_t_weight; i++){
 			*bit_position += 1;
 			k_t.emplace_back(input.front());
 			input.pop_front();
