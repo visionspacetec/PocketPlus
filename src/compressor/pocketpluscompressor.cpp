@@ -298,7 +298,7 @@ std::deque<bool> PocketPlusCompressor::compress(
 		// k_t = empty
 	}
 	else{
-		k_t = bit_extraction(inverse(mask_new), reverse(X_t));
+		k_t = bit_extraction(reverse(inverse(mask_new)), X_t);
 	}
 
 	// Equation (20)

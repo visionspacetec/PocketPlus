@@ -315,8 +315,7 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
 		//std::cout << "e_t: " << e_t.at(0) << std::endl;
 	}
 	//std::cout << (*robustness_level == 0) << (*X_t_weight == 0) << (hamming_weight(y_t) == 0) << std::endl;
-	//std::cout << hamming_weight(y_t) << std::endl;
-	if((*robustness_level == 0) || (*X_t_weight == 0) || (hamming_weight(y_t) == 0)){
+	if(((*robustness_level == 0) || (*X_t_weight == 0) || (hamming_weight(y_t) == 0)) && ((e_t.size() == 0) || (e_t.at(0) == 0))){
 		// k_t is empty
 		//std::cout << "must print" << std::endl;
 	}
@@ -364,7 +363,7 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
 		//std::cout << "y_t: " << std::endl;
 		//pocketplus::utils::print_vector(y_t);
 		if(y_t.size() > 0){
-			auto it_y_t = y_t.begin();
+			auto it_y_t = y_t.rbegin();
 			while(it_M_t != M_t.end()){
 				if(*it_D_t){
 					*it_M_t = !*it_y_t; // Undo ~M_t
@@ -376,7 +375,7 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
 			}
 		}
 		else if(k_t.size() > 0){
-			auto it_k_t = k_t.begin();
+			auto it_k_t = k_t.rbegin();
 			while(it_M_t != M_t.end()){
 				if(*it_D_t){
 					*it_M_t = !*it_k_t; // Undo ~M_t
@@ -478,7 +477,7 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
 				// BE(I_t, (X_t OR M_t))
 				output.assign(*input_vector_length, 0); // Fill the output vector with zeros
 				auto it_mask = mask_vector.back().begin();
-				auto it_X_t = X_t.begin();
+				auto it_X_t = X_t.rbegin();
 				auto it_output = output.begin();
 				auto it_last_input = input_vector.back().begin();
 				for(; it_mask != mask_vector.back().end();){
