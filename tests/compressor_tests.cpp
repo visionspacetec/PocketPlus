@@ -157,6 +157,17 @@ TEST(compress, CompressTwoDataFramesChangeInOneLSB){
 	ASSERT_EQ(ref, output_vector_2);
 }
 
+TEST(compress, CompressTwoDataFramesChangeInOneMSB){
+	std::deque<bool> input_vector_1 = {1, 0, 1, 0, 1, 0, 1, 0};
+	std::deque<bool> input_vector_2 = {0, 0, 1, 0, 1, 0, 1, 0};
+	auto compressor = std::make_unique<pocketplus::compressor::PocketPlusCompressor>();
+	compressor->set_input_vector_length(8);
+	compressor->compress(input_vector_1, 0, 1, 1, 1);
+	auto output_vector_2 = compressor->compress(input_vector_2, 0, 0, 0, 0);
+	std::deque<bool> ref = {1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0};
+	ASSERT_EQ(ref, output_vector_2);
+}
+
 TEST(compress, CompressThreeDataFramesChangeInOneLSB){
 	std::deque<bool> input_vector_1 = {1, 0, 1, 0, 1, 0, 1, 0};
 	std::deque<bool> input_vector_2 = {1, 0, 1, 0, 1, 0, 1, 1};
