@@ -101,6 +101,13 @@ TEST(write_bool_deque_to_file, ValidInput){
 	ASSERT_EQ(0, remove("test.bin"));
 }
 
+TEST(write_bool_deque_to_file, Symlink){
+	std::deque<bool> in = {1, 0, 1, 0, 1, 0, 1, 0};
+	std::filesystem::create_symlink("target", "test2.bin");
+	ASSERT_THROW(pocketplus::utils::write_bool_deque_to_file("test2.bin", in), std::invalid_argument);
+	std::filesystem::remove_all("test2.bin");
+}
+
 //std::deque<bool> read_bool_deque_from_file(const std::string& file_name);
 // auto read_compressed = pocketplus::utils::read_bool_deque_from_file("compressed.bin");
 TEST(read_bool_deque_from_file, ValidInput){
@@ -109,6 +116,12 @@ TEST(read_bool_deque_from_file, ValidInput){
 	auto read_test = pocketplus::utils::read_bool_deque_from_file("test.bin");
 	ASSERT_EQ(in, read_test);
 	remove("test.bin");
+}
+
+TEST(read_bool_deque_from_file, Symlink){
+	std::filesystem::create_symlink("target", "test3.bin");
+	ASSERT_THROW(pocketplus::utils::read_bool_deque_from_file("test3.bin"), std::invalid_argument);
+	std::filesystem::remove_all("test3.bin");
 }
 
 // void pop_n_from_front(std::deque<bool>& in, const unsigned int& n);

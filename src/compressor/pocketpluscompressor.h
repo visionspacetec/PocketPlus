@@ -25,7 +25,7 @@ class PocketPlusCompressor{
 
 	//! Private COUNT encoding function implementation
 	/*!
-		Private function to set the input vector length of this class
+		Private function to calculate the COUNT function equivalent of an unsigned integer
 		\param a Unsigned integer to COUNT encode
 		\return The encoded value as boolen deque
 	*/
