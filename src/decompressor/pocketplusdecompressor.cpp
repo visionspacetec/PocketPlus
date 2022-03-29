@@ -323,7 +323,7 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
 		// k_t = BE( <~M_t>, X_t )
 		//std::cout << "X_t_weight: " << *X_t_weight << std::endl;
 		for(unsigned int i = 0; i < *X_t_weight; i++){
-			*bit_position += 1;
+			bit_position += 1;
 			k_t.emplace_back(input.front());
 			input.pop_front();
 		}
@@ -402,7 +402,7 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
 			send_mask_flag = std::make_unique<bool>(1);
 			//std::cout << "send_mask_flag (f_t) = 1" << std::endl;
 			// '1' | RLE(<(M_t XOR (M_t<<1)))>) | '10'
-			bit_position++;
+			bit_position += 1;
 			input.pop_front();
 			std::deque<bool> mask_mask_shifted;
 			if(!((*bit_position == 1) && (*(bit_position + 1) == 0))){
