@@ -1,6 +1,7 @@
 #include "pocketplusutils.h"
 #include <gtest/gtest.h>
 #include <string>
+#include <stdio.h>
 
 // void zero_stuffing(std::deque<bool>& in);
 TEST(zero_stuffing, EmptyInput){
@@ -50,6 +51,12 @@ TEST(number_to_deque_bool, ValidInput){
 	ASSERT_EQ(std::deque<bool>({0, 0, 0, 0, 0, 0, 0, 1}), pocketplus::utils::number_to_deque_bool(*in, *length));
 }
 
+TEST(number_to_deque_bool, LargeOutput){
+	auto in = std::make_unique<long>(1);
+	auto length = std::make_unique<unsigned int>(33);
+	ASSERT_EQ(std::deque<bool>({0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}), pocketplus::utils::number_to_deque_bool(*in, *length));
+}
+
 //long int deque_bool_to_number(const std::deque<bool>& input);
 TEST(deque_bool_to_number, EmptyInput){
 	ASSERT_EQ(0, pocketplus::utils::deque_bool_to_number(std::deque<bool>()));
@@ -87,13 +94,22 @@ TEST(bool_to_string, ValidInput){
 	ASSERT_EQ(std::string("\xAA"), pocketplus::utils::bool_to_string(in));
 }
 
-/*
-// Saves a boolean deque to file
-void write_bool_deque_to_file(const std::string& file_name, const std::deque<bool>& in);
+// void write_bool_deque_to_file(const std::string& file_name, const std::deque<bool>& in);
+TEST(write_bool_deque_to_file, ValidInput){
+	std::deque<bool> in = {1, 0, 1, 0, 1, 0, 1, 0};
+	ASSERT_NO_THROW(pocketplus::utils::write_bool_deque_to_file("test.bin", in));
+	ASSERT_EQ(0, remove("test.bin"));
+}
 
-// Reads as boolean deque from file
-std::deque<bool> read_bool_deque_from_file(const std::string& file_name);
-*/
+//std::deque<bool> read_bool_deque_from_file(const std::string& file_name);
+// auto read_compressed = pocketplus::utils::read_bool_deque_from_file("compressed.bin");
+TEST(read_bool_deque_from_file, ValidInput){
+	std::deque<bool> in = {1, 0, 1, 0, 1, 0, 1, 0};
+	pocketplus::utils::write_bool_deque_to_file("test.bin", in);
+	auto read_test = pocketplus::utils::read_bool_deque_from_file("test.bin");
+	ASSERT_EQ(in, read_test);
+	remove("test.bin");
+}
 
 // void pop_n_from_front(std::deque<bool>& in, const unsigned int& n);
 TEST(pop_n_from_front, EmptyInput){

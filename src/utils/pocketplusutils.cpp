@@ -18,13 +18,13 @@ void pocketplus::utils::print_vector(const std::deque<bool>& in){
 }
 
 // Converts a long integer to a size n boolean vector
-std::deque<bool> pocketplus::utils::number_to_deque_bool(long int& input, unsigned int& length){
+std::deque<bool> pocketplus::utils::number_to_deque_bool(const long int& input, const unsigned int& length){
 	std::deque<bool> out;
 	for(unsigned int i = 0; (i < length) && (i < 32); i++){
 		out.emplace_front((input >> i) & 1);
 	}
 	if(length > 32){
-		for(auto i = 32; i < length; i++){
+		for(unsigned int i = 32; i < length; i++){
 			out.emplace_front(0);
 		}
 	}
@@ -73,7 +73,10 @@ std::string pocketplus::utils::bool_to_string(std::deque<bool> const& boolvector
 // Saves a boolean deque to file
 void pocketplus::utils::write_bool_deque_to_file(const std::string& file_name, const std::deque<bool>& in){
 	std::ofstream output_file;
-	output_file.open(file_name, std::ios::out | std::ofstream::binary);
+	if(std::filesystem::is_symlink(file_name)){
+		throw std::invalid_argument("File is a symlink, rejected due to CWE-362");
+	}
+	output_file.open(file_name, std::ios::out | std::ofstream::binary); // flawfinder: ignore
 	output_file << pocketplus::utils::bool_to_string(in);
 	output_file.close();
 }
@@ -81,7 +84,10 @@ void pocketplus::utils::write_bool_deque_to_file(const std::string& file_name, c
 // Reads as boolean deque from file and returns it
 std::deque<bool> pocketplus::utils::read_bool_deque_from_file(const std::string& file_name){
 	std::ifstream input_file;
-	input_file.open(file_name, std::ios::in | std::ifstream::binary);
+	if(std::filesystem::is_symlink(file_name)){
+		throw std::invalid_argument("File is a symlink, rejected due to CWE-362");
+	}
+	input_file.open(file_name, std::ios::in | std::ifstream::binary); // flawfinder: ignore
 	input_file >> std::noskipws;
 	std::deque<char> buffer_char;
 	std::copy(
@@ -99,7 +105,7 @@ std::deque<bool> pocketplus::utils::read_bool_deque_from_file(const std::string&
 
 // Pops n elements from the front of a boolean deque
 void pocketplus::utils::pop_n_from_front(std::deque<bool>& in, const unsigned int& n){
-	for(auto i = 0; i < n; i++){
+	for(unsigned int i = 0; i < n; i++){
 		if(in.size() > 0){
 			in.pop_front();
 		}

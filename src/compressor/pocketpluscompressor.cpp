@@ -9,7 +9,7 @@ void PocketPlusCompressor::set_input_vector_length(const unsigned int& vector_le
 	if ((vector_length < 1) || (vector_length > 65535)){ 
 		throw std::out_of_range("1 <= input_vector_length <= 2^16-1 (65535");
 	}
-	input_vector_length = std::make_shared<unsigned int>(vector_length); // F // User defined value
+	input_vector_length = std::make_unique<unsigned int>(vector_length); // F // User defined value
 	input_vector_length_count = count(*input_vector_length);
 	initial_mask_vector.assign(*input_vector_length, 0); // M_0 = 0 // ToDo: Make initial mask user defined
 	mask_new = initial_mask_vector;
@@ -208,7 +208,8 @@ std::deque<bool> PocketPlusCompressor::compress(
 			}
 		);
 		// 5.3.2.2
-		if(hamming_weight(mask_change_vector.at(0)) == 0){
+		auto mask_change_weight = hamming_weight(mask_change_vector.at(0));
+		if(*mask_change_weight == 0){
 			*no_mask_changes += 1;
 			if(*no_mask_changes > robustness_level){
 				*C_t = *no_mask_changes - robustness_level;
@@ -281,19 +282,23 @@ std::deque<bool> PocketPlusCompressor::compress(
 	//pocketplus::utils::print_vector(y_t);
 	// Equation (18)
 	e_t.clear();
-	if((*V_t == 0) || (*hamming_weight(X_t) == 0)){} // ToDo: calculate hamming_weight X_t only once
-	else if(((*hamming_weight(y_t) == 0) && (*V_t > 0)) && (*hamming_weight(X_t) != 0)){ // ToDo: calculate hamming_weight y_t only once
+	auto X_t_weight = hamming_weight(X_t);
+	auto y_t_weight = hamming_weight(y_t);
+	if((*V_t == 0) || (*X_t_weight == 0)){
+		// e_t = empty
+	}
+	else if((*y_t_weight == 0) && (*V_t > 0) && (*X_t_weight > 0)){
 		e_t = {0};
 	}
 	else{
 		e_t = {1};
 	}
 	// Equation (19)
-	if((*V_t == 0) || (*hamming_weight(X_t) == 0) || (*hamming_weight(y_t) == 0)){
+	if((*V_t == 0) || (*X_t_weight == 0) || (*y_t_weight == 0)){
 		// k_t = empty
 	}
 	else{
-		k_t = bit_extraction(inverse(mask_new), reverse(X_t));
+		k_t = bit_extraction(reverse(inverse(mask_new)), X_t);
 	}
 
 	// Equation (20)
@@ -366,7 +371,7 @@ std::deque<bool> PocketPlusCompressor::compress(
 			X_t_or_M_t.begin(), 
 			X_t_or_M_t.end(), 
 			[m=mask_new, x=X_t, n = 0]() mutable {
-				auto out = m.at(n) || x.at(n);
+				auto out = m.at(n) || x.at(x.size() - 1 - n);
 				n++;
 				return out;
 			}
@@ -394,7 +399,7 @@ std::deque<bool> PocketPlusCompressor::compress(
 			X_t_or_M_t.begin(), 
 			X_t_or_M_t.end(), 
 			[m=mask_new, x=X_t, n = 0]() mutable {
-				auto out = m.at(n) || x.at(n);
+				auto out = m.at(n) || x.at(x.size() - 1 - n);
 				n++;
 				return out;
 			}

@@ -16,7 +16,7 @@ Since the standard was not yet released, some changes might happen before the fi
 ## Installation
 This project uses Google Test (GTest) with CMake for testing and building.
 ```bash
-sudo apt-get install cmake git libgtest-dev
+sudo apt-get install cmake git libgtest-dev lcov gcovr
 cd /usr/src/gtest
 cmake CMakeLists.txt
 make
@@ -76,6 +76,15 @@ valgrind --tool=callgrind ./PocketPlus.exe
 gprof2dot --format=callgrind --output=out.dot ./callgrind.out.[xxx]
 dot -Tpng out.dot -o graph.png
 # Or, open with KCachegrind/QCachegrind
+```
+
+## Test coverage
+
+```bash
+cd build
+cmake -DCMAKE_BUILD_TYPE=Debug ..
+make
+make PocketPlus_tests_coverage
 ```
 
 ## Find out more

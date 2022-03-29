@@ -14,6 +14,10 @@ find_package( Threads REQUIRED )
 find_package( GTest REQUIRED )
 include_directories( ${GTEST_INCLUDE_DIRS} )
 
+# Code coverage
+include(${CMAKE_CURRENT_SOURCE_DIR}/CodeCoverage.cmake)
+set(CMAKE_CXX_FLAGS "-g -O0 -fprofile-arcs -ftest-coverage")
+
 # Include source folders
 include_directories(
     ./src
@@ -26,11 +30,8 @@ include_directories(
 # Declare source files
 set(SOURCES
     ./src/main.cpp
-    #./src/compressor/compressor.h
     ./src/compressor/pocketpluscompressor.cpp
-    #./src/decompressor/decompressor.h
     ./src/decompressor/pocketplusdecompressor.cpp
-    #./src/utils/utils.h
     ./src/utils/pocketplusutils.cpp
 )
 set(TEST_SOURCES
@@ -47,10 +48,10 @@ set_target_properties( PocketPlus PROPERTIES PUBLIC_HEADER
 )
 
 # Declare binary target
-add_executable( PocketPlus.exe ${SOURCES} )#PocketPlus )
+add_executable( PocketPlus.exe ${SOURCES} )
 
 # Declare test target
-add_executable( PocketPlus_tests ${TEST_SOURCES} )# PocketPlus )
+add_executable( PocketPlus_tests ${TEST_SOURCES} )
 target_link_libraries(
     PocketPlus_tests
     gtest
@@ -59,10 +60,14 @@ target_link_libraries(
     PocketPlus
 )
 
+SETUP_TARGET_FOR_COVERAGE(
+	PocketPlus_tests_coverage # Name for custom target.
+	PocketPlus_tests          # Name of the test driver executable that runs the tests.
+	coverage                  # Name of output directory.
+)
+
 # Discover test cases
 gtest_discover_tests( PocketPlus_tests )
 
 # Install
 install( TARGETS PocketPlus LIBRARY DESTINATION lib PUBLIC_HEADER DESTINATION include )
-         #ARCHIVE DESTINATION lib
-#RUNTIME DESTINATION bin)

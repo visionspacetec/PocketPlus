@@ -5,6 +5,7 @@
 #include <memory>
 #include <algorithm>
 #include <cmath>
+#include <gtest/gtest_prod.h>
 
 #include "pocketplusutils.h"
 
@@ -16,6 +17,12 @@ namespace compressor {
 	This class implements the latest CCSDS draft standard for housekeeping telemetry data compression
 */
 class PocketPlusCompressor{
+	FRIEND_TEST(count, InputValid1);
+	FRIEND_TEST(count, InputTooSmall);
+	FRIEND_TEST(count, InputTooLarge);
+	FRIEND_TEST(bit_extraction, InputValid);
+	FRIEND_TEST(bit_extraction, InputInvalid);
+
 	//! Private COUNT encoding function implementation
 	/*!
 		Private function to set the input vector length of this class
@@ -66,14 +73,14 @@ class PocketPlusCompressor{
 	std::deque<bool> inverse(const std::deque<bool>& a);
 
 	//! Constant minimum allowed robustness level
-	std::shared_ptr<const unsigned int> robustness_level_min;
+	std::unique_ptr<const unsigned int> robustness_level_min;
 	//! Constant maximum allowed robustness level
-	std::shared_ptr<const unsigned int> robustness_level_max;
+	std::unique_ptr<const unsigned int> robustness_level_max;
 
 	//! Internal time counter which is equavalent to a processed packet counter
-	std::shared_ptr<unsigned int> t;
+	std::unique_ptr<unsigned int> t;
 	//! The currently set input vector length F
-	std::shared_ptr<unsigned int> input_vector_length;
+	std::unique_ptr<unsigned int> input_vector_length;
 	//! The input vector length F, encoded usign the COUNT function
 	std::deque<bool> input_vector_length_count;
 	//! The initial mask vector
@@ -134,46 +141,32 @@ class PocketPlusCompressor{
 		/*!
 			The PocketPlusCompressor constructor has no arguments, it is configured after creation
 		*/
-		PocketPlusCompressor(){
-			robustness_level_min = std::make_shared<const unsigned int>(0);
-			robustness_level_max = std::make_shared<const unsigned int>(7);
-			t = std::make_shared<unsigned int>(0);
-			/*
-			input_vector_length = std::make_unique<unsigned int>(*vector_length); // F // User defined value
-			input_vector_length_count = count(*input_vector_length);
-			initial_mask_vector.assign(*input_vector_length, 0); // M_0 = 0 // ############ ToDo: Make initial mask user defined
-			mask_new = initial_mask_vector;
-			input_old.assign(*input_vector_length, 0);
-			mask_old.assign(*input_vector_length, 0); // M_t
-			mask_build_old.assign(*input_vector_length, 0); // B_t // B_0 = 0
-			mask_build_new.assign(*input_vector_length, 0); // B_t // B_0 = 0
-			mask_change_0.assign(*input_vector_length, 0); 
-			*/
-		}
+		PocketPlusCompressor(): robustness_level_min(std::make_unique<const unsigned int>(0)), robustness_level_max(std::make_unique<const unsigned int>(7)), t(std::make_unique<unsigned int>(0)){}
 
 		//! PocketPlusCompressor copy constructor
 		/*!
 			This copy constructor takes a PocketPlusCompressor object reference and creates an new object as a copy of it
 			\param old Reference to the PocketPlusCompressor object to copy
 		*/
-		PocketPlusCompressor(const PocketPlusCompressor& old){
-			robustness_level_min = std::make_shared<const unsigned int>(0);
-			robustness_level_max = std::make_shared<const unsigned int>(7);
-			t = std::make_shared<unsigned int>(*old.t);
-			input_vector_length = std::make_shared<unsigned int>(*old.input_vector_length);
-			input_vector_length_count = old.input_vector_length_count;
-			initial_mask_vector = old.initial_mask_vector;
-			mask_flag = old.mask_flag;
-			input_old = old.input_old;
-			mask_new = old.mask_new;
-			mask_old = old.mask_old;
-			mask_build_old = old.mask_build_old;
-			mask_build_new = old.mask_build_new;
-			mask_change_vector = old.mask_change_vector;
-			mask_change_0 = old.mask_change_0;
-			no_mask_changes = std::make_unique<unsigned int>(*old.no_mask_changes);
-			C_t = std::make_unique<unsigned int>(*old.C_t);
-			V_t = std::make_unique<unsigned int>(*old.V_t);
+		PocketPlusCompressor(const PocketPlusCompressor& old):
+			robustness_level_min(std::make_unique<const unsigned int>(0)),
+			robustness_level_max(std::make_unique<const unsigned int>(7)),
+			t(std::make_unique<unsigned int>(*old.t)),
+			input_vector_length(std::make_unique<unsigned int>(*old.input_vector_length)),
+			input_vector_length_count(old.input_vector_length_count),
+			initial_mask_vector(old.initial_mask_vector),
+			mask_flag(old.mask_flag),
+			input_old(old.input_old),
+			mask_new(old.mask_new),
+			mask_old(old.mask_old),
+			mask_build_old(old.mask_build_old),
+			mask_build_new(old.mask_build_new),
+			mask_change_vector(old.mask_change_vector),
+			mask_change_0(old.mask_change_0),
+			no_mask_changes(std::make_unique<unsigned int>(*old.no_mask_changes)),
+			C_t(std::make_unique<unsigned int>(*old.C_t)),
+			V_t(std::make_unique<unsigned int>(*old.V_t)){
+				// Empty
 		}
 
 		//! Public function to set the input vector length
