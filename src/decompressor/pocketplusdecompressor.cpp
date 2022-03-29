@@ -277,9 +277,13 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
 			*robustness_level |= 1 << *bit_shift;
 		}
 	}
+	//std::cout << "Input:" << std::endl;
+	//pocketplus::utils::print_vector(input);
 	//std::cout << "Robustness level: " << *robustness_level << std::endl;
 	bit_position += 4;
 	pocketplus::utils::pop_n_from_front(input, 4);
+	//std::cout << "Input:" << std::endl;
+	//pocketplus::utils::print_vector(input);
 	std::deque<bool> e_t;
 	
 	if((*robustness_level == 0) || (*X_t_weight == 0)){
@@ -393,7 +397,11 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
 				it_D_t++;
 			}
 		}
+		//std::cout << "old_mask: " << std::endl;
+		//pocketplus::utils::print_vector(mask_vector.back());
 		mask_vector.push_back(M_t);
+		//std::cout << "D_t: " << std::endl;
+		//pocketplus::utils::print_vector(D_t);
 		//std::cout << "M_t: " << std::endl;
 		//pocketplus::utils::print_vector(M_t);
 	}
@@ -471,9 +479,16 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
 	// Process third sub vector
 	// 5.3.3.3
 	//std::cout << "Third vector" << std::endl;
+	//std::cout << "Input:" << std::endl;
+	//pocketplus::utils::print_vector(input);
 	if(*d_t == 1){ // d_t = 1
 		if(c_t){
 			if(*c_t == 1){ // c_t = 1
+				//std::cout << "Case 1" << std::endl;
+				//std::cout << "X_t: " << std::endl;
+				//pocketplus::utils::print_vector(X_t);
+				//std::cout << "M_t: " << std::endl;
+				//pocketplus::utils::print_vector(mask_vector.back());
 				// BE(I_t, (X_t OR M_t))
 				output.assign(*input_vector_length, 0); // Fill the output vector with zeros
 				auto it_mask = mask_vector.back().begin();
@@ -674,6 +689,6 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
 	*t += 1;
 	pocketplus::utils::pop_n_from_front(input, (8 - ((*input_vector_size_before_processing - input.size()) % 8)) % 8);
 	//std::cout << "INPUT remaining:" << std::endl;
-	//spocketplus::utils::print_vector(input);
+	//pocketplus::utils::print_vector(input);
 	return output;
 }

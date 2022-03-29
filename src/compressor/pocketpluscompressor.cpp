@@ -300,6 +300,16 @@ std::deque<bool> PocketPlusCompressor::compress(
 	else{
 		k_t = bit_extraction(reverse(inverse(mask_new)), X_t);
 	}
+	/*std::cout << "X_t:" << std::endl;
+	pocketplus::utils::print_vector(X_t);
+	std::cout << "mask_new:" << std::endl;
+	pocketplus::utils::print_vector(mask_new);
+	std::cout << "e_t:" << std::endl;
+	pocketplus::utils::print_vector(e_t);
+	std::cout << "y_t:" << std::endl;
+	pocketplus::utils::print_vector(y_t);
+	std::cout << "k_t:" << std::endl;
+	pocketplus::utils::print_vector(k_t);*/
 
 	// Equation (20)
 	auto it_mask_flag = mask_flag.rbegin();
@@ -324,12 +334,19 @@ std::deque<bool> PocketPlusCompressor::compress(
 	X_t_rle = run_length_encoding(X_t);
 	first_binary_vector.clear();
 	first_binary_vector.insert(first_binary_vector.end(), X_t_rle.begin(), X_t_rle.end());
+	//pocketplus::utils::print_vector(first_binary_vector);
 	first_binary_vector.insert(first_binary_vector.end(), {1, 0});
+	//pocketplus::utils::print_vector(first_binary_vector);
 	first_binary_vector.insert(first_binary_vector.end(), V_t_bit_4.begin(), V_t_bit_4.end());
+	//pocketplus::utils::print_vector(first_binary_vector);
 	first_binary_vector.insert(first_binary_vector.end(), e_t.begin(), e_t.end());
+	//pocketplus::utils::print_vector(first_binary_vector);
 	first_binary_vector.insert(first_binary_vector.end(), k_t.begin(), k_t.end());
+	//pocketplus::utils::print_vector(first_binary_vector);
 	first_binary_vector.insert(first_binary_vector.end(), c_t.begin(), c_t.end());
+	//pocketplus::utils::print_vector(first_binary_vector);
 	first_binary_vector.emplace_back(*d_t);
+	//pocketplus::utils::print_vector(first_binary_vector);
 
 	// 5.3.3.2 Second binary vector
 	// Equation (21)

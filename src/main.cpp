@@ -19,8 +19,8 @@ int main(__attribute__((unused))int argc, __attribute__((unused)) char* argv[]){
 	auto input_vector_length = std::make_unique<unsigned int>(32);
 	compressor.set_input_vector_length(*input_vector_length);
 
-	std::deque<unsigned int> robustness_level = {0, 2, 2, 2, 2, 2, 2}; // R_t
-	std::deque<bool> new_mask_flag            = {1, 0, 0, 1, 0, 0, 1}; // p_t
+	std::deque<unsigned int> robustness_level = {2, 2, 2, 2, 2, 2, 2}; // R_t
+	std::deque<bool> new_mask_flag            = {1, 0, 0, 0, 0, 0, 0}; // p_t
 	std::deque<bool> send_mask_flag           = {1, 1, 1, 0, 0, 0, 0}; // f_t // if t <= R_t then f_t = 1
 	std::deque<bool> uncompressed_flag        = {1, 1, 1, 0, 0, 0, 0}; // r_t // if t <= R_t then r_t = 1
 	std::deque<long int> input = {
@@ -84,7 +84,7 @@ int main(__attribute__((unused))int argc, __attribute__((unused)) char* argv[]){
 		auto read_compressed = pocketplus::utils::read_bool_deque_from_file("compressed.bin");
 		pocketplus::utils::print_vector(read_compressed);
 
-		pocketplus::decompressor::PocketPlusDecompressor decompressor(input_vector_length);
+		pocketplus::decompressor::PocketPlusDecompressor decompressor(*input_vector_length);
 
 		auto i = std::make_unique<unsigned int>(1);
 		std::deque<bool> data;
