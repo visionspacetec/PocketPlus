@@ -38,7 +38,7 @@ void PocketPlusDecompressor::undo_rle(std::deque<bool>& in, std::deque<bool>& ou
 			it += 1;
 			in.pop_front();
 		}
-		else if(hamming_weight_in_range(it, it + 2) == 2){
+		else if((*it == 1) && (*(it+1) == 1) && (*(it+2) == 0)){
 			it += 3;
 			pocketplus::utils::pop_n_from_front(in, 3);
 			// Undo BIT_5(A - 2)
@@ -57,11 +57,11 @@ void PocketPlusDecompressor::undo_rle(std::deque<bool>& in, std::deque<bool>& ou
 			}
 			out.emplace_back(1);
 		}
-		else if(hamming_weight_in_range(it, it + 2) == 3){ // ToDo ### Check if working!
+		else if((*it == 1) && (*(it+1) == 1) && (*(it+2) == 1)){
 			it += 3;
 			pocketplus::utils::pop_n_from_front(in, 3);
 			// Undo BIT_E(A - 2)
-			auto count_size = std::make_unique<unsigned int>(5);
+			auto count_size = std::make_unique<unsigned int>(6);
 			while(!*it){
 				*count_size += 1;
 				it++;
@@ -69,14 +69,14 @@ void PocketPlusDecompressor::undo_rle(std::deque<bool>& in, std::deque<bool>& ou
 			}
 			auto count_tmp = std::make_unique<unsigned int>(0);
 			auto bit_shift = std::make_unique<unsigned int>(0);
-			for(auto ite = it + *count_size; ite >= it; ite--, *bit_shift += 1){
+			for(auto ite = it + *count_size - 1; ite >= it; ite--, *bit_shift += 1){
 				if(*ite){
 					*count_tmp |= 1 << *bit_shift;
 				}
 			}
 			*count_tmp += 2;
-			it += *count_size + 1;
-			pocketplus::utils::pop_n_from_front(in, *count_size + 1);
+			it += *count_size;
+			pocketplus::utils::pop_n_from_front(in, *count_size);
 			for(unsigned int i = 0; i < *count_size + 1; i++){
 				out.emplace_front(((*count_tmp) >> i) & 1);
 			}
@@ -171,7 +171,7 @@ unsigned int PocketPlusDecompressor::get_input_vector_length(const std::deque<bo
 		if(*bit_position == 0){
 			input_vector_length = std::make_unique<unsigned int>(1);
 		}
-		else if(hamming_weight_in_range(bit_position, bit_position + 2) == 2){
+		else if((*bit_position == 1) && (*(bit_position+1) == 1) && (*(bit_position+2) == 0)){
 			bit_position += 3;
 			pocketplus::utils::pop_n_from_front(input_copy, 3);
 			// Undo BIT_5(A - 2)
@@ -184,7 +184,7 @@ unsigned int PocketPlusDecompressor::get_input_vector_length(const std::deque<bo
 			}
 			*input_vector_length += 2;
 		}
-		else if(hamming_weight_in_range(bit_position, bit_position + 2) == 3){
+		else if((*bit_position == 1) && (*(bit_position+1) == 1) && (*(bit_position+2) == 1)){
 			bit_position += 3;
 			pocketplus::utils::pop_n_from_front(input_copy, 3);
 			// Undo BIT_E(A - 2)
@@ -511,7 +511,6 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
 				input_vector.push_back(output);
 			}
 			else{ // c_t /= 1
-				std::cout << "2" << std::endl;
 				// BE(I_t, M_t) values of I_t at the positions where M_t is one
 				// Evaluate mask and add bits in predictable positions from previous input_vector
 				output.assign(*input_vector_length, 0); // Fill the output vector with zeros
@@ -564,7 +563,7 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
 			bit_position += 1;
 			pocketplus::utils::pop_n_from_front(input, 1);
 		}
-		else if(hamming_weight_in_range(bit_position, bit_position + 2) == 2){
+		else if((*bit_position == 1) && (*(bit_position+1) == 1) && (*(bit_position+2) == 0)){
 			bit_position += 3;
 			pocketplus::utils::pop_n_from_front(input, 3);
 			// Undo BIT_5(A - 2)
@@ -579,7 +578,7 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
 			pocketplus::utils::pop_n_from_front(input, 5);
 			//std::cout << "input_vector_length=" << *input_vector_length << std::endl;
 		}
-		else if(hamming_weight_in_range(bit_position, bit_position + 2) == 3){
+		else if((*bit_position == 1) && (*(bit_position+1) == 1) && (*(bit_position+2) == 1)){
 			bit_position += 3;
 			pocketplus::utils::pop_n_from_front(input, 3);
 			// Undo BIT_E(A - 2)
