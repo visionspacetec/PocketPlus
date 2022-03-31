@@ -74,12 +74,13 @@ void PocketPlusDecompressor::undo_rle(std::deque<bool>& in, std::deque<bool>& ou
 					*count_tmp |= 1 << *bit_shift;
 				}
 			}
-			*count_tmp += 2;
+			*count_tmp += 1;
 			it += *count_size;
 			pocketplus::utils::pop_n_from_front(in, *count_size);
-			for(unsigned int i = 0; i < *count_size + 1; i++){
-				out.emplace_front(((*count_tmp) >> i) & 1);
+			for(unsigned int i = 0; i < *count_tmp; i++){
+				out.emplace_back(0);
 			}
+			out.emplace_back(1);
 		}
 		else{
 			throw std::invalid_argument("Revert of COUNT(X) failed");
