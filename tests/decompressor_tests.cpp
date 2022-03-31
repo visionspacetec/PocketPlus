@@ -56,6 +56,24 @@ TEST(get_input_vector_length, FirstFrame){
 	ASSERT_EQ(8, pocketplus::decompressor::PocketPlusDecompressor::get_input_vector_length(input_vector));
 }
 
+TEST(get_input_vector_length, VeryLargeFrame){
+	std::deque<bool> ref_1;
+	ref_1.assign(10000, 0);
+	auto compressor = std::make_unique<pocketplus::compressor::PocketPlusCompressor>();
+	compressor->set_input_vector_length(10000);
+	auto input_vector = compressor->compress(ref_1, 0, 1, 1, 1);
+	pocketplus::utils::zero_stuffing(input_vector);
+	ASSERT_EQ(10000, pocketplus::decompressor::PocketPlusDecompressor::get_input_vector_length(input_vector));
+}
+
+TEST(decompress, InputEmpty){
+	std::deque<bool> input_vector = {};
+	std::deque<bool> ref;
+	auto decompressor = std::make_unique<pocketplus::decompressor::PocketPlusDecompressor>(8);
+	auto output_vector = decompressor->decompress(input_vector);
+	ASSERT_EQ(ref, output_vector);
+}
+
 TEST(decompress, DecompressFirstDataFrame){
 	std::deque<bool> input_vector = {1, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0};
 	std::deque<bool> ref = {1, 0, 1, 0, 1, 0, 1, 0};
@@ -241,10 +259,29 @@ TEST(decompress, DecompressTwoLongFramesChangeInMSBAndMiddle){
 	auto decompressor = std::make_unique<pocketplus::decompressor::PocketPlusDecompressor>(64);
 	auto output_vector_1 = decompressor->decompress(input_vector);
 	auto output_vector_2 = decompressor->decompress(input_vector);
-	pocketplus::utils::print_vector(ref_1);
-	pocketplus::utils::print_vector(ref_2);
-	pocketplus::utils::print_vector(output_vector_1);
-	pocketplus::utils::print_vector(output_vector_2);
+	ASSERT_EQ(ref_1, output_vector_1);
+	ASSERT_EQ(ref_2, output_vector_2);
+}
+
+TEST(decompress, DecompressUncompressedSendMaskC_t){
+	std::deque<bool> ref_1;
+	std::deque<bool> ref_2;
+	ref_1.assign(64, 0);
+	ref_2.assign(64, 0);
+	ref_2.at(61) = 1;
+	ref_2.at(1) = 1;
+	auto compressor = std::make_unique<pocketplus::compressor::PocketPlusCompressor>();
+	compressor->set_input_vector_length(64);
+	std::deque<bool> input_vector;
+	auto input_vector_1 = compressor->compress(ref_1, 0, 1, 1, 1);
+	auto input_vector_2 = compressor->compress(ref_2, 0, 1, 1, 0);
+	pocketplus::utils::zero_stuffing(input_vector_1);
+	pocketplus::utils::zero_stuffing(input_vector_2);
+	input_vector.insert(input_vector.end(), input_vector_1.begin(), input_vector_1.end());
+	input_vector.insert(input_vector.end(), input_vector_2.begin(), input_vector_2.end());
+	auto decompressor = std::make_unique<pocketplus::decompressor::PocketPlusDecompressor>(64);
+	auto output_vector_1 = decompressor->decompress(input_vector);
+	auto output_vector_2 = decompressor->decompress(input_vector);
 	ASSERT_EQ(ref_1, output_vector_1);
 	ASSERT_EQ(ref_2, output_vector_2);
 }
