@@ -413,6 +413,9 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
 			std::deque<bool> mask_mask_shifted;
 			if(!((*bit_position == 1) && (*(bit_position + 1) == 0))){
 				undo_rle(input, mask_mask_shifted, bit_position);
+				while(mask_mask_shifted.size() < *input_vector_length){
+					mask_mask_shifted.emplace_back(0);
+				}
 				std::deque<bool> M_t;
 				auto it = mask_mask_shifted.begin();
 				auto it_M_t = M_t.rbegin();
@@ -448,6 +451,21 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
 						if(*it_D_t){
 							*it_M_t_new = !*it_y_t; // Undo ~M_t
 							it_y_t++;
+						}
+						it_D_t++;
+						it_M_t_new++;
+						it_old_mask++;
+					}
+				}
+				else if(k_t.size() > 0){
+					auto it_D_t = D_t.begin();
+					auto it_M_t_new = M_t.begin();
+					auto it_old_mask = mask_vector.back().begin();
+					auto it_k_t = k_t.rbegin();
+					while(it_M_t_new != M_t.end()){
+						if(*it_D_t){
+							*it_M_t_new = !*it_k_t; // Undo ~M_t
+							it_k_t++;
 						}
 						it_D_t++;
 						it_M_t_new++;
