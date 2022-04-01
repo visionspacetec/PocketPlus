@@ -290,10 +290,7 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
 	if((*robustness_level == 0) || (*X_t_weight == 0)){
 		// e_t is empty
 		for(unsigned int i = 0; i < *X_t_weight; i++){
-			//*bit_position += 1;
-			//y_t.emplace_back(input.front());
 			y_t.emplace_back(0);
-			//input.pop_front();
 		}
 	}
 	else{
