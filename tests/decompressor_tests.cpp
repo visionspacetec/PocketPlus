@@ -83,7 +83,7 @@ TEST(decompress, DecompressFirstDataFrame){
 }
 
 TEST(decompress, DecompressTwoIdenticalDataFrames){
-	std::deque<bool> input_vector = {1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1};
+	std::deque<bool> input_vector = {1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0};
 	std::deque<bool> ref = {1, 0, 1, 0, 1, 0, 1, 0};
 	auto decompressor = std::make_unique<pocketplus::decompressor::PocketPlusDecompressor>(8);
 	auto output_vector_1 = decompressor->decompress(input_vector);
