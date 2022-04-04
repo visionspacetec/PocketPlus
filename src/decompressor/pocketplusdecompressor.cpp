@@ -346,7 +346,7 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
 		uncompressed_flag = std::make_unique<bool>(0);
 	}
 	else{
-		uncompressed_flag = std::make_unique<bool>(1);
+		//uncompressed_flag = std::make_unique<bool>(1);
 	}
 
 	// Process second sub vector
@@ -486,6 +486,7 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
 		}
 		else{ // otherwise
 			send_mask_flag = std::make_unique<bool>(0);
+			uncompressed_flag = std::make_unique<bool>(1);
 			//std::cout << "send_mask_flag (f_t) = 0" << std::endl;
 			bit_position++;
 			input.pop_front();
@@ -586,6 +587,7 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
 		}
 	}
 	else if(*bit_position){ // rt = 1
+		uncompressed_flag = std::make_unique<bool>(1);
 		bit_position += 1;
 		input.pop_front();
 		// Revert COUNT(input_vector_length) operation
@@ -643,12 +645,15 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
 		}
 	}
 	else{
+		bit_position += 1;
+		input.pop_front();
+		uncompressed_flag = std::make_unique<bool>(0);
 		if(uncompressed_flag && send_mask_flag && c_t){
 			if((*uncompressed_flag == 0) && (*send_mask_flag == 1) && (*c_t == 1)){
 				// BE(I_t, (X_t OR M_t))
 				output.assign(*input_vector_length, 0); // Fill the output vector with zeros
 				auto it_mask = mask_vector.back().begin();
-				auto it_X_t = X_t.begin();
+				auto it_X_t = X_t.rbegin();
 				auto it_output = output.begin();
 				auto it_last_input = input_vector.back().begin();
 				for(; it_mask != mask_vector.back().end();){
@@ -669,8 +674,6 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
 			else{
 				// BE(I_t, M_t) values of I_t at the positions where M_t is one
 				// Evaluate mask and add bits in predictable positions from previous input_vector
-				bit_position += 1;
-				input.pop_front();
 				output.assign(*input_vector_length, 0); // Fill the output vector with zeros
 				auto it_mask = mask_vector.back().begin();
 				auto it_output = output.begin();
@@ -693,8 +696,6 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
 		else{
 			// BE(I_t, M_t) values of I_t at the positions where M_t is one
 			// Evaluate mask and add bits in predictable positions from previous input_vector
-			bit_position += 1;
-			input.pop_front();
 			output.assign(*input_vector_length, 0); // Fill the output vector with zeros
 			auto it_mask = mask_vector.back().begin();
 			auto it_output = output.begin();
