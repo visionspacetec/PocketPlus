@@ -80,9 +80,9 @@ std::deque<bool> PocketPlusCompressor::bit_extraction(const std::deque<bool>& a,
 		throw std::invalid_argument("a.size() == b.size()");
 	}
 	std::deque<bool> output_vector;
-	for(size_t i = 0; i < a.size(); i++){
-		if(b.at(i) == 1){
-			output_vector.emplace_back(a.at(i));
+	for (auto i = std::make_pair(a.begin(), b.begin()); i.first != a.end(); ++i.first, ++i.second){
+		if(*i.second == 1){
+			output_vector.emplace_back(*i.first);
 		}
 	}
 	return output_vector;
@@ -91,8 +91,8 @@ std::deque<bool> PocketPlusCompressor::bit_extraction(const std::deque<bool>& a,
 // Hamming weight - Number of ones in vector
 std::unique_ptr<unsigned int> PocketPlusCompressor::hamming_weight(const std::deque<bool>& a){
 	auto output = std::make_unique<unsigned int>(0);
-	for(size_t i = 0; i < a.size(); i++){
-		*output += a.at(i);
+	for(auto it = a.begin(); it != a.end(); it++){
+		*output += *it;
 	}
 	return output;
 }
@@ -157,9 +157,11 @@ std::deque<bool> PocketPlusCompressor::compress(
 		std::generate(
 			mask_build_new.begin(), 
 			mask_build_new.end(), 
-			[mo=mask_build_old, input_new, io=input_old, n = 0]() mutable {
-				auto out = (!input_new.at(n) != !io.at(n)) || mo.at(n);
-				n++;
+			[mo=mask_build_old.begin(), in=input_new.begin(), io=input_old.begin()]() mutable {
+				auto out = (!*in != !*io) || *mo;
+				mo++;
+				in++;
+				io++;
 				return out;
 			}
 		);
@@ -179,9 +181,11 @@ std::deque<bool> PocketPlusCompressor::compress(
 			std::generate(
 				mask_new.begin(), 
 				mask_new.end(), 
-				[mo=mask_old, input_new, io=input_old, n = 0]() mutable {
-					auto out = (!input_new.at(n) != !io.at(n)) || mo.at(n);
-					n++;
+				[mo=mask_old.begin(), in=input_new.begin(), io=input_old.begin()]() mutable {
+					auto out = (!*in != !*io) || *mo;
+					mo++;
+					in++;
+					io++;
 					return out;
 				}
 			);
@@ -190,25 +194,28 @@ std::deque<bool> PocketPlusCompressor::compress(
 			std::generate(
 				mask_new.begin(), 
 				mask_new.end(), 
-				[mbo=mask_build_old, input_new, io=input_old, n = 0]() mutable {
-					auto out = (!input_new.at(n) != !io.at(n)) || mbo.at(n);
-					n++;
+				[mbo=mask_build_old.begin(), in=input_new.begin(), io=input_old.begin()]() mutable {
+					auto out = (!*in != !*io) || *mbo;
+					mbo++;
+					in++;
+					io++;
 					return out;
 				}
 			);
 		}
 		// Section 4.2.3
 		std::generate(
-			mask_change_vector.at(0).begin(), 
-			mask_change_vector.at(0).end(), 
-			[mn=mask_new, mo=mask_old, n = 0]() mutable {
-				auto out = !mn.at(n) != !mo.at(n);
-				n++;
+			mask_change_vector.front().begin(), 
+			mask_change_vector.front().end(), 
+			[mn=mask_new.begin(), mo=mask_old.begin()]() mutable {
+				auto out = !*mn != !*mo;
+				mn++;
+				mo++;
 				return out;
 			}
 		);
 		// 5.3.2.2
-		auto mask_change_weight = hamming_weight(mask_change_vector.at(0));
+		auto mask_change_weight = hamming_weight(mask_change_vector.front());
 		if(*mask_change_weight == 0){
 			*no_mask_changes += 1;
 			if(*no_mask_changes > robustness_level){
@@ -253,15 +260,22 @@ std::deque<bool> PocketPlusCompressor::compress(
 	X_t.resize(*input_vector_length);
 	if(*V_t == 0){
 		// X_t = <D_t>
-		X_t = reverse(mask_change_vector.at(0));
+		X_t = reverse(mask_change_vector.front());
 	}
 	else if((int)(*t - *V_t) <= 0){
 		// X_t = [<D_1 OR D_2 OR ... OR D_t>]
 		X_t.assign(*input_vector_length, 0);
 		for(unsigned int i = 0; i < mask_change_vector.size(); i++){
-			for(unsigned int index = 0; index < mask_change_vector.at(i).size(); index++){
-				X_t.at(index) = mask_change_vector.at(i).at(index) || X_t.at(index);
-			}
+			std::generate(
+				X_t.begin(), 
+				X_t.end(), 
+				[mcv=mask_change_vector.at(i).begin(), xt=X_t.begin()]() mutable {
+					auto out = *mcv || *xt;
+					mcv++;
+					xt++;
+					return out;
+				}
+			);
 		}
 		X_t = reverse(X_t); // ToDo: Just go the other way thru the for loop to avoid this step
 	}
@@ -269,9 +283,16 @@ std::deque<bool> PocketPlusCompressor::compress(
 		// X_t = [<D_(t-robustness_level) OR D_(t-robustness_level)+1 OR ... OR D_t>]
 		X_t.assign(*input_vector_length, 0); 
 		for(unsigned int i = 0; i < robustness_level + 1; i++){
-			for(unsigned int index = 0; index < mask_change_vector.at(i).size(); index++){
-				X_t.at(index) = mask_change_vector.at(i).at(index) || X_t.at(index);
-			}
+			std::generate(
+				X_t.begin(), 
+				X_t.end(), 
+				[mcv=mask_change_vector.at(i).begin(), xt=X_t.begin()]() mutable {
+					auto out = *mcv || *xt;
+					mcv++;
+					xt++;
+					return out;
+				}
+			);
 		}
 		X_t = reverse(X_t); // ToDo: Just go the other way thru the for loop to avoid this step
 		//std::cout << "X_t case 3" << std::endl;
@@ -361,9 +382,10 @@ std::deque<bool> PocketPlusCompressor::compress(
 		std::generate(
 			mask_shifted_rle.begin(), 
 			mask_shifted_rle.end(), 
-			[mn=mask_new, msr=mask_shifted_rle, n = 0]() mutable {
-				auto out = mn.at(n) ^ msr.at(n);
-				n++;
+			[mn=mask_new.begin(), msr=mask_shifted_rle.begin()]() mutable {
+				auto out = *mn ^ *msr;
+				mn++;
+				msr++;
 				return out;
 			}
 		);
@@ -387,9 +409,10 @@ std::deque<bool> PocketPlusCompressor::compress(
 		std::generate(
 			X_t_or_M_t.begin(), 
 			X_t_or_M_t.end(), 
-			[m=mask_new, x=X_t, n = 0]() mutable {
-				auto out = m.at(n) || x.at(x.size() - 1 - n);
-				n++;
+			[m=mask_new.begin(), x=X_t.rbegin()]() mutable {
+				auto out = *m || *x;
+				m++;
+				x++;
 				return out;
 			}
 		);
@@ -415,9 +438,10 @@ std::deque<bool> PocketPlusCompressor::compress(
 		std::generate(
 			X_t_or_M_t.begin(), 
 			X_t_or_M_t.end(), 
-			[m=mask_new, x=X_t, n = 0]() mutable {
-				auto out = m.at(n) || x.at(x.size() - 1 - n);
-				n++;
+			[m=mask_new.begin(), x=X_t.rbegin()]() mutable {
+				auto out = *m || *x;
+				m++;
+				x++;
 				return out;
 			}
 		);
