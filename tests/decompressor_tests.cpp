@@ -138,7 +138,7 @@ TEST(decompress, DecompressTwoDataFramesNewMaskFlag){
 	ASSERT_EQ(ref_2, output_vector_2);
 }
 
-TEST(decompress, DecompressThreeDataFramesChangeInLSBNewMaskFlag){
+TEST(decompress, CompressThreeDataFramesChangeInLSBNewMaskFlagR1){
 	std::deque<bool> input_vector = {1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0, 0};
 	std::deque<bool> ref_1 = {1, 0, 1, 0, 1, 0, 1, 0};
 	std::deque<bool> ref_2 = {1, 0, 1, 0, 1, 0, 1, 1};
@@ -152,7 +152,7 @@ TEST(decompress, DecompressThreeDataFramesChangeInLSBNewMaskFlag){
 	ASSERT_EQ(ref_3, output_vector_3);
 }
 
-TEST(decompress, DecompressThreeDataFramesChangeInLSBSendMaskFlag){
+TEST(decompress, CompressThreeDataFramesChangeInLSBSendMaskFlagR1){
 	std::deque<bool> input_vector = {1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0};
 	std::deque<bool> ref_1 = {1, 0, 1, 0, 1, 0, 1, 0};
 	std::deque<bool> ref_2 = {1, 0, 1, 0, 1, 0, 1, 1};
@@ -166,7 +166,7 @@ TEST(decompress, DecompressThreeDataFramesChangeInLSBSendMaskFlag){
 	ASSERT_EQ(ref_3, output_vector_3);
 }
 
-TEST(decompress, DecompressThreeDataFramesChangeInLSBUncompressedFlag){
+TEST(decompress, DecompressThreeDataFramesChangeInLSBSendMaskFlag){
 	std::deque<bool> input_vector = {1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0};
 	std::deque<bool> ref_1 = {1, 0, 1, 0, 1, 0, 1, 0};
 	std::deque<bool> ref_2 = {1, 0, 1, 0, 1, 0, 1, 1};
@@ -309,6 +309,31 @@ TEST(decompress, DecompressShiftedMask2){
 	auto input_vector_1 = compressor->compress(ref_1, 1, 1, 1, 1);
 	auto input_vector_2 = compressor->compress(ref_2, 0, 0, 1, 0);
 	auto input_vector_3 = compressor->compress(ref_3, 0, 0, 1, 0);
+	pocketplus::utils::zero_stuffing(input_vector_1);
+	pocketplus::utils::zero_stuffing(input_vector_2);
+	pocketplus::utils::zero_stuffing(input_vector_3);
+	input_vector.insert(input_vector.end(), input_vector_1.begin(), input_vector_1.end());
+	input_vector.insert(input_vector.end(), input_vector_2.begin(), input_vector_2.end());
+	input_vector.insert(input_vector.end(), input_vector_3.begin(), input_vector_3.end());
+	auto decompressor = std::make_unique<pocketplus::decompressor::PocketPlusDecompressor>(8);
+	auto output_vector_1 = decompressor->decompress(input_vector);
+	auto output_vector_2 = decompressor->decompress(input_vector);
+	auto output_vector_3 = decompressor->decompress(input_vector);
+	ASSERT_EQ(ref_1, output_vector_1);
+	ASSERT_EQ(ref_2, output_vector_2);
+	ASSERT_EQ(ref_3, output_vector_3);
+}
+
+TEST(decompress, DecompressC_t){
+	auto compressor = std::make_unique<pocketplus::compressor::PocketPlusCompressor>();
+	compressor->set_input_vector_length(8);
+	std::deque<bool> input_vector;
+	std::deque<bool> ref_1 = {1, 0, 1, 0, 1, 0, 1, 0};
+	std::deque<bool> ref_2 = {1, 0, 1, 0, 1, 0, 1, 1};
+	std::deque<bool> ref_3 = {1, 0, 1, 0, 1, 1, 1, 1};
+	auto input_vector_1 = compressor->compress(ref_1, 0, 1, 1, 1);
+	auto input_vector_2 = compressor->compress(ref_2, 0, 1, 0, 0);
+	auto input_vector_3 = compressor->compress(ref_3, 1, 1, 1, 0);
 	pocketplus::utils::zero_stuffing(input_vector_1);
 	pocketplus::utils::zero_stuffing(input_vector_2);
 	pocketplus::utils::zero_stuffing(input_vector_3);

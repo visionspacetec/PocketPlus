@@ -195,7 +195,7 @@ TEST(compress, CompressTwoDataFramesNewMaskFlag){
 	ASSERT_EQ(ref, output_vector_2);
 }
 
-TEST(compress, CompressThreeDataFramesChangeInLSBNewMaskFlag){
+TEST(compress, CompressThreeDataFramesChangeInLSBNewMaskFlagR1){
 	std::deque<bool> input_vector_1 = {1, 0, 1, 0, 1, 0, 1, 0};
 	std::deque<bool> input_vector_2 = {1, 0, 1, 0, 1, 0, 1, 1};
 	std::deque<bool> input_vector_3 = {1, 0, 1, 0, 1, 1, 1, 1};
@@ -210,7 +210,7 @@ TEST(compress, CompressThreeDataFramesChangeInLSBNewMaskFlag){
 	ASSERT_EQ(ref3, output_vector_3);
 }
 
-TEST(compress, CompressThreeDataFramesChangeInLSBSendMaskFlag){
+TEST(compress, CompressThreeDataFramesChangeInLSBSendMaskFlagR1){
 	std::deque<bool> input_vector_1 = {1, 0, 1, 0, 1, 0, 1, 0};
 	std::deque<bool> input_vector_2 = {1, 0, 1, 0, 1, 0, 1, 1};
 	std::deque<bool> input_vector_3 = {1, 0, 1, 0, 1, 1, 1, 1};
@@ -225,7 +225,7 @@ TEST(compress, CompressThreeDataFramesChangeInLSBSendMaskFlag){
 	ASSERT_EQ(ref3, output_vector_3);
 }
 
-TEST(compress, CompressThreeDataFramesChangeInLSBUncompressedFlag){
+TEST(compress, CompressThreeDataFramesChangeInLSBSendMaskFlag){
 	std::deque<bool> input_vector_1 = {1, 0, 1, 0, 1, 0, 1, 0};
 	std::deque<bool> input_vector_2 = {1, 0, 1, 0, 1, 0, 1, 1};
 	std::deque<bool> input_vector_3 = {1, 0, 1, 0, 1, 0, 1, 1};
