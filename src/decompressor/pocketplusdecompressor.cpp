@@ -5,8 +5,8 @@ using namespace pocketplus::decompressor;
 // Hamming weight - Number of ones in vector
 unsigned int PocketPlusDecompressor::hamming_weight(const std::deque<bool>& a){
 	auto output = std::make_unique<unsigned int>(0);
-	for(size_t i = 0; i < a.size(); i++){
-		*output += a.at(i);
+	for(auto it = a.begin(); it != a.end(); it++){
+		*output += *it;
 	}
 	return *output;
 }
@@ -314,10 +314,10 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
 		//std::cout << "e_t: EMPTY" << std::endl;
 	}
 	else{
-		//std::cout << "e_t: " << e_t.at(0) << std::endl;
+		//std::cout << "e_t: " << e_t.front() << std::endl;
 	}
 	//std::cout << (*robustness_level == 0) << (*X_t_weight == 0) << (hamming_weight(y_t) == 0) << std::endl;
-	if(((*robustness_level == 0) || (*X_t_weight == 0) || (hamming_weight(y_t) == 0)) && ((e_t.size() == 0) || (e_t.at(0) == 0))){
+	if(((*robustness_level == 0) || (*X_t_weight == 0) || (hamming_weight(y_t) == 0)) && ((e_t.size() == 0) || (e_t.front() == 0))){
 		// k_t is empty
 		//std::cout << "must print" << std::endl;
 	}
