@@ -262,7 +262,7 @@ TEST(compress, c_t_zero){
 	compressor->compress(input_vector_2, 0, 1, 0, 0);
 	compressor->compress(input_vector_3, 1, 1, 1, 0);
 	auto output_vector_4 = compressor->compress(input_vector_4, 1, 0, 0, 0);
-	std::deque<bool> ref4 = {0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1};
+	std::deque<bool> ref4 = {0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1};
 	ASSERT_EQ(ref4, output_vector_4);
 }
 
