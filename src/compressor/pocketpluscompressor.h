@@ -141,7 +141,15 @@ class PocketPlusCompressor{
 		/*!
 			The PocketPlusCompressor constructor has no arguments, it is configured after creation
 		*/
-		PocketPlusCompressor(): robustness_level_min(std::make_unique<const unsigned int>(0)), robustness_level_max(std::make_unique<const unsigned int>(7)), t(std::make_unique<unsigned int>(0)){}
+		PocketPlusCompressor(): 
+			robustness_level_min(std::make_unique<const unsigned int>(0)), 
+			robustness_level_max(std::make_unique<const unsigned int>(7)), 
+			t(std::make_unique<unsigned int>(0)),
+			input_vector_length(std::make_unique<unsigned int>(0)),
+			no_mask_changes(std::make_unique<unsigned int>(0)),
+			C_t(std::make_unique<unsigned int>(0)),
+			V_t(std::make_unique<unsigned int>(0))
+			{}
 
 		//! PocketPlusCompressor copy constructor
 		/*!
