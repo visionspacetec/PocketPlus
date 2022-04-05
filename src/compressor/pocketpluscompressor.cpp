@@ -404,22 +404,24 @@ std::deque<bool> PocketPlusCompressor::compress(
 	// 5.3.3.3 Third binary vector
 	// Equation (22)
 	third_binary_vector.clear();
-	if((*d_t == 1) && (c_t.front() == 1)){
-		// BE(I_t,(X_t OR M_t))
-		std::deque<bool> X_t_or_M_t;
-		X_t_or_M_t.assign(*input_vector_length, 0);
-		std::generate(
-			X_t_or_M_t.begin(), 
-			X_t_or_M_t.end(), 
-			[m=mask_new.begin(), x=X_t.rbegin()]() mutable {
-				auto out = *m || *x;
-				m++;
-				x++;
-				return out;
-			}
-		);
-		input_mask_bit_extraction = bit_extraction(input_new, X_t_or_M_t);
-		third_binary_vector.insert(third_binary_vector.end(), input_mask_bit_extraction.begin(), input_mask_bit_extraction.end());
+	if((*d_t == 1) && !c_t.empty()){
+		if(c_t.front() == 1){
+			// BE(I_t,(X_t OR M_t))
+			std::deque<bool> X_t_or_M_t;
+			X_t_or_M_t.assign(*input_vector_length, 0);
+			std::generate(
+				X_t_or_M_t.begin(), 
+				X_t_or_M_t.end(), 
+				[m=mask_new.begin(), x=X_t.rbegin()]() mutable {
+					auto out = *m || *x;
+					m++;
+					x++;
+					return out;
+				}
+			);
+			input_mask_bit_extraction = bit_extraction(input_new, X_t_or_M_t);
+			third_binary_vector.insert(third_binary_vector.end(), input_mask_bit_extraction.begin(), input_mask_bit_extraction.end());
+		}
 	}
 	else if(*d_t == 1){
 		// BE(I_t,M_t)
@@ -432,23 +434,25 @@ std::deque<bool> PocketPlusCompressor::compress(
 		third_binary_vector.insert(third_binary_vector.end(), input_vector_length_count.begin(), input_vector_length_count.end());
 		third_binary_vector.insert(third_binary_vector.end(), input_new.begin(), input_new.end());
 	}
-	else if((uncompressed_flag == 0) && (send_mask_flag == 1) && (c_t.front() == 1)){
-		// '0' || BE(I_t,(X_t OR M_t))
-		third_binary_vector.emplace_back(0);
-		std::deque<bool> X_t_or_M_t;
-		X_t_or_M_t.assign(*input_vector_length, 0);
-		std::generate(
-			X_t_or_M_t.begin(), 
-			X_t_or_M_t.end(), 
-			[m=mask_new.begin(), x=X_t.rbegin()]() mutable {
-				auto out = *m || *x;
-				m++;
-				x++;
-				return out;
-			}
-		);
-		input_mask_bit_extraction = bit_extraction(input_new, X_t_or_M_t);
-		third_binary_vector.insert(third_binary_vector.end(), input_mask_bit_extraction.begin(), input_mask_bit_extraction.end());
+	else if((uncompressed_flag == 0) && (send_mask_flag == 1) && !c_t.empty()){
+		if(c_t.front() == 1){
+			// '0' || BE(I_t,(X_t OR M_t))
+			third_binary_vector.emplace_back(0);
+			std::deque<bool> X_t_or_M_t;
+			X_t_or_M_t.assign(*input_vector_length, 0);
+			std::generate(
+				X_t_or_M_t.begin(), 
+				X_t_or_M_t.end(), 
+				[m=mask_new.begin(), x=X_t.rbegin()]() mutable {
+					auto out = *m || *x;
+					m++;
+					x++;
+					return out;
+				}
+			);
+			input_mask_bit_extraction = bit_extraction(input_new, X_t_or_M_t);
+			third_binary_vector.insert(third_binary_vector.end(), input_mask_bit_extraction.begin(), input_mask_bit_extraction.end());
+		}
 	}
 	else{
 		// '0' || BE(I_t,M_t)
