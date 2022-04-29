@@ -13,7 +13,7 @@ void PocketPlusCompressor::set_input_vector_length(const unsigned int& vector_le
 	}
 	input_vector_length = std::make_unique<unsigned int>(vector_length); // F // User defined value
 	input_vector_length_count = count(*input_vector_length);
-	initial_mask_vector.assign(*input_vector_length, 0); // M_0 = 0 // ToDo: Make initial mask user defined
+	initial_mask_vector.assign(*input_vector_length, 0); // Defaults to M_0 = 0
 	mask_new = initial_mask_vector;
 	input_old.assign(*input_vector_length, 0);
 	mask_old.assign(*input_vector_length, 0); // M_t
@@ -110,6 +110,17 @@ std::deque<bool> PocketPlusCompressor::inverse(const std::deque<bool>& a){
 		output_vector.emplace_back(!*i);
 	}
 	return output_vector;
+}
+
+// Set the initial mask vector
+void PocketPlusCompressor::set_initial_mask(const std::deque<bool>& initial_mask){
+	if(*input_vector_length == 0){
+		throw std::invalid_argument("Input vector length must be set before calling set_initial_mask");
+	}
+	if(initial_mask.size() != *input_vector_length){
+		throw std::invalid_argument("Initial mask must have the predefined input_vector_length");
+	}
+	initial_mask_vector = initial_mask;
 }
 
 // Performs the actual compression

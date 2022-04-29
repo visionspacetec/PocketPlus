@@ -190,6 +190,13 @@ class PocketPlusCompressor{
 		*/
 		unsigned int get_input_vector_length();
 
+		//! Public function to set the initial mask vector
+		/*!
+			Public function to set the initial mask vector
+			\param initial_mask Intitial mask as boolean deque
+		*/
+		void set_initial_mask(const std::deque<bool>& initial_mask);
+
 		//! Public function to perform the actual compression
 		/*!
 			Public function to perform the compression of a given boolean deque

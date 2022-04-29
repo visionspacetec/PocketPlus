@@ -73,6 +73,33 @@ TEST(get_input_vector_length, Initialized){
 	ASSERT_EQ(8, output);
 }
 
+TEST(set_initial_mask, LengthNotSet){
+	auto compressor = std::make_unique<pocketplus::compressor::PocketPlusCompressor>();
+	std::deque<bool> mask = {1, 0, 1, 0};
+	ASSERT_THROW(compressor->set_initial_mask(mask), std::invalid_argument);
+}
+
+TEST(set_initial_mask, LengthValid){
+	auto compressor = std::make_unique<pocketplus::compressor::PocketPlusCompressor>();
+	compressor->set_input_vector_length(4);
+	std::deque<bool> mask = {1, 0, 1, 0};
+	ASSERT_NO_THROW(compressor->set_initial_mask(mask));
+}
+
+TEST(set_initial_mask, LengthTooSmall){
+	auto compressor = std::make_unique<pocketplus::compressor::PocketPlusCompressor>();
+	compressor->set_input_vector_length(4);
+	std::deque<bool> mask = {1, 0};
+	ASSERT_THROW(compressor->set_initial_mask(mask), std::invalid_argument);
+}
+
+TEST(set_initial_mask, LengthTooLarge){
+	auto compressor = std::make_unique<pocketplus::compressor::PocketPlusCompressor>();
+	compressor->set_input_vector_length(4);
+	std::deque<bool> mask = {1, 0, 1, 0, 1, 0};
+	ASSERT_THROW(compressor->set_initial_mask(mask), std::invalid_argument);
+}
+
 TEST(compress, InputVectorSizeNotInitialized){
 	std::deque<bool> input_vector = {1, 0, 1, 0};
 	auto compressor = std::make_unique<pocketplus::compressor::PocketPlusCompressor>();
