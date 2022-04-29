@@ -26,12 +26,7 @@ void PocketPlusCompressor::set_input_vector_length(const unsigned int& vector_le
 }
 
 unsigned int PocketPlusCompressor::get_input_vector_length(){
-	if(input_vector_length){
-		return *input_vector_length;
-	}
-	else{
-		return 0;
-	}
+	return *input_vector_length;
 }
 
 // 5.2.1 Counter encoding function
