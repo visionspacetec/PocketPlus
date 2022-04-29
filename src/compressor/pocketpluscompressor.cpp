@@ -125,7 +125,7 @@ std::deque<bool> PocketPlusCompressor::compress(
 	const bool& send_mask_flag, // f_t
 	const bool& uncompressed_flag // r_t
 	){
-	if(!input_vector_length){
+	if(*input_vector_length == 0){
 		throw std::invalid_argument("Input vector length must be set before calling compress");
 	}
 	// Section 3.3.2 Compressor parameters
