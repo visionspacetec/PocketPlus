@@ -120,7 +120,7 @@ void PocketPlusCompressor::set_initial_mask(const std::deque<bool>& initial_mask
 	if(initial_mask.size() != *input_vector_length){
 		throw std::invalid_argument("Initial mask must have the predefined input_vector_length");
 	}
-	initial_mask_vector = initial_mask;
+	mask_new = initial_mask;
 }
 
 // Performs the actual compression
@@ -151,7 +151,7 @@ std::deque<bool> PocketPlusCompressor::compress(
 	}
 	mask_flag.emplace_back(new_mask_flag);
 
-	if(mask_flag.size() > 15){
+	if(mask_flag.size() > 16){
 		mask_flag.pop_front();
 	}
 	first_binary_vector.clear();
@@ -179,8 +179,8 @@ std::deque<bool> PocketPlusCompressor::compress(
 	}
 
 	// Section 4.2.2
-	while(mask_change_vector.size() > *robustness_level_max + 1){
-		mask_change_vector.pop_front();
+	while(mask_change_vector.size() > 15){
+		mask_change_vector.pop_back();
 	}
 	mask_change_vector.emplace_front(mask_change_0);
 
@@ -223,21 +223,16 @@ std::deque<bool> PocketPlusCompressor::compress(
 			}
 		);
 		// 5.3.2.2
-		auto mask_change_weight = hamming_weight(mask_change_vector.front());
-		if(*mask_change_weight == 0){
-			*no_mask_changes += 1;
-			if(*no_mask_changes > robustness_level){
-				*C_t = *no_mask_changes - robustness_level;
-				if(*C_t > 15){
-					*C_t = 15;
-				}
+		*C_t = 0;
+		*V_t = *C_t + robustness_level;
+		while((*V_t <= *t) && (*V_t <= 15) && ((mask_change_vector.size() - *V_t - 1) > 0)){
+			if(std::all_of(mask_change_vector.at(*V_t + 1).begin(), mask_change_vector.at(*V_t + 1).end(), [](int i) { return i==0; })){
+				*C_t += 1;
+				*V_t = *C_t + robustness_level;
 			}
-			*V_t = *C_t + robustness_level;
-		}
-		else{
-			*no_mask_changes = 0;
-			*C_t = 0;
-			*V_t = robustness_level;
+			else{
+				break;
+			}
 		}
 	}
 	else{
@@ -306,7 +301,7 @@ std::deque<bool> PocketPlusCompressor::compress(
 		//std::cout << "X_t case 3" << std::endl;
 	}
 	// Equation (17)
-	y_t = bit_extraction(reverse(inverse(mask_new)), X_t);
+	y_t = reverse(bit_extraction(reverse(inverse(mask_new)), X_t));
 	//std::cout<< "y_t" << std::endl;
 	//pocketplus::utils::print_vector(y_t);
 	// Equation (18)
@@ -324,12 +319,13 @@ std::deque<bool> PocketPlusCompressor::compress(
 	}
 	// Equation (19)
 	if((*V_t == 0) || (*X_t_weight == 0) || (*y_t_weight == 0)){
-		// k_t = empty
+		k_t.clear();
 	}
 	else{
-		k_t = bit_extraction(reverse(inverse(mask_new)), X_t);
+		k_t = reverse(bit_extraction(reverse(inverse(mask_new)), X_t));
 	}
-	/*std::cout << "X_t:" << std::endl;
+	/*std::cout << "V_t: " << *V_t << std::endl;
+	std::cout << "X_t:" << std::endl;
 	pocketplus::utils::print_vector(X_t);
 	std::cout << "mask_new:" << std::endl;
 	pocketplus::utils::print_vector(mask_new);
@@ -425,13 +421,18 @@ std::deque<bool> PocketPlusCompressor::compress(
 					return out;
 				}
 			);
-			input_mask_bit_extraction = bit_extraction(input_new, X_t_or_M_t);
+			input_mask_bit_extraction = reverse(bit_extraction(input_new, X_t_or_M_t));
+			third_binary_vector.insert(third_binary_vector.end(), input_mask_bit_extraction.begin(), input_mask_bit_extraction.end());
+		}
+		else{
+			// BE(I_t,M_t)
+			input_mask_bit_extraction = reverse(bit_extraction(input_new, mask_new));
 			third_binary_vector.insert(third_binary_vector.end(), input_mask_bit_extraction.begin(), input_mask_bit_extraction.end());
 		}
 	}
 	else if(*d_t == 1){
 		// BE(I_t,M_t)
-		input_mask_bit_extraction = bit_extraction(input_new, mask_new);
+		input_mask_bit_extraction = reverse(bit_extraction(input_new, mask_new));
 		third_binary_vector.insert(third_binary_vector.end(), input_mask_bit_extraction.begin(), input_mask_bit_extraction.end());
 	}
 	else if(uncompressed_flag == 1){
@@ -456,14 +457,20 @@ std::deque<bool> PocketPlusCompressor::compress(
 					return out;
 				}
 			);
-			input_mask_bit_extraction = bit_extraction(input_new, X_t_or_M_t);
+			input_mask_bit_extraction = reverse(bit_extraction(input_new, X_t_or_M_t));
+			third_binary_vector.insert(third_binary_vector.end(), input_mask_bit_extraction.begin(), input_mask_bit_extraction.end());
+		}
+		else{
+			// '0' || BE(I_t,M_t)
+			third_binary_vector.emplace_back(0);
+			input_mask_bit_extraction = reverse(bit_extraction(input_new, mask_new));
 			third_binary_vector.insert(third_binary_vector.end(), input_mask_bit_extraction.begin(), input_mask_bit_extraction.end());
 		}
 	}
 	else{
 		// '0' || BE(I_t,M_t)
 		third_binary_vector.emplace_back(0);
-		input_mask_bit_extraction = bit_extraction(input_new, mask_new);
+		input_mask_bit_extraction = reverse(bit_extraction(input_new, mask_new));
 		third_binary_vector.insert(third_binary_vector.end(), input_mask_bit_extraction.begin(), input_mask_bit_extraction.end());
 	}
 

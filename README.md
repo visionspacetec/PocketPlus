@@ -18,10 +18,10 @@ This project uses Google Test (GTest) with CMake for testing and building.
 ```bash
 sudo apt-get install cmake git libgtest-dev lcov gcovr
 cd /usr/src/gtest
-cmake CMakeLists.txt
-make
+sudo cmake CMakeLists.txt
+sudo make
 cd lib
-cp *.a /usr/lib
+sudo cp *.a /usr/lib
 cd ~
 git clone https://github.com/visionspacetec/PocketPlus.git
 cd PocketPlus
@@ -69,7 +69,7 @@ In you code, import the compressor, decompressor and the utility functions as ne
 
 A simple example can be found in the provided [main function](https://github.com/visionspacetec/PocketPlus/blob/master/src/main.cpp), which is only ment to showcase and test the algorithm.
 
-## Develpment
+## Development
 
 ```bash
 valgrind --tool=callgrind ./PocketPlus.exe 
