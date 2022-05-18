@@ -87,7 +87,7 @@ class PocketPlusDecompressor{
 				throw std::out_of_range("1 <= input_vector_length <= 2^16-1 (65535");
 			}
 			input_vector_length = std::make_unique<unsigned int>(vector_length);
-			minimum_size = std::make_unique<const unsigned int>(8);
+			minimum_size = std::make_unique<const unsigned int>(7);
 			input_vector_size_before_processing = std::make_unique<unsigned int>(0);
 			t = std::make_unique<unsigned int>(0);
 			check_send_changes_flag = {1, 0, 0, 0, 0, 0};
