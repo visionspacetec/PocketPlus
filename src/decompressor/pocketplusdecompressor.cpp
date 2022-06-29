@@ -312,9 +312,6 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
 	
 	if((*robustness_level == 0) || (*X_t_weight == 0)){
 		// e_t is empty
-		for(unsigned int i = 0; i < *X_t_weight; i++){
-			y_t.emplace_back(0);
-		}
 	}
 	else{
 		if(input.size() == 0){
@@ -336,12 +333,12 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
 	}
 	//std::cout << "y_t.size(): " << y_t.size() << std::endl;
 	//pocketplus::utils::print_vector(y_t);
-	if(e_t.size() == 0){
+	//if(e_t.size() == 0){
 		//std::cout << "e_t: EMPTY" << std::endl;
-	}
-	else{
+	//}
+	//else{
 		//std::cout << "e_t: " << e_t.front() << std::endl;
-	}
+	//}
 	//std::cout << (*robustness_level == 0) << (*X_t_weight == 0) << (hamming_weight(y_t) == 0) << std::endl;
 	if(((*robustness_level == 0) || (*X_t_weight == 0) || (hamming_weight(y_t) == 0)) && ((e_t.size() == 0) || (e_t.front() == 0))){
 		// k_t is empty
