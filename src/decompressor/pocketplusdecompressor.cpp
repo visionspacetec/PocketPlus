@@ -403,11 +403,11 @@ std::deque<bool> PocketPlusDecompressor::decompress(std::deque<bool>& input){
 			auto it_y_t = y_t.rbegin();
 			while(it_M_t != M_t.end()){
 				if(*it_D_t){
-					*it_M_t = !*it_y_t; // Undo ~M_t
-					it_y_t++;
 					if(it_y_t == y_t.rend()){
 						throw std::invalid_argument("Invalid input, not enough y_t bits left");
 					}
+					*it_M_t = !*it_y_t; // Undo ~M_t
+					it_y_t++;
 				}
 				it_D_t++;
 				it_M_t++;
