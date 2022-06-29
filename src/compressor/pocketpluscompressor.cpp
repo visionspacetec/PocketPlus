@@ -354,6 +354,8 @@ std::deque<bool> PocketPlusCompressor::compress(
 			c_t = {0};
 		}
 	}
+	//std::cout << "c_t:" << std::endl;
+	//pocketplus::utils::print_vector(c_t);
 
 	// Equation (15)
 	X_t_rle = run_length_encoding(X_t);
