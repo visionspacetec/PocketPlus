@@ -303,5 +303,11 @@ TEST(compress, second_vector_zero){
 	ASSERT_EQ(ref2, output_vector_2);
 }
 
+TEST(constructor, copy_constructor){
+	auto compressor = std::make_unique<pocketplus::compressor::PocketPlusCompressor>();
+	compressor->set_input_vector_length(8);
+	ASSERT_NO_THROW(auto copied_compressor = std::make_unique<pocketplus::compressor::PocketPlusCompressor>(*compressor));
+}
+
 };
 };
