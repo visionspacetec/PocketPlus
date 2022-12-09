@@ -73,6 +73,33 @@ TEST(get_input_vector_length, Initialized){
 	ASSERT_EQ(8, output);
 }
 
+TEST(set_initial_mask, LengthNotSet){
+	auto compressor = std::make_unique<pocketplus::compressor::PocketPlusCompressor>();
+	std::deque<bool> mask = {1, 0, 1, 0};
+	ASSERT_THROW(compressor->set_initial_mask(mask), std::invalid_argument);
+}
+
+TEST(set_initial_mask, LengthValid){
+	auto compressor = std::make_unique<pocketplus::compressor::PocketPlusCompressor>();
+	compressor->set_input_vector_length(4);
+	std::deque<bool> mask = {1, 0, 1, 0};
+	ASSERT_NO_THROW(compressor->set_initial_mask(mask));
+}
+
+TEST(set_initial_mask, LengthTooSmall){
+	auto compressor = std::make_unique<pocketplus::compressor::PocketPlusCompressor>();
+	compressor->set_input_vector_length(4);
+	std::deque<bool> mask = {1, 0};
+	ASSERT_THROW(compressor->set_initial_mask(mask), std::invalid_argument);
+}
+
+TEST(set_initial_mask, LengthTooLarge){
+	auto compressor = std::make_unique<pocketplus::compressor::PocketPlusCompressor>();
+	compressor->set_input_vector_length(4);
+	std::deque<bool> mask = {1, 0, 1, 0, 1, 0};
+	ASSERT_THROW(compressor->set_initial_mask(mask), std::invalid_argument);
+}
+
 TEST(compress, InputVectorSizeNotInitialized){
 	std::deque<bool> input_vector = {1, 0, 1, 0};
 	auto compressor = std::make_unique<pocketplus::compressor::PocketPlusCompressor>();
@@ -262,7 +289,7 @@ TEST(compress, c_t_zero){
 	compressor->compress(input_vector_2, 0, 1, 0, 0);
 	compressor->compress(input_vector_3, 1, 1, 1, 0);
 	auto output_vector_4 = compressor->compress(input_vector_4, 1, 0, 0, 0);
-	std::deque<bool> ref4 = {0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1};
+	std::deque<bool> ref4 = {0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1};
 	ASSERT_EQ(ref4, output_vector_4);
 }
 
@@ -274,6 +301,12 @@ TEST(compress, second_vector_zero){
 	auto output_vector_2 = compressor->compress(input_vector, 0, 0, 0, 1);
 	std::deque<bool> ref2 = {1, 0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0};
 	ASSERT_EQ(ref2, output_vector_2);
+}
+
+TEST(constructor, copy_constructor){
+	auto compressor = std::make_unique<pocketplus::compressor::PocketPlusCompressor>();
+	compressor->set_input_vector_length(8);
+	ASSERT_NO_THROW(auto copied_compressor = std::make_unique<pocketplus::compressor::PocketPlusCompressor>(*compressor));
 }
 
 };
