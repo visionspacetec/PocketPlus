@@ -127,7 +127,7 @@ TEST(read_bool_deque_from_file, Symlink){
 // void pop_n_from_front(std::deque<bool>& in, const unsigned int& n);
 TEST(pop_n_from_front, EmptyInput){
 	std::deque<bool> in;
-	ASSERT_NO_THROW(pocketplus::utils::pop_n_from_front(in, 1));
+	ASSERT_THROW(pocketplus::utils::pop_n_from_front(in, 1), std::invalid_argument);
 	ASSERT_EQ(std::deque<bool>(), in);
 }
 

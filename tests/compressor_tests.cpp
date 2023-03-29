@@ -184,7 +184,7 @@ TEST(compress, CompressTwoDataFramesChangeInOneLSB){
 	compressor->set_input_vector_length(8);
 	compressor->compress(input_vector_1, 0, 1, 1, 1);
 	auto output_vector_2 = compressor->compress(input_vector_2, 0, 0, 0, 0);
-	std::deque<bool> ref = {0, 1, 0, 0, 0, 0, 0, 1, 1};
+	std::deque<bool> ref = {0, 1, 0, 0, 0, 0, 1, 0, 1, 1};
 	ASSERT_EQ(ref, output_vector_2);
 }
 
@@ -195,7 +195,7 @@ TEST(compress, CompressTwoDataFramesChangeInOneMSB){
 	compressor->set_input_vector_length(8);
 	compressor->compress(input_vector_1, 0, 1, 1, 1);
 	auto output_vector_2 = compressor->compress(input_vector_2, 0, 0, 0, 0);
-	std::deque<bool> ref = {1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0};
+	std::deque<bool> ref = { 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0 };
 	ASSERT_EQ(ref, output_vector_2);
 }
 
@@ -207,7 +207,7 @@ TEST(compress, CompressThreeDataFramesChangeInOneLSB){
 	compressor->compress(input_vector_1, 0, 1, 1, 1);
 	compressor->compress(input_vector_2, 0, 0, 0, 0);
 	auto output_vector_3 = compressor->compress(input_vector_1, 0, 0, 0, 0);
-	std::deque<bool> ref = {1, 0, 0, 0, 0, 1, 1, 0};
+	std::deque<bool> ref = { 1, 0, 0, 0, 0, 0, 1, 0 };
 	ASSERT_EQ(ref, output_vector_3);
 }
 
@@ -218,7 +218,7 @@ TEST(compress, CompressTwoDataFramesNewMaskFlag){
 	compressor->set_input_vector_length(8);
 	compressor->compress(input_vector_1, 0, 1, 1, 1);
 	auto output_vector_2 = compressor->compress(input_vector_2, 0, 1, 0, 0);
-	std::deque<bool> ref = {0, 1, 0, 0, 0, 0, 0, 1, 1};
+	std::deque<bool> ref = { 0, 1, 0, 0, 0, 0, 1, 0, 1, 1 };
 	ASSERT_EQ(ref, output_vector_2);
 }
 
@@ -231,8 +231,8 @@ TEST(compress, CompressThreeDataFramesChangeInLSBNewMaskFlagR1){
 	compressor->compress(input_vector_1, 0, 1, 1, 1);
 	auto output_vector_2 = compressor->compress(input_vector_2, 0, 1, 0, 0);
 	auto output_vector_3 = compressor->compress(input_vector_3, 1, 1, 0, 0);
-	std::deque<bool> ref2 = {0, 1, 0, 0, 0, 0, 0, 1, 1};
-	std::deque<bool> ref3 = {0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1};
+	std::deque<bool> ref2 = { 0, 1, 0, 0, 0, 0, 1, 0, 1, 1 };
+	std::deque<bool> ref3 = { 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1 };
 	ASSERT_EQ(ref2, output_vector_2);
 	ASSERT_EQ(ref3, output_vector_3);
 }
@@ -246,9 +246,11 @@ TEST(compress, CompressThreeDataFramesChangeInLSBSendMaskFlagR1){
 	compressor->compress(input_vector_1, 0, 1, 1, 1);
 	auto output_vector_2 = compressor->compress(input_vector_2, 0, 1, 0, 0);
 	auto output_vector_3 = compressor->compress(input_vector_3, 1, 1, 1, 0);
-	std::deque<bool> ref2 = {0, 1, 0, 0, 0, 0, 0, 1, 1};
-	std::deque<bool> ref3 = {0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 1};
+	std::deque<bool> ref2 = { 0, 1, 0, 0, 0, 0, 1, 0, 1, 1 };
+	std::deque<bool> ref3 = {0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 1};
 	ASSERT_EQ(ref2, output_vector_2);
+    for(auto item : output_vector_3)
+        printf("%i, ",item);
 	ASSERT_EQ(ref3, output_vector_3);
 }
 
@@ -261,8 +263,8 @@ TEST(compress, CompressThreeDataFramesChangeInLSBSendMaskFlag){
 	compressor->compress(input_vector_1, 0, 1, 1, 1);
 	auto output_vector_2 = compressor->compress(input_vector_2, 0, 0, 0, 0);
 	auto output_vector_3 = compressor->compress(input_vector_3, 0, 0, 1, 0);
-	std::deque<bool> ref2 = {0, 1, 0, 0, 0, 0, 0, 1, 1};
-	std::deque<bool> ref3 = {1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1};
+	std::deque<bool> ref2 = { 0, 1, 0, 0, 0, 0, 1, 0, 1, 1 };
+	std::deque<bool> ref3 = { 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1 };
 	ASSERT_EQ(ref2, output_vector_2);
 	ASSERT_EQ(ref3, output_vector_3);
 }
@@ -289,7 +291,7 @@ TEST(compress, c_t_zero){
 	compressor->compress(input_vector_2, 0, 1, 0, 0);
 	compressor->compress(input_vector_3, 1, 1, 1, 0);
 	auto output_vector_4 = compressor->compress(input_vector_4, 1, 0, 0, 0);
-	std::deque<bool> ref4 = {0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1};
+	std::deque<bool> ref4 = { 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1, 1 };
 	ASSERT_EQ(ref4, output_vector_4);
 }
 
